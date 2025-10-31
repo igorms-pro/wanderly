@@ -1,0 +1,12 @@
+{
+  "app": { "name": "Wanderly" },
+  "common": { "loading": "Carregando...", "error": "Erro", "success": "Sucesso", "cancel": "Cancelar", "save": "Salvar", "delete": "Excluir", "edit": "Editar", "close": "Fechar", "back": "Voltar", "next": "Próximo", "previous": "Anterior", "submit": "Enviar", "reset": "Redefinir", "search": "Pesquisar", "filter": "Filtrar", "sort": "Ordenar", "refresh": "Atualizar", "retry": "Tentar novamente", "reload": "Recarregar", "language": "Idioma" },
+  "auth": { "signIn": "Entrar", "signUp": "Cadastrar", "signOut": "Sair", "email": "Email", "password": "Senha", "confirmPassword": "Confirmar senha", "forgotPassword": "Esqueceu a senha?", "alreadyHaveAccount": "Já tem uma conta?", "dontHaveAccount": "Não tem uma conta?", "getStarted": "Começar", "getStartedFree": "Começar grátis" },
+  "navigation": { "dashboard": "Painel", "trips": "Viagens", "explore": "Explorar", "chat": "Chat", "profile": "Perfil", "settings": "Configurações", "home": "Início" },
+  "trip": { "createTrip": "Criar viagem", "tripTitle": "Título da viagem", "destination": "Destino", "startDate": "Data de início", "endDate": "Data de fim", "groupSize": "Tamanho do grupo", "budget": "Orçamento", "myTrips": "Minhas viagens", "noTrips": "Ainda não há viagens. Crie sua primeira viagem para começar!", "viewTrip": "Ver viagem", "editTrip": "Editar viagem", "deleteTrip": "Excluir viagem" },
+  "itinerary": { "title": "Roteiro", "generate": "Gerar roteiro", "regenerate": "Regenerar", "day": "Dia", "activities": "Atividades", "noActivities": "Não há atividades planejadas para este dia", "addActivity": "Adicionar atividade" },
+  "activity": { "title": "Atividade", "proposed": "Proposta", "accepted": "Aceita", "rejected": "Rejeitada", "vote": "Votar", "upvote": "Voto positivo", "downvote": "Voto negativo", "votes": "Votos" },
+  "chat": { "messagePlaceholder": "Digite uma mensagem...", "send": "Enviar", "typing": "Digitando...", "online": "Online", "offline": "Offline" },
+  "weather": { "current": "Clima atual", "forecast": "Previsão", "temperature": "Temperatura", "conditions": "Condições" },
+  "settings": { "language": "Idioma", "languageSelection": "Selecionar idioma", "english": "Inglês", "french": "Francês", "spanish": "Espanhol", "portuguese": "Português", "portugueseBrazil": "Português (Brasil)", "japanese": "Japonês", "chinese": "Chinês", "german": "Alemão", "italian": "Italiano", "russian": "Russo" }
+}

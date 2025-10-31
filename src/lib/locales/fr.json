@@ -1,0 +1,109 @@
+{
+  "app": {
+    "name": "Wanderly"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "submit": "Soumettre",
+    "reset": "Réinitialiser",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "sort": "Trier",
+    "refresh": "Actualiser",
+    "retry": "Réessayer",
+    "reload": "Recharger",
+    "language": "Langue"
+  },
+  "auth": {
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "signOut": "Se déconnecter",
+    "email": "Email",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "forgotPassword": "Mot de passe oublié?",
+    "alreadyHaveAccount": "Vous avez déjà un compte?",
+    "dontHaveAccount": "Vous n'avez pas de compte?",
+    "getStarted": "Commencer",
+    "getStartedFree": "Commencer gratuitement"
+  },
+  "navigation": {
+    "dashboard": "Tableau de bord",
+    "trips": "Voyages",
+    "explore": "Explorer",
+    "chat": "Chat",
+    "profile": "Profil",
+    "settings": "Paramètres",
+    "home": "Accueil"
+  },
+  "trip": {
+    "createTrip": "Créer un voyage",
+    "tripTitle": "Titre du voyage",
+    "destination": "Destination",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "groupSize": "Taille du groupe",
+    "budget": "Budget",
+    "myTrips": "Mes voyages",
+    "noTrips": "Aucun voyage pour le moment. Créez votre premier voyage pour commencer!",
+    "viewTrip": "Voir le voyage",
+    "editTrip": "Modifier le voyage",
+    "deleteTrip": "Supprimer le voyage"
+  },
+  "itinerary": {
+    "title": "Itinéraire",
+    "generate": "Générer l'itinéraire",
+    "regenerate": "Régénérer",
+    "day": "Jour",
+    "activities": "Activités",
+    "noActivities": "Aucune activité prévue pour ce jour",
+    "addActivity": "Ajouter une activité"
+  },
+  "activity": {
+    "title": "Activité",
+    "proposed": "Proposée",
+    "accepted": "Acceptée",
+    "rejected": "Rejetée",
+    "vote": "Voter",
+    "upvote": "Vote positif",
+    "downvote": "Vote négatif",
+    "votes": "Votes"
+  },
+  "chat": {
+    "messagePlaceholder": "Tapez un message...",
+    "send": "Envoyer",
+    "typing": "En train de taper...",
+    "online": "En ligne",
+    "offline": "Hors ligne"
+  },
+  "weather": {
+    "current": "Météo actuelle",
+    "forecast": "Prévisions",
+    "temperature": "Température",
+    "conditions": "Conditions"
+  },
+  "settings": {
+    "language": "Langue",
+    "languageSelection": "Sélectionner la langue",
+    "english": "Anglais",
+    "french": "Français",
+    "spanish": "Espagnol",
+    "portuguese": "Portugais",
+    "portugueseBrazil": "Portugais (Brésil)",
+    "japanese": "Japonais",
+    "chinese": "Chinois",
+    "german": "Allemand",
+    "italian": "Italien",
+    "russian": "Russe"
+  }
+}
