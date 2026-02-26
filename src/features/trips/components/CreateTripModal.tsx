@@ -1,8 +1,8 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useStore } from '../lib/store';
-import { generateItinerary, ItineraryRequest } from '../lib/openai-service';
+import { useStore } from '@/lib/store';
+import { generateItinerary, ItineraryRequest } from '@/lib/openai-service';
 import {
   X,
   Sparkles,

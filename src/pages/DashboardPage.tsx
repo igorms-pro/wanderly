@@ -19,9 +19,9 @@ import {
   Users,
   ArrowUpDown,
 } from 'lucide-react';
-import CreateTripModal from '../components/CreateTripModal';
-import { LanguageSwitcher } from '../components/LanguageSwitcher';
-import { ThemeToggle } from '../components/ThemeToggle';
+import { CreateTripModal } from '@/features/trips';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { format } from 'date-fns';
 
 type StatusFilter = 'all' | 'planned' | 'locked' | 'archived';

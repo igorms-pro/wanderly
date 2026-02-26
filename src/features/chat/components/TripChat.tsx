@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef, FormEvent, useCallback } from 'react';
-import { useStore } from '../lib/store';
-import { Message } from '../lib/mock-supabase';
-import { supabase } from '../lib/supabase';
-import { Send, Loader2, Edit2, Trash2, X } from 'lucide-react';
+import { useStore } from '@/lib/store';
+import { Message } from '@/lib/mock-supabase';
+import { supabase } from '@/lib/supabase';
+import { Send, Loader2, Edit2, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { useTranslation } from 'react-i18next';
@@ -147,12 +147,8 @@ export default function TripChat({ tripId, userRole }: TripChatProps) {
   }, [tripId, loadMessages, setupRealtimeSubscription]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messagesWithProfiles]);
-
-  const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  }, [messagesWithProfiles]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -260,7 +256,7 @@ export default function TripChat({ tripId, userRole }: TripChatProps) {
       await loadMessages();
     } catch (error) {
       console.error('Error deleting message:', error);
-      alert('Failed to delete message. Please try again.');
+      alert(t('errors.failedToDeleteMessage'));
     }
   };
 

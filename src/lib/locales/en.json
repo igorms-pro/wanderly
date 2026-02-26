@@ -185,7 +185,8 @@
     "failedToDeleteTrip": "Failed to delete trip. Please try again.",
     "failedToCreateActivity": "Failed to create activity. Please try again.",
     "failedToVote": "Failed to vote. Please try again.",
-    "failedToUpdateMessage": "Failed to update message. Please try again."
+    "failedToUpdateMessage": "Failed to update message. Please try again.",
+    "failedToDeleteMessage": "Failed to delete message. Please try again."
   },
   "dashboard": {
     "loadingTrips": "Loading your trips...",
