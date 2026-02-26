@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
 import { PostHogProvider } from './contexts/PostHogContext';
+import { ToastProvider } from './contexts/ToastContext';
 import { useStore } from './lib/store';
 import { supabase } from './lib/supabase';
 import LandingPage from './pages/LandingPage';
@@ -57,24 +58,26 @@ function App() {
       disableTransitionOnChange={false}
     >
       <PostHogProvider>
-        <QueryClientProvider client={queryClient}>
-          <Router>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignupPage />} />
-              <Route
-                path="/dashboard"
-                element={user ? <DashboardPage /> : <Navigate to="/login" replace />}
-              />
-              <Route
-                path="/trip/:tripId"
-                element={user ? <TripDetailPage /> : <Navigate to="/login" replace />}
-              />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Router>
-        </QueryClientProvider>
+        <ToastProvider>
+          <QueryClientProvider client={queryClient}>
+            <Router>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />
+                <Route
+                  path="/dashboard"
+                  element={user ? <DashboardPage /> : <Navigate to="/login" replace />}
+                />
+                <Route
+                  path="/trip/:tripId"
+                  element={user ? <TripDetailPage /> : <Navigate to="/login" replace />}
+                />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Router>
+          </QueryClientProvider>
+        </ToastProvider>
       </PostHogProvider>
     </ThemeProvider>
   );

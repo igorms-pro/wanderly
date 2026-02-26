@@ -617,6 +617,32 @@ Trip Detail (with tabs)
 
 ---
 
+### 6. Profile Settings (Future)
+
+**Route:** `/profile` or `/settings` (TBD)  
+**Auth Required:** Yes  
+**Layout:** Full page or sheet
+
+- User avatar, display name, email
+- Preferences (language, theme, notifications)
+- Account security (password change, etc.)
+- States: Loading, Success, Error
+
+---
+
+### 7. Team Settings (Future)
+
+**Route:** `/trip/:tripId/settings` or similar  
+**Auth Required:** Yes (trip member)  
+**Layout:** Full page or sheet
+
+- Member list and roles
+- Invite members
+- Trip settings (visibility, etc.)
+- States: Loading, Success, Error
+
+---
+
 ## Modal Patterns
 
 ### Standard Modal
