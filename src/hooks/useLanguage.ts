@@ -13,6 +13,9 @@ export const useLanguage = () => {
   // Force re-render when language changes
   useEffect(() => {
     const handleLanguageChanged = () => {
+      // TEMP: debug language changes
+
+      console.log('[i18n] languageChanged →', i18n.language);
       forceUpdate({});
     };
     i18n.on('languageChanged', handleLanguageChanged);

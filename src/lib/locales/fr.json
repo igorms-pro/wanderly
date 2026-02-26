@@ -140,7 +140,16 @@
     "send": "Envoyer",
     "typing": "En train de taper...",
     "online": "En ligne",
-    "offline": "Hors ligne"
+    "offline": "Hors ligne",
+    "loadingChat": "Chargement du chat...",
+    "tripChatTitle": "Chat du voyage",
+    "tripChatSubtitle": "Discutez des plans avec les membres de votre voyage",
+    "noMessagesYet": "Aucun message pour le moment. Lancez la conversation !",
+    "avatarAlt": "Avatar de l'utilisateur",
+    "unknownUser": "Inconnu",
+    "confirmDeleteMessage": "Êtes-vous sûr de vouloir supprimer ce message ?",
+    "editMessage": "Modifier le message",
+    "deleteMessage": "Supprimer le message"
   },
   "weather": {
     "current": "Météo actuelle",
@@ -160,7 +169,9 @@
     "chinese": "Chinois",
     "german": "Allemand",
     "italian": "Italien",
-    "russian": "Russe"
+    "russian": "Russe",
+    "switchToLight": "Passer en mode clair",
+    "switchToDark": "Passer en mode sombre"
   },
   "errors": {
     "somethingWentWrong": "Quelque chose s'est mal passé",
@@ -173,7 +184,8 @@
     "failedToUpdateTrip": "Échec de la mise à jour du voyage. Veuillez réessayer.",
     "failedToDeleteTrip": "Échec de la suppression du voyage. Veuillez réessayer.",
     "failedToCreateActivity": "Échec de la création de l'activité. Veuillez réessayer.",
-    "failedToVote": "Échec du vote. Veuillez réessayer."
+    "failedToVote": "Échec du vote. Veuillez réessayer.",
+    "failedToUpdateMessage": "Échec de la mise à jour du message. Veuillez réessayer."
   },
   "dashboard": {
     "loadingTrips": "Chargement de vos voyages...",
