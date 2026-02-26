@@ -372,7 +372,7 @@ Reorganize the codebase from the current flat/pre-MVP structure into a **feature
 
 ## 🎯 Issue #4: Design System & Screen System
 
-**Status:** 🔴 **NOT STARTED**  
+**Status:** 🟢 **COMPLETED for MVP**  
 **Priority:** HIGH  
 **Phase:** Foundation  
 **Dependencies:** Issue #0
@@ -385,62 +385,62 @@ Complete design system and define screen system for consistent UI/UX.
 
 #### Design System
 
-- [ ] 🔴 **Complete `docs/design/design-system.md`**:
-  - [x] 🟢 Color system
-  - [x] 🟢 Typography
-  - [x] 🟢 Spacing
-  - [ ] 🔴 Component library (buttons, inputs, cards, modals)
-  - [ ] 🔴 Loading states (skeletons, spinners)
-  - [ ] 🔴 Empty states
-  - [ ] 🔴 Error states
-  - [ ] 🔴 Toast notifications
-  - [ ] 🔴 Modal patterns
-  - [ ] 🔴 Form patterns
+- [x] 🟢 **Complete `docs/design/design-system.md`**:
+  - [x] Color system
+  - [x] Typography
+  - [x] Spacing
+  - [x] Component library (buttons, inputs, cards, modals)
+  - [x] Loading states (skeletons, spinners)
+  - [x] Empty states
+  - [x] Error states
+  - [x] Toast notifications
+  - [x] Modal patterns
+  - [x] Form patterns
 
 #### Screen System
 
-- [ ] 🔴 **Create `docs/design/screen-system.md`**:
-  - [ ] Screen structure (header, content, footer)
-  - [ ] Navigation patterns (mobile + desktop)
-  - [ ] Tab patterns
-  - [ ] Modal patterns
-  - [ ] Drawer patterns
-  - [ ] Bottom sheet patterns (mobile)
-  - [ ] Screen transitions
-  - [ ] Loading states per screen
-  - [ ] Error states per screen
-  - [ ] Empty states per screen
+- [x] 🟢 **Complete `docs/design/screen-system.md`**:
+  - [x] Screen structure (header, content, footer)
+  - [x] Navigation patterns (mobile + desktop)
+  - [x] Tab patterns
+  - [x] Modal patterns
+  - [x] Drawer patterns
+  - [x] Bottom sheet patterns (mobile)
+  - [x] Screen transitions
+  - [x] Loading states per screen
+  - [x] Error states per screen
+  - [x] Empty states per screen
 
 #### Screen Inventory
 
-- [ ] 🔴 **Document all screens**:
-  - [ ] Landing Page
-  - [ ] Login Page
-  - [ ] Signup Page
-  - [ ] Dashboard Page (Trip List)
-  - [ ] Trip Detail Page
-  - [ ] Profile Settings (future)
-  - [ ] Team Settings (future)
+- [x] 🟢 **Document all screens**:
+  - [x] Landing Page
+  - [x] Login Page
+  - [x] Signup Page
+  - [x] Dashboard Page (Trip List)
+  - [x] Trip Detail Page
+  - [x] Profile Settings (future)
+  - [x] Team Settings (future)
 
 #### Component Library
 
-- [ ] 🔴 **Create reusable components**:
-  - [ ] Button variants
-  - [ ] Input variants
-  - [ ] Card variants
-  - [ ] Modal component
-  - [ ] Toast component
-  - [ ] Loading spinner
-  - [ ] Skeleton loader
-  - [ ] Empty state component
-  - [ ] Error state component
+- [x] 🟢 **Create reusable components** (`src/components/ui/`):
+  - [x] Button variants (primary, secondary, ghost, outline, accent, destructive; sm/md/lg)
+  - [x] Input (with label, error, hint)
+  - [x] Card (default, interactive, elevated) + CardHeader
+  - [x] Modal (backdrop, close, title, footer)
+  - [x] Toast (success, error, warning, info) + ToastProvider / useToast
+  - [x] Spinner (sm/md/lg)
+  - [x] Skeleton + SkeletonCard
+  - [x] EmptyState (icon, title, description, action)
+  - [x] ErrorState (icon, title, description, retry)
 
 ### Acceptance Criteria
 
-- [ ] Design system is complete
-- [ ] Screen system is documented
-- [ ] All screens follow design system
-- [ ] Component library is consistent
+- [x] Design system doc is complete (conceptual; warm palette, states, patterns)
+- [x] Screen system is documented (navigation, screens, modals, loading/empty/error)
+- [ ] All screens use design system components (iterative; apply in Issues #5+)
+- [x] Component library is implemented and exported from `@/components/ui`
 
 ---
 
@@ -1331,7 +1331,7 @@ _Will be tracked here as discovered_
 - **Issue #2 (i18n Complete)**: 🟢 100% - ✅ COMPLETE (MVP)
 - **Issue #3 (Architecture Update)**: 🟢 100% - ✅ COMPLETE (MVP)
 - **Issue #3b (Codebase Reorganization)**: 🟢 100% - ✅ COMPLETE (MVP)
-- **Issue #4 (Design System)**: 🔴 30% - Not Started
+- **Issue #4 (Design System)**: 🟢 100% - ✅ COMPLETE (MVP)
 
 ### Screens (Sequential)
 
@@ -1364,7 +1364,7 @@ _Will be tracked here as discovered_
 2. Complete Issue #2 (i18n) ✅
 3. Complete Issue #3 (Architecture doc) ✅
 4. Complete Issue #3b (Codebase reorganization – feature-based) ✅
-5. Complete Issue #4 (Design System)
+5. Complete Issue #4 (Design System) ✅
 6. Then work on screens sequentially (#5 → #6 → #7 → #8 → #9 → #10 → etc.)
 
 **BLOCKER**: Issue #10 (Voting) CANNOT start until Issue #9 (Activities) is complete.

@@ -451,6 +451,40 @@ Based on 4px base unit.
 - Step labels (optional)
 - Used for AI generation, uploads, multi-step processes
 
+### Empty States
+
+- **Layout:** Centered content with optional illustration/icon, title, short description, and primary CTA button.
+- **Use for:** No trips, no activities, no messages, no search results, no members.
+- **Tone:** Encouraging and actionable (e.g. "Start your first adventure", "Add your first activity").
+- **Visual:** Warm neutral background; icon or illustration in warm orange/amber; button uses primary (warm orange).
+- **Accessibility:** Semantic heading for title; CTA is the main focus.
+
+### Error States
+
+- **Inline error:** Red/warm-red tint, border or ring, message below field; optional retry or dismiss.
+- **Block error:** Banner above content (e.g. form) with icon, message, and retry/dismiss actions.
+- **Full-page error:** Centered illustration/icon, title ("Something went wrong"), description, and "Try again" button.
+- **Semantic color:** Error red with sufficient contrast in light and dark mode.
+- **Accessibility:** Role alert or aria-live for dynamic errors; focus management after retry.
+
+### Toast Notifications
+
+- **Position:** Top-right on desktop, top-center on mobile; stack multiple toasts vertically.
+- **Variants:** Success (green), Error (red), Warning (amber), Info (orange).
+- **Behavior:** Auto-dismiss after 4–5 seconds; manual dismiss via close control; optional action button.
+- **Content:** Icon + message; optional title.
+- **Animation:** Slide-in from top; fade out on dismiss.
+- **Accessibility:** aria-live polite; avoid interrupting screen reader flow.
+
+### Form Patterns
+
+- **Layout:** Label above input; optional hint below; error message below field when invalid.
+- **Validation:** Inline on blur or on submit; error state with red border/ring and message.
+- **Required:** Indicate with asterisk or "required" in label; do not rely on placeholder.
+- **Disabled:** Reduced opacity; cursor not-allowed; all fields in form disabled when form is submitting.
+- **Submit:** Primary button; show spinner inside button when loading; disable form during submit.
+- **Grouping:** Related fields in a visual group (e.g. date + time); clear section headings for long forms.
+
 ---
 
 ## Navigation Patterns
