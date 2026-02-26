@@ -225,7 +225,7 @@ Ensure ALL text in the application is internationalized. No hardcoded strings.
 
 ## 🎯 Issue #3: Architecture Documentation Update
 
-**Status:** 🔴 **NOT STARTED**  
+**Status:** 🟢 **COMPLETED for MVP**  
 **Priority:** MEDIUM  
 **Phase:** Foundation  
 **Dependencies:** Issue #1
@@ -238,55 +238,134 @@ Update architecture documentation to reflect current MVP (was based on pre-MVP w
 
 #### Review Current Architecture
 
-- [ ] 🔴 **Read existing `docs/architecture_design.md`**
-- [ ] 🔴 **Identify outdated sections** (minimax references, old tech stack)
+- [x] 🟢 **Read existing `docs/architecture_design.md`**
+- [x] 🟢 **Identify outdated sections** (minimax references, old tech stack)
 
 #### Update Architecture Document
 
-- [ ] 🔴 **Update tech stack**:
-  - [ ] Frontend: Vite + React + TypeScript
-  - [ ] Backend: Supabase (Postgres + Auth + Realtime)
-  - [ ] AI: OpenAI (not minimax)
-  - [ ] State: Zustand
-  - [ ] Styling: Tailwind CSS
-  - [ ] i18n: i18next
-  - [ ] Monitoring: Sentry + PostHog
+- [x] 🟢 **Update tech stack**:
+  - [x] Frontend: Vite + React + TypeScript
+  - [x] Backend: Supabase (Postgres + Auth + Realtime)
+  - [x] AI: OpenAI (not minimax)
+  - [x] State: Zustand
+  - [x] Styling: Tailwind CSS
+  - [x] i18n: i18next
+  - [x] Monitoring: Sentry + PostHog
 
-- [ ] 🔴 **Update data models**:
-  - [ ] Trips with constraints
-  - [ ] Activities (human + AI)
-  - [ ] Scenarios (human + AI)
-  - [ ] Votes (democratic decision-making)
-  - [ ] Messages (real-time chat)
+- [x] 🟢 **Update data models**:
+  - [x] Trips with constraints
+  - [x] Activities (human + AI)
+  - [x] Scenarios (human + AI)
+  - [x] Votes (democratic decision-making)
+  - [x] Messages (real-time chat)
 
-- [ ] 🔴 **Update workflows**:
-  - [ ] Trip creation with constraints
-  - [ ] Activity/scenario creation (human or AI)
-  - [ ] Voting workflow
-  - [ ] Itinerary finalization
-  - [ ] Post-finalization editing (admin only)
+- [x] 🟢 **Update workflows**:
+  - [x] Trip creation with constraints
+  - [x] Activity/scenario creation (human or AI)
+  - [x] Voting workflow
+  - [x] Itinerary finalization
+  - [x] Post-finalization editing (admin only)
 
-- [ ] 🔴 **Add architecture diagrams**:
-  - [ ] System architecture
-  - [ ] Data flow
-  - [ ] Real-time architecture
-  - [ ] Authentication flow
-  - [ ] Voting flow
+- [x] 🟢 **Add architecture diagrams**:
+  - [x] System architecture
+  - [x] Data flow
+  - [x] Real-time architecture
+  - [x] Authentication flow
+  - [x] Voting flow
 
 #### Create Screen Architecture
 
-- [ ] 🔴 **Document screen hierarchy**:
-  - [ ] Screen navigation flow
-  - [ ] Screen state management
-  - [ ] Screen-to-screen communication
-  - [ ] Shared components per screen
+- [x] 🟢 **Document screen hierarchy**:
+  - [x] Screen navigation flow
+  - [x] Screen state management
+  - [x] Screen-to-screen communication
+  - [x] Shared components per screen
 
 ### Acceptance Criteria
 
-- [ ] Architecture document is up-to-date
-- [ ] No references to minimax or old tech
-- [ ] Diagrams are clear and helpful
-- [ ] Screen architecture is documented
+- [x] Architecture document is up-to-date
+- [x] No references to minimax or old tech
+- [x] Diagrams are clear and helpful
+- [x] Screen architecture is documented
+
+---
+
+## 🎯 Issue #3b: Codebase Reorganization – Feature-Based Architecture
+
+**Status:** 🔴 **NOT STARTED**  
+**Priority:** HIGH  
+**Phase:** Foundation  
+**Dependencies:** Issue #3 (architecture doc)
+
+### Description
+
+Reorganize the codebase from the current flat/pre-MVP structure into a **feature-based architecture** aligned with big-tech standards and with `docs/architecture_design.md` and `.cursor/rules/architecture-structure/RULE.md`. This must be done **before** adding or heavily modifying feature code so that new work happens in the right place.
+
+**Current state:** Components and logic are mostly in `src/components/`, `src/hooks/`, `src/lib/` with no feature boundaries.
+
+**Target state:** Feature modules under `src/features/<domain>/` with clear public APIs (`index.ts`), shared primitives in `src/components/`, and pages that assemble features only. Dependency rule: pages → features → components → lib.
+
+### Tasks
+
+#### Create Feature Folders and Public APIs
+
+- [ ] 🔴 **Create `src/features/` and feature modules**:
+  - [ ] `src/features/auth/` – components, hooks, services for login/signup/session (from LoginPage/SignupPage + auth logic)
+  - [ ] `src/features/trips/` – TripCard, CreateTripModal, trip CRUD, constraints; hooks (e.g. useTrip); tripService or equivalent
+  - [ ] `src/features/activities/` – CreateActivityModal, activity list/cards, activity CRUD; hooks; services
+  - [ ] `src/features/chat/` – TripChat, message list, composer; hooks; chat service / realtime
+  - [ ] `src/features/voting/` – placeholder for voting UI/hooks (can be minimal until Issue #10)
+  - [ ] Each feature has `index.ts` exporting only the public API (no deep imports from outside into feature internals)
+
+#### Move Code into Features
+
+- [ ] 🔴 **Move auth-related code**:
+  - [ ] Extract auth UI/logic from pages into `features/auth/` (e.g. login/signup forms, redirect logic)
+  - [ ] Keep or move `useAuth`-style hook into `features/auth` or shared `hooks/` per rule (cross-feature = shared)
+
+- [ ] 🔴 **Move trip-related code**:
+  - [ ] CreateTripModal, trip list/cards, trip settings → `features/trips/`
+  - [ ] Trip-related API calls / Supabase calls → `features/trips/services/` or equivalent
+  - [ ] Trip-specific hooks → `features/trips/hooks/`
+
+- [ ] 🔴 **Move activity-related code**:
+  - [ ] CreateActivityModal, activity list/cards → `features/activities/`
+  - [ ] Activity CRUD and realtime → `features/activities/` services/hooks
+
+- [ ] 🔴 **Move chat-related code**:
+  - [ ] TripChat and message UI → `features/chat/`
+  - [ ] Chat/realtime subscription logic → `features/chat/` services or hooks
+
+#### Shared Layer
+
+- [ ] 🔴 **Keep `src/components/` for shared primitives only**:
+  - [ ] Layout, Button, Modal, Card, Skeleton, ErrorBoundary, ThemeToggle, LanguageSwitcher, etc.
+  - [ ] Remove from `components/` anything that belongs to a single feature (move to that feature)
+
+- [ ] 🔴 **Keep `src/hooks/` for cross-feature hooks only** (e.g. useLanguage, useTheme, useErrorTracking, usePostHog)
+
+- [ ] 🔴 **Keep `src/lib/` for infrastructure** (supabase, i18n, sentry, analytics, utils, types, locales); no feature business logic here
+
+#### Pages and Imports
+
+- [ ] 🔴 **Update pages to assemble features only**:
+  - [ ] LandingPage, LoginPage, SignupPage, DashboardPage, TripDetailPage import from `features/*` (via `index.ts`) and shared `components/`, not from deep feature paths
+  - [ ] No circular dependencies; dependency direction: pages → features → components → lib
+
+#### Verification and Docs
+
+- [ ] 🔴 **Verify dependency rules**: No feature imports another feature directly (only via shared lib/hooks/components or composition in pages)
+- [ ] 🔴 **Update imports across codebase** so that lint and build pass
+- [ ] 🔴 **Document in ISSUES.md or architecture_design.md** that the codebase is now feature-based and where to add new code (which feature vs shared)
+
+### Acceptance Criteria
+
+- [ ] `src/features/` exists with auth, trips, activities, chat (and optional voting placeholder)
+- [ ] Each feature has a public API (`index.ts`) and no external deep imports into its internals
+- [ ] `src/components/` contains only shared UI primitives; feature-specific UI lives in features
+- [ ] Pages import only from features (via index), shared components, and lib
+- [ ] Lint and build pass; no circular dependencies
+- [ ] Architecture is aligned with `.cursor/rules/architecture-structure/RULE.md` and ready for big-tech-style scaling
 
 ---
 
@@ -1186,9 +1265,7 @@ Add trip templates and sharing capabilities.
 
 ### This Week
 
-- [ ] 🟡 **Issue #1**: Database Schema & RLS verification
-- [ ] 🟡 **Issue #2**: i18n audit and completion
-- [ ] 🔴 **Issue #3**: Architecture documentation update
+- [ ] 🔴 **Issue #3b**: Codebase reorganization (feature-based architecture)
 
 ### Next Week
 
@@ -1249,9 +1326,10 @@ _Will be tracked here as discovered_
 ### Foundation (Must complete first)
 
 - **Issue #0 (Project Initialization)**: 🟢 100% - ✅ COMPLETE
-- **Issue #1 (Database Setup)**: 🟡 60% - In Progress
-- **Issue #2 (i18n Complete)**: 🟡 40% - In Progress
-- **Issue #3 (Architecture Update)**: 🔴 0% - Not Started
+- **Issue #1 (Database Setup)**: 🟢 100% - ✅ COMPLETE
+- **Issue #2 (i18n Complete)**: 🟢 100% - ✅ COMPLETE (MVP)
+- **Issue #3 (Architecture Update)**: 🟢 100% - ✅ COMPLETE (MVP)
+- **Issue #3b (Codebase Reorganization)**: 🔴 0% - Not Started
 - **Issue #4 (Design System)**: 🔴 30% - Not Started
 
 ### Screens (Sequential)
@@ -1283,7 +1361,9 @@ _Will be tracked here as discovered_
 
 1. Complete Issue #1 (Database) ✅
 2. Complete Issue #2 (i18n) ✅
-3. Complete Issue #4 (Design System) ✅
-4. Then work on screens sequentially (#5 → #6 → #7 → #8 → #9 → #10 → etc.)
+3. Complete Issue #3 (Architecture doc) ✅
+4. Complete Issue #3b (Codebase reorganization – feature-based) ← do before heavy feature work
+5. Complete Issue #4 (Design System)
+6. Then work on screens sequentially (#5 → #6 → #7 → #8 → #9 → #10 → etc.)
 
 **BLOCKER**: Issue #10 (Voting) CANNOT start until Issue #9 (Activities) is complete.
