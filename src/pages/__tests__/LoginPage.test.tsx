@@ -5,25 +5,14 @@ import { BrowserRouter } from 'react-router-dom';
 import LoginPage from '../LoginPage';
 import { useStore } from '../../lib/store';
 
-// Mock dependencies
 vi.mock('../../lib/store');
-vi.mock('../../lib/sentry', () => ({
-  setSentryUser: vi.fn(),
-}));
-vi.mock('../../lib/analytics', () => ({
-  Analytics: {
-    identify: vi.fn(),
-  },
-}));
+vi.mock('../../lib/sentry', () => ({ setSentryUser: vi.fn() }));
+vi.mock('../../lib/analytics', () => ({ Analytics: { identify: vi.fn() } }));
 
-// Mock useNavigate and useLocation
 const mockNavigate = vi.fn();
-const mockLocation = {
-  state: null,
-  pathname: '/login',
-  search: '',
-  hash: '',
-};
+const mockLocation = { state: null, pathname: '/login', search: '', hash: '' };
+const mockSearchParams = new URLSearchParams();
+const mockSetSearchParams = vi.fn();
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
@@ -31,17 +20,33 @@ vi.mock('react-router-dom', async () => {
     ...actual,
     useNavigate: () => mockNavigate,
     useLocation: () => mockLocation,
+    useSearchParams: () => [mockSearchParams, mockSetSearchParams],
   };
 });
 
+vi.mock('@/contexts/ToastContext', () => ({
+  useToast: () => ({ showToast: vi.fn() }),
+}));
+
 describe('LoginPage', () => {
-  const mockSetUser = vi.fn();
+  const mockSignInWithPassword = vi.fn();
+  const mockSignInWithOAuth = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useStore as any).mockImplementation((selector: any) => {
+    (useStore as unknown as { getState: () => object }).getState = () => ({
+      user: {
+        id: '1',
+        email: 'test@example.com',
+        display_name: 'Test',
+        avatar_url: '',
+        created_at: '',
+      },
+    });
+    (useStore as any).mockImplementation((selector: (s: any) => any) => {
       const state = {
-        setUser: mockSetUser,
+        signInWithPassword: mockSignInWithPassword,
+        signInWithOAuth: mockSignInWithOAuth,
       };
       return selector(state);
     });
@@ -64,21 +69,18 @@ describe('LoginPage', () => {
     expect(screen.getByTestId('login-signup-link')).toBeInTheDocument();
   });
 
-  it('has pre-filled email and password', () => {
+  it('renders Google OAuth button', () => {
     render(
       <BrowserRouter>
         <LoginPage />
       </BrowserRouter>,
     );
 
-    const emailInput = screen.getByTestId('login-email-input') as HTMLInputElement;
-    const passwordInput = screen.getByTestId('login-password-input') as HTMLInputElement;
-
-    expect(emailInput.value).toBe('demo@voyagely.com');
-    expect(passwordInput.value).toBe('demo123');
+    expect(screen.getByText(/Continue with Google/i)).toBeInTheDocument();
+    // Facebook commenté en attendant vérif app FB
   });
 
-  it('allows user to change email and password', async () => {
+  it('allows user to enter email and password', async () => {
     const user = userEvent.setup();
     render(
       <BrowserRouter>
@@ -86,49 +88,57 @@ describe('LoginPage', () => {
       </BrowserRouter>,
     );
 
-    const emailInput = screen.getByTestId('login-email-input') as HTMLInputElement;
-    const passwordInput = screen.getByTestId('login-password-input') as HTMLInputElement;
+    const emailInput = screen.getByTestId('login-email-input');
+    const passwordInput = screen.getByTestId('login-password-input');
 
-    await user.clear(emailInput);
     await user.type(emailInput, 'test@example.com');
-    await user.clear(passwordInput);
     await user.type(passwordInput, 'newpassword');
 
-    expect(emailInput.value).toBe('test@example.com');
-    expect(passwordInput.value).toBe('newpassword');
+    expect((emailInput as HTMLInputElement).value).toBe('test@example.com');
+    expect((passwordInput as HTMLInputElement).value).toBe('newpassword');
   });
 
-  it('submits form and navigates to dashboard', async () => {
+  it('submits form and navigates to dashboard when sign-in succeeds', async () => {
     const user = userEvent.setup();
+    mockSignInWithPassword.mockResolvedValueOnce({});
+
     render(
       <BrowserRouter>
         <LoginPage />
       </BrowserRouter>,
     );
 
-    const submitButton = screen.getByTestId('login-submit-button');
-    await user.click(submitButton);
+    await user.type(screen.getByTestId('login-email-input'), 'test@example.com');
+    await user.type(screen.getByTestId('login-password-input'), 'password');
+    await user.click(screen.getByTestId('login-submit-button'));
 
     await waitFor(() => {
-      expect(mockSetUser).toHaveBeenCalled();
-      expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
+      expect(mockSignInWithPassword).toHaveBeenCalledWith('test@example.com', 'password');
+      expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true });
     });
   });
 
-  it('shows error message when error occurs', () => {
+  it('shows error when sign-in fails', async () => {
+    const user = userEvent.setup();
+    mockSignInWithPassword.mockResolvedValueOnce({ error: 'Invalid credentials' });
+
     render(
       <BrowserRouter>
         <LoginPage />
       </BrowserRouter>,
     );
 
-    // Error message should not be visible initially
-    expect(screen.queryByTestId('login-error-message')).not.toBeInTheDocument();
+    await user.type(screen.getByTestId('login-email-input'), 'test@example.com');
+    await user.type(screen.getByTestId('login-password-input'), 'password');
+    await user.click(screen.getByTestId('login-submit-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('login-error-message')).toHaveTextContent('Invalid credentials');
+    });
   });
 
   it('shows success message when provided', () => {
-    // Update mock location with success message
-    mockLocation.state = { message: 'Account created successfully!' };
+    (mockLocation as any).state = { message: 'Account created successfully!' };
 
     render(
       <BrowserRouter>
@@ -139,7 +149,6 @@ describe('LoginPage', () => {
     expect(screen.getByTestId('login-success-message')).toBeInTheDocument();
     expect(screen.getByText('Account created successfully!')).toBeInTheDocument();
 
-    // Reset for other tests
-    mockLocation.state = null;
+    (mockLocation as any).state = null;
   });
 });

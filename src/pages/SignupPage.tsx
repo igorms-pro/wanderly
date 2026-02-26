@@ -5,6 +5,12 @@ import { supabase } from '../lib/supabase';
 import { useStore } from '../lib/store';
 import { Plane, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { Layout } from '../components/Layout';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Card } from '@/components/ui/Card';
+import { useToast } from '@/contexts/ToastContext';
+import { GoogleIcon } from '@/features/auth/components/GoogleIcon';
+// import { FacebookIcon } from '@/features/auth/components/FacebookIcon'; // TODO: réactiver quand app FB vérifiée
 
 export default function SignupPage() {
   const { t } = useTranslation();
@@ -17,7 +23,12 @@ export default function SignupPage() {
   const [success, setSuccess] = useState(false);
 
   const refreshUser = useStore((state) => state.refreshUser);
+  const signInWithOAuth = useStore((state) => state.signInWithOAuth);
+  const { showToast } = useToast();
   const navigate = useNavigate();
+  const [oauthLoading, setOauthLoading] = useState<'google' | null>(null); // 'facebook' quand FB réactivé
+  const hasSupabase =
+    !!import.meta.env.VITE_SUPABASE_URL && !!import.meta.env.VITE_SUPABASE_ANON_KEY;
 
   // Validate email format
   const validateEmail = (email: string): boolean => {
@@ -216,33 +227,53 @@ export default function SignupPage() {
     }
   };
 
+  const handleOAuth = async (provider: 'google' | 'facebook') => {
+    if (!hasSupabase) {
+      showToast(t('auth.failedToSignIn'), 'error');
+      return;
+    }
+    setOauthLoading(provider);
+    setError('');
+    const res = await signInWithOAuth(provider);
+    if (res.error) {
+      setOauthLoading(null);
+      const msg = res.error.toLowerCase();
+      if (msg.includes('facebook')) {
+        showToast(
+          msg.includes('cancel') ? t('auth.oauthFacebookCancelled') : t('auth.oauthFacebookError'),
+          'error',
+        );
+      } else {
+        showToast(
+          msg.includes('cancel') ? t('auth.oauthCancelled') : t('auth.oauthError'),
+          'error',
+        );
+      }
+    }
+  };
+
   return (
     <Layout showLanguageTheme={true}>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex items-center justify-center p-4">
         <div className="max-w-md w-full">
-          {/* Logo and Title */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 dark:bg-blue-500 rounded-2xl mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-500 dark:bg-orange-400 rounded-2xl mb-4">
               <Plane className="w-8 h-8 text-white" />
             </div>
             <h1
-              className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2"
+              className="text-3xl font-bold text-stone-900 dark:text-stone-100 mb-2"
               data-testid="signup-join-title"
             >
               {t('auth.joinTitle')}
             </h1>
-            <p className="text-gray-600 dark:text-gray-300" data-testid="signup-join-subtitle">
+            <p className="text-stone-600 dark:text-stone-400" data-testid="signup-join-subtitle">
               {t('auth.joinSubtitle')}
             </p>
           </div>
 
-          {/* Signup Form */}
-          <div
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl dark:shadow-2xl p-8"
-            data-testid="signup-form"
-          >
+          <Card className="p-8" data-testid="signup-form">
             <h2
-              className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6"
+              className="text-xl font-semibold text-stone-900 dark:text-stone-100 mb-6"
               data-testid="signup-form-title"
             >
               {t('auth.createAccount')}
@@ -250,154 +281,154 @@ export default function SignupPage() {
 
             {error && (
               <div
-                className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm flex items-start"
+                className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm flex items-start gap-2"
                 data-testid="signup-error-message"
               >
-                <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
             )}
 
             {success && (
               <div
-                className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-400 text-sm flex items-start"
+                className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-400 text-sm flex items-start gap-2"
                 data-testid="signup-success-message"
               >
-                <CheckCircle2 className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
-                <span>{loadingStep || 'Account created successfully!'}</span>
+                <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <span>{loadingStep || t('auth.accountCreated')}</span>
               </div>
             )}
 
             {loading && loadingStep && (
               <div
-                className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-blue-700 dark:text-blue-400 text-sm flex items-center"
+                className="mb-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg text-amber-800 dark:text-amber-200 text-sm flex items-center gap-2"
                 data-testid="signup-loading-message"
               >
-                <Loader2 className="w-5 h-5 mr-2 animate-spin flex-shrink-0" />
+                <Loader2 className="w-5 h-5 animate-spin flex-shrink-0" />
                 <span>{loadingStep}</span>
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4" data-testid="signup-form-element">
-              <div>
-                <label
-                  htmlFor="displayName"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
-                  {t('auth.displayName')}
-                </label>
-                <input
-                  id="displayName"
-                  type="text"
-                  value={displayName}
-                  onChange={(e) => {
-                    setDisplayName(e.target.value);
-                    setError(''); // Clear error when user types
-                  }}
-                  required
-                  disabled={loading || success}
-                  minLength={2}
-                  data-testid="signup-display-name-input"
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:opacity-50 disabled:bg-gray-50 dark:disabled:bg-gray-800"
-                  placeholder={t('auth.displayNamePlaceholder')}
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
-                  {t('auth.email')}
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setError(''); // Clear error when user types
-                  }}
-                  required
-                  disabled={loading || success}
-                  data-testid="signup-email-input"
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:opacity-50 disabled:bg-gray-50 dark:disabled:bg-gray-800"
-                  placeholder={t('auth.emailPlaceholder')}
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
-                  {t('auth.password')}
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    setError(''); // Clear error when user types
-                  }}
-                  required
-                  disabled={loading || success}
-                  minLength={6}
-                  maxLength={72}
-                  data-testid="signup-password-input"
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:opacity-50 disabled:bg-gray-50 dark:disabled:bg-gray-800"
-                  placeholder={t('auth.passwordMinLength')}
-                />
-                {password && (
-                  <p
-                    className="mt-1 text-xs text-gray-500 dark:text-gray-400"
-                    data-testid="signup-password-hint"
-                  >
-                    {password.length < 6
+              <Input
+                id="signup-displayName"
+                label={t('auth.displayName')}
+                value={displayName}
+                onChange={(e) => {
+                  setDisplayName(e.target.value);
+                  setError('');
+                }}
+                required
+                disabled={loading || success}
+                minLength={2}
+                placeholder={t('auth.displayNamePlaceholder')}
+                data-testid="signup-display-name-input"
+              />
+              <Input
+                id="signup-email"
+                type="email"
+                label={t('auth.email')}
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setError('');
+                }}
+                required
+                disabled={loading || success}
+                placeholder={t('auth.emailPlaceholder')}
+                data-testid="signup-email-input"
+              />
+              <Input
+                id="signup-password"
+                type="password"
+                label={t('auth.password')}
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setError('');
+                }}
+                required
+                disabled={loading || success}
+                minLength={6}
+                maxLength={72}
+                placeholder={t('auth.passwordMinLength')}
+                hint={
+                  password
+                    ? password.length < 6
                       ? t('auth.passwordMoreChars', { count: 6 - password.length })
                       : password.length > 72
                         ? t('auth.passwordTooLong')
-                        : t('auth.passwordLooksGood')}
-                  </p>
-                )}
-              </div>
-
-              <button
+                        : t('auth.passwordLooksGood')
+                    : undefined
+                }
+                data-testid="signup-password-input"
+              />
+              <Button
                 type="submit"
                 disabled={loading || success}
+                className="w-full"
+                loading={loading && !success}
+                leftIcon={success ? <CheckCircle2 className="w-5 h-5" /> : undefined}
                 data-testid="signup-submit-button"
-                className="w-full bg-blue-600 dark:bg-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    {t('auth.creatingAccount')}
-                  </>
-                ) : success ? (
-                  <>
-                    <CheckCircle2 className="w-5 h-5 mr-2" />
-                    {t('auth.accountCreated')}
-                  </>
-                ) : (
-                  t('auth.createAccount')
-                )}
-              </button>
+                {loading && !success
+                  ? t('auth.creatingAccount')
+                  : success
+                    ? t('auth.accountCreated')
+                    : t('auth.createAccount')}
+              </Button>
             </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-gray-600 dark:text-gray-300">
-                {t('auth.alreadyHaveAccount')}{' '}
-                <Link
-                  to="/login"
-                  data-testid="signup-login-link"
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
-                >
-                  {t('auth.signIn')}
-                </Link>
-              </p>
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-stone-200 dark:border-stone-700" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400">
+                  {t('auth.or')}
+                </span>
+              </div>
             </div>
-          </div>
+
+            <div className="space-y-3">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 border-stone-300 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-700"
+                disabled={loading || success || oauthLoading !== null}
+                onClick={() => handleOAuth('google')}
+                loading={oauthLoading === 'google'}
+                leftIcon={<GoogleIcon className="w-5 h-5" />}
+              >
+                {oauthLoading === 'google' ? t('auth.oauthLoading') : t('auth.continueWithGoogle')}
+              </Button>
+              {/* TODO: réactiver quand app Facebook vérifiée
+              <Button
+                type="button"
+                className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white border-0 focus:ring-[#1877F2]"
+                disabled={loading || success || oauthLoading !== null}
+                onClick={() => handleOAuth('facebook')}
+                loading={oauthLoading === 'facebook'}
+                leftIcon={<FacebookIcon className="w-5 h-5 text-white" />}
+              >
+                {oauthLoading === 'facebook'
+                  ? t('auth.oauthLoading')
+                  : t('auth.continueWithFacebook')}
+              </Button>
+              */}
+            </div>
+
+            <p className="mt-6 text-center text-stone-600 dark:text-stone-400 text-sm">
+              {t('auth.alreadyHaveAccount')}{' '}
+              <Link
+                to="/login"
+                data-testid="signup-login-link"
+                className="text-orange-600 dark:text-orange-400 hover:underline font-medium"
+              >
+                {t('auth.signIn')}
+              </Link>
+            </p>
+          </Card>
         </div>
       </div>
     </Layout>

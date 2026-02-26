@@ -1,103 +1,145 @@
 import { useState, FormEvent, useEffect } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useNavigate, Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '../lib/store';
 import { Plane, CheckCircle2 } from 'lucide-react';
 import { setSentryUser } from '../lib/sentry';
 import { Analytics } from '../lib/analytics';
 import { Layout } from '../components/Layout';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Card } from '@/components/ui/Card';
+import { useToast } from '@/contexts/ToastContext';
+import { GoogleIcon } from '@/features/auth/components/GoogleIcon';
+// import { FacebookIcon } from '@/features/auth/components/FacebookIcon'; // TODO: réactiver quand app FB vérifiée
 
 export default function LoginPage() {
   const { t } = useTranslation();
-  // Default fake credentials
-  const [email, setEmail] = useState('demo@voyagely.com');
-  const [password, setPassword] = useState('demo123');
+  const { showToast } = useToast();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<'google' | null>(null); // 'facebook' quand FB réactivé
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const location = useLocation();
-  const setUser = useStore((state) => state.setUser);
+  const [searchParams] = useSearchParams();
+  const signInWithPassword = useStore((state) => state.signInWithPassword);
+  const signInWithOAuth = useStore((state) => state.signInWithOAuth);
   const navigate = useNavigate();
 
-  // Check for success message from signup redirect
+  const hasSupabase =
+    !!import.meta.env.VITE_SUPABASE_URL && !!import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  // Success message from signup redirect
   useEffect(() => {
-    if (location.state && (location.state as any).message) {
-      setSuccessMessage((location.state as any).message);
-      // Clear the message from location state
-      window.history.replaceState({}, document.title);
+    const state = location.state as { message?: string } | null;
+    if (state?.message) {
+      setSuccessMessage(state.message);
+      window.history.replaceState({}, document.title, location.pathname);
     }
   }, [location]);
+
+  // OAuth errors in URL (e.g. callback ?error=access_denied)
+  useEffect(() => {
+    const oauthError = searchParams.get('error');
+    const oauthErrorDescription = searchParams.get('error_description');
+    if (!oauthError) return;
+
+    let message = t('auth.oauthError');
+    if (oauthError === 'access_denied' || oauthError === 'user_cancelled') {
+      message = t('auth.oauthCancelled');
+    } else if (oauthErrorDescription?.toLowerCase().includes('facebook')) {
+      message = t('auth.oauthFacebookCancelled');
+    } else if (oauthErrorDescription) {
+      message = oauthErrorDescription;
+    }
+    showToast(message, 'error');
+
+    const next = new URLSearchParams(searchParams);
+    next.delete('error');
+    next.delete('error_description');
+    next.delete('error_code');
+    navigate({ pathname: '/login', search: next.toString() }, { replace: true });
+  }, [searchParams, navigate, t, showToast]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    try {
-      // Fake authentication - no API calls
-      // Create a fake user object
-      const fakeUserId = 'demo-user-' + Date.now();
-      const user = {
-        id: fakeUserId,
-        email: email,
-        display_name: email.split('@')[0],
-        avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-        created_at: new Date().toISOString(),
-      };
-
-      setUser(user);
-
-      // Set user context for Sentry and PostHog
-      setSentryUser({
-        id: user.id,
-        email: user.email,
-        username: user.display_name,
-      });
-
-      Analytics.identify(user.id, {
-        email: user.email,
-        displayName: user.display_name,
-      });
-
-      navigate('/dashboard');
-    } catch (err: any) {
-      setError(err.message || t('auth.failedToSignIn'));
-    } finally {
+    if (!hasSupabase) {
+      setError(t('auth.failedToSignIn'));
       setLoading(false);
+      return;
     }
+
+    const res = await signInWithPassword(email.trim(), password);
+    setLoading(false);
+
+    if (res.error) {
+      setError(res.error);
+      return;
+    }
+
+    const user = useStore.getState().user;
+    if (user) {
+      setSentryUser({ id: user.id, email: user.email, username: user.display_name });
+      Analytics.identify(user.id, { email: user.email, displayName: user.display_name });
+    }
+    navigate('/dashboard', { replace: true });
+  };
+
+  const handleOAuth = async (provider: 'google' | 'facebook') => {
+    if (!hasSupabase) {
+      showToast(t('auth.failedToSignIn'), 'error');
+      return;
+    }
+    setOauthLoading(provider);
+    setError('');
+    const res = await signInWithOAuth(provider);
+    if (res.error) {
+      setOauthLoading(null);
+      const msg = res.error.toLowerCase();
+      if (msg.includes('facebook')) {
+        showToast(
+          msg.includes('cancel') ? t('auth.oauthFacebookCancelled') : t('auth.oauthFacebookError'),
+          'error',
+        );
+      } else {
+        showToast(
+          msg.includes('cancel') ? t('auth.oauthCancelled') : t('auth.oauthError'),
+          'error',
+        );
+      }
+      return;
+    }
+    // OAuth redirects away; no need to set oauthLoading to null
   };
 
   return (
     <Layout showLanguageTheme={true}>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex items-center justify-center p-4">
         <div className="max-w-md w-full">
-          {/* Logo and Title */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 dark:bg-blue-500 rounded-2xl mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-500 dark:bg-orange-400 rounded-2xl mb-4">
               <Plane className="w-8 h-8 text-white" />
             </div>
             <h1
-              className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2"
+              className="text-3xl font-bold text-stone-900 dark:text-stone-100 mb-2"
               data-testid="login-welcome-title"
             >
               {t('auth.welcomeTitle')}
             </h1>
-            <p className="text-gray-600 dark:text-gray-300" data-testid="login-welcome-subtitle">
+            <p className="text-stone-600 dark:text-stone-400" data-testid="login-welcome-subtitle">
               {t('auth.welcomeSubtitle')}
             </p>
           </div>
 
-          {/* Login Form */}
-          <div
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl dark:shadow-2xl p-8"
-            data-testid="login-form"
-          >
+          <Card className="p-8" data-testid="login-form">
             <h2
-              className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6"
+              className="text-xl font-semibold text-stone-900 dark:text-stone-100 mb-6"
               data-testid="login-form-title"
             >
               {t('auth.signIn')}
@@ -105,10 +147,10 @@ export default function LoginPage() {
 
             {successMessage && (
               <div
-                className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-400 text-sm flex items-start"
+                className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-400 text-sm flex items-start gap-2"
                 data-testid="login-success-message"
               >
-                <CheckCircle2 className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
                 <span>{successMessage}</span>
               </div>
             )}
@@ -123,67 +165,89 @@ export default function LoginPage() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4" data-testid="login-form-element">
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
-                  {t('auth.email')}
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  data-testid="login-email-input"
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  placeholder={t('auth.emailPlaceholder')}
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
-                  {t('auth.password')}
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  data-testid="login-password-input"
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  placeholder={t('auth.passwordPlaceholder')}
-                />
-              </div>
-
-              <button
+              <Input
+                id="login-email"
+                type="email"
+                label={t('auth.email')}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={loading}
+                placeholder={t('auth.emailPlaceholder')}
+                data-testid="login-email-input"
+              />
+              <Input
+                id="login-password"
+                type="password"
+                label={t('auth.password')}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={loading}
+                placeholder={t('auth.passwordPlaceholder')}
+                data-testid="login-password-input"
+              />
+              <Button
                 type="submit"
                 disabled={loading}
+                className="w-full"
+                loading={loading}
                 data-testid="login-submit-button"
-                className="w-full bg-blue-600 dark:bg-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? t('auth.signingIn') : t('auth.signInButton')}
-              </button>
+              </Button>
             </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-gray-600 dark:text-gray-300">
-                {t('auth.dontHaveAccount')}{' '}
-                <Link
-                  to="/signup"
-                  data-testid="login-signup-link"
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
-                >
-                  {t('auth.signUp')}
-                </Link>
-              </p>
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-stone-200 dark:border-stone-700" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400">
+                  {t('auth.or')}
+                </span>
+              </div>
             </div>
-          </div>
+
+            <div className="space-y-3">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 border-stone-300 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-700"
+                disabled={loading || oauthLoading !== null}
+                onClick={() => handleOAuth('google')}
+                loading={oauthLoading === 'google'}
+                leftIcon={<GoogleIcon className="w-5 h-5" />}
+              >
+                {oauthLoading === 'google' ? t('auth.oauthLoading') : t('auth.continueWithGoogle')}
+              </Button>
+              {/* TODO: réactiver quand app Facebook vérifiée
+              <Button
+                type="button"
+                className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white border-0 focus:ring-[#1877F2]"
+                disabled={loading || oauthLoading !== null}
+                onClick={() => handleOAuth('facebook')}
+                loading={oauthLoading === 'facebook'}
+                leftIcon={<FacebookIcon className="w-5 h-5 text-white" />}
+              >
+                {oauthLoading === 'facebook'
+                  ? t('auth.oauthLoading')
+                  : t('auth.continueWithFacebook')}
+              </Button>
+              */}
+            </div>
+
+            <p className="mt-6 text-center text-stone-600 dark:text-stone-400 text-sm">
+              {t('auth.dontHaveAccount')}{' '}
+              <Link
+                to="/signup"
+                data-testid="login-signup-link"
+                className="text-orange-600 dark:text-orange-400 hover:underline font-medium"
+              >
+                {t('auth.signUp')}
+              </Link>
+            </p>
+          </Card>
         </div>
       </div>
     </Layout>

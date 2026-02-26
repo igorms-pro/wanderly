@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
+import { ToastProvider } from '../../contexts/ToastContext';
 import SignupPage from '../SignupPage';
 import { useStore } from '../../lib/store';
 import { supabase } from '../../lib/supabase';
@@ -15,6 +16,16 @@ vi.mock('../../lib/supabase', () => ({
     },
   },
 }));
+
+function renderSignupPage() {
+  return render(
+    <ToastProvider>
+      <BrowserRouter>
+        <SignupPage />
+      </BrowserRouter>
+    </ToastProvider>,
+  );
+}
 
 // Mock useNavigate
 const mockNavigate = vi.fn();
@@ -31,18 +42,18 @@ describe('SignupPage', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useStore as any).mockReturnValue({
-      refreshUser: mockRefreshUser,
-      user: null,
+    (useStore as any).mockImplementation((selector: (s: any) => any) => {
+      const state = {
+        refreshUser: mockRefreshUser,
+        signInWithOAuth: vi.fn(),
+        user: null,
+      };
+      return selector(state);
     });
   });
 
   it('renders signup page with all elements', () => {
-    render(
-      <BrowserRouter>
-        <SignupPage />
-      </BrowserRouter>,
-    );
+    renderSignupPage();
 
     expect(screen.getByTestId('signup-join-title')).toBeInTheDocument();
     expect(screen.getByTestId('signup-join-subtitle')).toBeInTheDocument();
@@ -57,11 +68,7 @@ describe('SignupPage', () => {
 
   it('allows user to fill in form fields', async () => {
     const user = userEvent.setup();
-    render(
-      <BrowserRouter>
-        <SignupPage />
-      </BrowserRouter>,
-    );
+    renderSignupPage();
 
     const displayNameInput = screen.getByTestId('signup-display-name-input') as HTMLInputElement;
     const emailInput = screen.getByTestId('signup-email-input') as HTMLInputElement;
@@ -78,25 +85,23 @@ describe('SignupPage', () => {
 
   it('shows password hint when password is entered', async () => {
     const user = userEvent.setup();
-    render(
-      <BrowserRouter>
-        <SignupPage />
-      </BrowserRouter>,
-    );
+    renderSignupPage();
 
     const passwordInput = screen.getByTestId('signup-password-input') as HTMLInputElement;
 
-    // Initially no hint
-    expect(screen.queryByTestId('signup-password-hint')).not.toBeInTheDocument();
+    // Initially no hint (no password text)
+    expect(
+      screen.queryByText(/more characters needed|password looks good/i),
+    ).not.toBeInTheDocument();
 
     // Enter short password
     await user.type(passwordInput, '123');
-    expect(screen.getByTestId('signup-password-hint')).toBeInTheDocument();
+    expect(screen.getByText(/more characters needed/i)).toBeInTheDocument();
 
     // Enter valid password
     await user.clear(passwordInput);
     await user.type(passwordInput, 'password123');
-    expect(screen.getByTestId('signup-password-hint')).toBeInTheDocument();
+    expect(screen.getByText(/password looks good/i)).toBeInTheDocument();
   });
 
   it('validates form fields before submission', async () => {
@@ -108,11 +113,7 @@ describe('SignupPage', () => {
 
     (supabase.auth.signUp as any) = mockSignUp;
 
-    render(
-      <BrowserRouter>
-        <SignupPage />
-      </BrowserRouter>,
-    );
+    renderSignupPage();
 
     // Fill only partial form
     const displayNameInput = screen.getByTestId('signup-display-name-input');
@@ -146,11 +147,7 @@ describe('SignupPage', () => {
 
     (supabase.auth.signUp as any) = mockSignUp;
 
-    render(
-      <BrowserRouter>
-        <SignupPage />
-      </BrowserRouter>,
-    );
+    renderSignupPage();
 
     const displayNameInput = screen.getByTestId('signup-display-name-input');
     const emailInput = screen.getByTestId('signup-email-input');
@@ -183,11 +180,7 @@ describe('SignupPage', () => {
 
     (supabase.auth.signUp as any) = mockSignUp;
 
-    render(
-      <BrowserRouter>
-        <SignupPage />
-      </BrowserRouter>,
-    );
+    renderSignupPage();
 
     const displayNameInput = screen.getByTestId('signup-display-name-input');
     const emailInput = screen.getByTestId('signup-email-input');

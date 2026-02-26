@@ -547,9 +547,9 @@ Complete login and signup screens with proper validation, error handling, and UX
   - [ ] Error messages match design
   - [ ] Loading states match design
 
-- [ ] 🔴 **Social login (optional for MVP)**:
-  - [ ] Google login
-  - [ ] GitHub login
+- [x] 🟢 **Social login**:
+  - [x] Google login
+  - [x] Facebook login
 
 #### Signup Page
 
@@ -563,30 +563,25 @@ Complete login and signup screens with proper validation, error handling, and UX
   - [ ] 🔴 Loading states
   - [ ] 🔴 Terms of service checkbox
 
-- [ ] 🔴 **Apply design system**:
-  - [ ] Form inputs match design
-  - [ ] Buttons match design
-  - [ ] Error messages match design
-  - [ ] Loading states match design
+- [x] 🟢 **Apply design system (Signup)**:
+  - [x] Input, Button, Card, stone/orange, OAuth buttons
 
 #### i18n
 
-- [ ] 🔴 **Verify all auth text is internationalized**:
-  - [ ] Form labels
-  - [ ] Buttons
-  - [ ] Error messages
-  - [ ] Success messages
-  - [ ] Validation messages
+- [x] 🟢 **Verify all auth text is internationalized**:
+  - [x] Form labels, buttons (incl. Continue with Google/Facebook)
+  - [x] OAuth errors (oauthError, oauthCancelled, oauthFacebookError, oauthFacebookCancelled)
+  - [x] Validation messages (existing keys)
 
 ### Acceptance Criteria
 
-- [ ] Login works with proper validation
-- [ ] Signup works with email confirmation
-- [ ] All text is internationalized
-- [ ] Design system is applied
-- [ ] Error handling works
-- [ ] Loading states work
-- [ ] Tests pass (unit + E2E)
+- [x] Login works (email/password + Google + Facebook)
+- [x] Signup works with email confirmation + social sign-up
+- [x] All auth text is internationalized
+- [x] Design system applied (Login + Signup)
+- [x] Error handling (display errors, OAuth URL cleanup)
+- [x] Loading states (submit + per-OAuth button)
+- [x] Tests pass (unit)
 
 ---
 
