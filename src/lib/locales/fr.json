@@ -147,7 +147,9 @@
     "noMessagesYet": "Aucun message pour le moment. Lancez la conversation !",
     "avatarAlt": "Avatar de l'utilisateur",
     "unknownUser": "Inconnu",
-    "confirmDeleteMessage": "Êtes-vous sûr de vouloir supprimer ce message ?"
+    "confirmDeleteMessage": "Êtes-vous sûr de vouloir supprimer ce message ?",
+    "editMessage": "Modifier le message",
+    "deleteMessage": "Supprimer le message"
   },
   "weather": {
     "current": "Météo actuelle",

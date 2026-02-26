@@ -377,7 +377,7 @@ export default function TripChat({ tripId, userRole }: TripChatProps) {
                                 <button
                                   onClick={() => handleEdit(message)}
                                   className="p-1 text-gray-400 hover:text-blue-600 transition"
-                                  title="Edit message"
+                                  title={t('chat.editMessage')}
                                 >
                                   <Edit2 className="w-3 h-3" />
                                 </button>
@@ -386,7 +386,7 @@ export default function TripChat({ tripId, userRole }: TripChatProps) {
                                 <button
                                   onClick={() => handleDelete(message.id)}
                                   className="p-1 text-gray-400 hover:text-red-600 transition"
-                                  title="Delete message"
+                                  title={t('chat.deleteMessage')}
                                 >
                                   <Trash2 className="w-3 h-3" />
                                 </button>
@@ -412,7 +412,7 @@ export default function TripChat({ tripId, userRole }: TripChatProps) {
             type="text"
             value={messageText}
             onChange={(e) => setMessageText(e.target.value)}
-            placeholder="Type a message..."
+            placeholder={t('chat.messagePlaceholder')}
             disabled={sending}
             className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:opacity-50"
           />
