@@ -75,6 +75,9 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   const handleLanguageChange = (
     language: 'en' | 'fr' | 'es' | 'pt' | 'pt-BR' | 'ja' | 'zh' | 'de' | 'it' | 'ru',
   ) => {
+    // TEMP: debug language switcher
+
+    console.log('[LanguageSwitcher] changeLanguage →', language);
     changeLanguage(language);
     setIsOpen(false);
   };
