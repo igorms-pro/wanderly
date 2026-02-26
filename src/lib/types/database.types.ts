@@ -57,6 +57,7 @@ export interface Database {
           status: 'planned' | 'locked' | 'archived';
           budget_cents: number | null; // INTEGER
           currency: string | null;
+          constraints: Json | null; // JSONB - trip-level planning constraints
           created_at: string; // TIMESTAMPTZ
           updated_at: string; // TIMESTAMPTZ
           deleted_at: string | null; // TIMESTAMPTZ
@@ -71,6 +72,7 @@ export interface Database {
           status: 'planned' | 'locked' | 'archived';
           budget_cents?: number | null;
           currency?: string | null;
+          constraints?: Json | null;
           created_at?: string;
           updated_at?: string;
           deleted_at?: string | null;
@@ -85,6 +87,7 @@ export interface Database {
           status?: 'planned' | 'locked' | 'archived';
           budget_cents?: number | null;
           currency?: string | null;
+          constraints?: Json | null;
           created_at?: string;
           updated_at?: string;
           deleted_at?: string | null;
