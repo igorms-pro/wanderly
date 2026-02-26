@@ -185,7 +185,8 @@
     "failedToDeleteTrip": "Échec de la suppression du voyage. Veuillez réessayer.",
     "failedToCreateActivity": "Échec de la création de l'activité. Veuillez réessayer.",
     "failedToVote": "Échec du vote. Veuillez réessayer.",
-    "failedToUpdateMessage": "Échec de la mise à jour du message. Veuillez réessayer."
+    "failedToUpdateMessage": "Échec de la mise à jour du message. Veuillez réessayer.",
+    "failedToDeleteMessage": "Échec de la suppression du message. Veuillez réessayer."
   },
   "dashboard": {
     "loadingTrips": "Chargement de vos voyages...",

@@ -1,6 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useStore } from '../lib/store';
+import { useStore } from '@/lib/store';
 import {
   X,
   Plus,
@@ -108,21 +108,19 @@ export default function CreateActivityModal({ tripId, onClose }: CreateActivityM
       let end_time: string | undefined;
 
       if (formData.startTime) {
-        // Ensure format is HH:MM:SS
         const timeParts = formData.startTime.split(':');
         if (timeParts.length === 2) {
           start_time = `${formData.startTime}:00`;
         } else {
-          start_time = formData.startTime; // Already in HH:MM:SS format
+          start_time = formData.startTime;
         }
       }
       if (formData.endTime) {
-        // Ensure format is HH:MM:SS
         const timeParts = formData.endTime.split(':');
         if (timeParts.length === 2) {
           end_time = `${formData.endTime}:00`;
         } else {
-          end_time = formData.endTime; // Already in HH:MM:SS format
+          end_time = formData.endTime;
         }
       }
 
@@ -161,7 +159,6 @@ export default function CreateActivityModal({ tripId, onClose }: CreateActivityM
       onClose();
     } catch (err: any) {
       console.error('Error creating activity:', err);
-      // Provide user-friendly error messages
       let errorMessage = t('errors.failedToCreateActivity') || 'Failed to create activity';
       if (err.message) {
         errorMessage = err.message;

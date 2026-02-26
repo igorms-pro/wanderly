@@ -35,10 +35,10 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import TripChat from '../components/TripChat';
-import WeatherWidget from '../components/WeatherWidget';
-import NearbyPlaces from '../components/NearbyPlaces';
-import CreateActivityModal from '../components/CreateActivityModal';
+import { TripChat } from '@/features/chat';
+import WeatherWidget from '@/components/WeatherWidget';
+import NearbyPlaces from '@/components/NearbyPlaces';
+import { CreateActivityModal } from '@/features/activities';
 
 export default function TripDetailPage() {
   const { t } = useTranslation();

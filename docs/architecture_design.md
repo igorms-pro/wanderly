@@ -24,6 +24,37 @@ The system comprises three layers: a client SPA with a mobile-first responsive d
 
 Security boundaries are enforced through per-row authorization policies anchored in trip membership and roles. Real-time channels are partitioned per trip, with explicit joins and presence tracking scoped to trip contexts. Integration events from weather, maps, or places providers flow through backend services that normalize and cache results, rate limit requests, and emit notifications for severe weather or critical updates.
 
+### Current MVP Architecture Snapshot (February 2026)
+
+- **Frontend (app layer)**:
+  - Vite + React 18 + TypeScript SPA using React Router, Zustand for client state, and React Query for server state.
+  - Tailwind CSS and the warm Voyagely design system; dark/light themes managed via `next-themes`. See `docs/design/design-system.md` for visual guidelines.
+  - i18n with i18next / react-i18next (21 languages configured; EN/FR complete for MVP).
+  - PWA-ready, mobile-first layouts; detailed screen hierarchy lives in `docs/design/screen-system.md`.
+
+- **Backend & data (Supabase)**:
+  - Single Supabase project providing Postgres, Auth, Realtime, storage, and row-level security.
+  - Core tables: `users`, `trips` (including a `constraints` JSONB column for budget, children, preferences, pace, must-dos and no-gos), `trip_members`, `activities`, `votes`, `messages`, `preferences`, `audit_logs`.
+  - RLS policies implement the owner/editor/viewer/moderator roles and the “everyone can vote” rule described in the product documentation.
+  - No separate long-running backend services yet; any shared business logic beyond row-level behavior runs in edge/serverless functions or in the client, with Supabase RLS enforcing access.
+
+- **AI & constraints engine**:
+  - OpenAI models called from a backend function to generate 1–3 constraint-aware itinerary scenarios per trip.
+  - Inputs include trip-level constraints from `trips.constraints` and user preferences; outputs are parsed and validated into activities bound to specific days.
+  - Human members can also create, edit, or delete activities and scenarios manually; AI proposes options but does not make final decisions.
+
+- **Collaboration & realtime**:
+  - Supabase Realtime channels scoped per trip for chat, presence, votes, and activity updates.
+  - Optimistic UI for messages and votes with reconciliation when the server acknowledges events.
+  - All realtime interactions ultimately persist through Postgres tables protected by RLS.
+
+- **Expenses (planned Phase 2+)**:
+  - Group expense tracking (Tricount-like) will be modeled via `expenses` and optional `settlements` tables linked to `trips` and, optionally, `activities`.
+  - The current schema and flows intentionally leave room for this without blocking the Phase 1 “plan & decide together” focus.
+
+- **Out of scope for MVP, planned later**:
+  - Deep integrations with maps, routing, weather and advanced personalization. The API integration and personalization sections of this document should be read as forward-looking extensions, not hard dependencies for the initial MVP.
+
 To illustrate the trust boundaries and access patterns, the following matrix summarizes component responsibilities and their security controls.
 
 ### Component Responsibilities and Trust Boundaries Matrix
