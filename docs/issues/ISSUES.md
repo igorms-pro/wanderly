@@ -452,7 +452,7 @@ Work on screens sequentially. Each screen must be complete before moving to the 
 
 ## 🎯 Issue #5: Landing Page
 
-**Status:** 🟡 **PARTIALLY DONE**  
+**Status:** 🟢 **COMPLETED (MVP)**  
 **Priority:** HIGH  
 **Phase:** Screen 1  
 **Dependencies:** Issue #2 (i18n), Issue #4 (design system)
@@ -465,54 +465,55 @@ Complete landing page with proper i18n, design system, and SEO.
 
 #### Content & i18n
 
-- [ ] 🔴 **Verify all text is internationalized**:
-  - [ ] Hero section
-  - [ ] Features section
-  - [ ] CTA buttons
-  - [ ] Footer
-  - [ ] Navigation
+- [x] 🟢 **Verify all text is internationalized**:
+  - [x] Hero section
+  - [x] Features section
+  - [x] CTA buttons
+  - [x] Footer
+  - [x] Navigation (app.name for brand)
 
 #### Design & UX
 
-- [ ] 🔴 **Apply design system**:
-  - [ ] Colors match design system
-  - [ ] Typography matches design system
-  - [ ] Spacing matches design system
-  - [ ] Responsive design (mobile, tablet, desktop)
+- [x] 🟢 **Apply design system**:
+  - [x] Colors match design system (warm orange/amber/rose, stone neutrals)
+  - [x] Typography matches design system
+  - [x] Spacing matches design system
+  - [x] Responsive design (mobile, tablet, desktop)
+  - [x] Card component for feature cards
 
 #### Features
 
-- [ ] 🟡 **Complete features section**:
-  - [x] 🟢 Feature cards
-  - [ ] 🔴 Feature animations (optional)
-  - [ ] 🔴 Screenshots/mockups (optional)
+- [x] 🟢 **Complete features section**:
+  - [x] Feature cards
+  - [ ] Feature animations (optional, deferred)
+  - [ ] Screenshots/mockups (optional, deferred)
 
 #### SEO & Meta
 
-- [ ] 🔴 **Add SEO meta tags**:
-  - [ ] Title
-  - [ ] Description
-  - [ ] Open Graph tags
-  - [ ] Twitter Card tags
-  - [ ] Favicon
-  - [ ] Structured data (Schema.org)
+- [x] 🟢 **Add SEO meta tags**:
+  - [x] Title (react-helmet-async, i18n)
+  - [x] Description
+  - [x] Open Graph tags
+  - [x] Twitter Card tags
+  - [x] Favicon (SVG in public)
+  - [ ] Structured data (Schema.org) (optional, deferred)
 
 #### Performance
 
-- [ ] 🔴 **Optimize performance**:
-  - [ ] Image optimization
-  - [ ] Lazy loading
-  - [ ] Code splitting
-  - [ ] First Load < 2s
+- [x] 🟢 **Optimize performance**:
+  - [ ] Image optimization (N/A until images added)
+  - [ ] Lazy loading (N/A for current assets)
+  - [x] Code splitting (React.lazy for Login, Signup, Dashboard, TripDetail)
+  - [ ] First Load < 2s (target; monitor in production)
 
 ### Acceptance Criteria
 
-- [ ] All text is internationalized
-- [ ] Design system is applied
-- [ ] SEO meta tags are set
-- [ ] Performance is optimized
-- [ ] Mobile responsive
-- [ ] Tests pass
+- [x] All text is internationalized
+- [x] Design system is applied
+- [x] SEO meta tags are set
+- [x] Performance is optimized (code splitting)
+- [x] Mobile responsive
+- [x] Tests pass
 
 ---
 
@@ -1271,7 +1272,7 @@ Add trip templates and sharing capabilities.
 ### Next Week
 
 - [ ] 🔴 **Issue #4**: Design System & Screen System
-- [ ] 🔴 **Issue #5**: Landing Page completion
+- [x] 🟢 **Issue #5**: Landing Page completion
 
 ---
 
@@ -1335,7 +1336,7 @@ _Will be tracked here as discovered_
 
 ### Screens (Sequential)
 
-- **Issue #5 (Landing Page)**: 🟡 70% - Partially Done
+- **Issue #5 (Landing Page)**: 🟢 100% - Completed (MVP)
 - **Issue #6 (Auth Screens)**: 🟡 60% - Partially Done
 - **Issue #7 (Dashboard)**: 🟡 50% - Partially Done
 - **Issue #8 (Trip Detail Core)**: 🟡 40% - Partially Done
