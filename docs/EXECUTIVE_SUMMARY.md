@@ -1,206 +1,185 @@
-# Voyagely: Executive Summary
+# Voyagely: Executive Summary (Final V3)
 
-**Last Updated:** January 2025  
-**Status:** Strategic Positioning – Early Product Phase (Free)
+**Last Updated:** February 2026  
+**Status:** Active Development – Free Product Phase
 
----
-
-## The Golden Circle
-
-### WHY - Our Belief
-
-**We believe that group travel planning should be collaborative, not chaotic.**
-
-Planning trips with friends, family, or colleagues shouldn't mean endless WhatsApp threads, broken Google Sheets, and decisions that never get made. Every group deserves a simple way to plan together—one that respects everyone's preferences and makes decisions transparent and shared.
-
-### HOW - Our Approach
-
-**We build the only platform designed for constraint-based, group decision-making in travel.**
-
-Unlike solo trip planners or booking platforms, Voyagely is built from the ground up for groups:
-
-- **Constraint-aware trip planning**: budget, children, preferences, pace, "must-dos" (whale watching, nightlife, nature, etc.)
-- **Real-time collaboration**: presence, chat, simultaneous editing
-- **Democratic decision-making**: votes on complete day-by-day itineraries _and_ on each individual activity
-- **Group-aware AI**: AI proposes scenarios for _the group_, not just for one individual
-
-### WHAT - Our Product
-
-**Voyagely is the Group Decision & Planning Platform for Travel.**
-
-Voyagely helps groups go from "we don't know what to do" to a concrete plan in minutes:
-
-- **AI-powered, constraint-based itineraries**: AI generates multiple day-by-day plans based on group constraints (budget, children, interests, pace)
-- **Structured voting on days and activities**: members can vote for a complete itinerary (Day 1 / Day 2) or accept/reject/modify each activity
-- **Live collaboration with presence and chat**: everyone sees who's online, discusses, and adjusts the plan in real-time
-- **Context-aware suggestions**: weather, opening hours, travel time, and fatigue logic integrated into planning
-- **Built-in group expenses (Tricount-like)**: track group expenses, "who owes what to whom", simple exports
+Voyagely is the Group Decision & Planning Platform for Travel, solving the chaos of group trip planning with constraint-aware AI, structured voting, real-time collaboration, and integrated expense tracking.
 
 ---
 
-## Value Proposition
+## Product Vision
 
-### For Groups Who Can't Decide
+**We believe group travel planning should be collaborative, decisive, and realistic—not endless WhatsApp debates and fragmented spreadsheets.**
 
-**"Stop the group chat chaos. Plan your voyage together."**
+Voyagely combines:
 
-Instead of scattering across WhatsApp, Excel, random links, and separate expense apps, groups get:
+- **Constraint-based AI planning**: Budget, children, preferences (beach/mountains/whales), pace, must-dos
+- **Democratic decision-making**: Vote on full day-by-day scenarios or individual activities
+- **Real-time collaboration**: Live chat, presence, simultaneous editing
+- **Integrated group expenses**: Tricount-like tracking tied directly to the itinerary
 
-- **From indecision to itinerary in minutes**: AI proposes 2-3 realistic scenarios, the group votes, the plan is decided
-- **Everyone's voice matters**: votes on day-by-day itineraries and on each activity, with the ability to mark activities as "must-have" or "no-go"
-- **Real-time coordination**: real-time presence, integrated chat, clear notifications when the plan changes
-- **Smart, realistic planning**: weather, travel time, opening hours, pace, and constraints (children, budget) are all taken into account
-- **Integrated group expenses**: like Tricount, but directly linked to the trip, so finances never become a source of friction
+---
 
-### Our Unique Position
+## Core Value Proposition
 
-**We're NOT:**
+**"Stop group chat chaos. Plan, decide, and track your voyage together."**
 
-- ❌ A booking platform (we plan, others book)
-- ❌ A solo trip planner (we're group-first)
-- ❌ Just another AI tool (AI is the engine, **group collaboration is the product**)
-- ❌ A social network (we're here to get trips planned and done)
+Groups get:
 
-**We ARE:**
-
-- ✅ **The** platform for groups planning complex trips together
-- ✅ **The** solution for group decision-making under real constraints (budget, children, preferences)
-- ✅ **The** real-time collaboration and expense layer for travel planning
-- ✅ **The** AI that understands group dynamics, not just one person's desires
+- From indecision → finalized itinerary in minutes (AI scenarios + group votes)
+- Transparent decisions (everyone sees votes, compromises, reasoning)
+- One app for planning + coordination + money (no app-switching)
+- Realistic plans respecting budget, kids, fatigue, weather, logistics
 
 ---
 
 ## Market Opportunity
 
-### The Problem
+**Group travel planning apps**: $2.4B (2024) → $6.5B (2035), 9.6% CAGR  
+**Broader group travel market**: $370B+ with strong digital transformation tailwinds
 
-The travel and planning app market is growing rapidly but remains largely focused on individuals, while a significant portion of travel happens in groups. Many tools focus on booking or static itineraries without seriously addressing **group decision-making** and **coordination**.
+**Key gaps Voyagely fills:**
 
-**Current reality:**
+- No dominant player combines AI constraints + group voting + integrated expenses
+- Existing tools are solo-focused, booking-heavy, or basic collaboration
+- 30-40% of trips are groups, but planning remains fragmented
 
-- A large portion of trips are group trips (friends, families, colleagues), but planning remains fragmented across messaging apps, shared documents, and separate expense apps
-- Existing planners mostly address a single "trip owner" who organizes for everyone, rarely a democratic decision-making process
-
-### The Opportunity
-
-Voyagely addresses a space that's still largely unoccupied: the **decision + planning + group finances layer**.
-
-- Clear pain point: indecision, coordination, mental fatigue of the organizer
-- Clear gap: few or no solutions that combine AI, group constraints, voting, and expenses in one flow
-- Network effects: each trip naturally brings multiple new users
+**TAM**: Multi-billion group planning layer  
+**Positioning**: First-mover in "group decision platform" category
 
 ---
 
-## Target Users
+## Target Users & Positioning
 
-### Primary Segments
+| Segment             | Pain Points                 | Why Voyagely                   |
+| ------------------- | --------------------------- | ------------------------------ |
+| **Friend Groups**   | Indecision, coordination    | Fast scenarios + voting        |
+| **Families**        | Complex constraints         | Budget/kids/pacing engine      |
+| **Couples**         | Compromise fatigue          | Balanced preference weighting  |
+| **Corporate Teams** | Budget approval, efficiency | Structured decisions + expense |
 
-1. **Friend Groups** (Bachelor/bachelorette parties, reunions, group vacations)
-   - Pain: Too many opinions, no one makes the final call
-   - Need: A tool that proposes scenarios and decides through voting
-
-2. **Families** (Multi-generational, with children)
-   - Pain: Multiple constraints (children, budget, fatigue, safety)
-   - Need: A realistic, kid-friendly plan that respects everyone's pace
-
-3. **Couples** (Important trips, anniversaries, honeymoons)
-   - Pain: Compromise, mental overload of one partner
-   - Need: Express each person's desires and get a plan that balances both
-
-4. **Corporate Teams** (Offsites, retreats, team travel)
-   - Pain: Budget approval, limited time, many constraints
-   - Need: Quick scenarios, cost visibility, simple coordination
+**Solo works too** (same constraint engine, simplified UI)
 
 ---
 
-## Competitive Advantage
+## Competitive Landscape
 
-### Our Defensible Moats
+**We're NOT:**
 
-1. **Constraint-based Group Planning Engine**
-   - AI explicitly encodes: budget, group size, presence of children, pace, must-dos, time and travel constraints
-   - Produces "livable" itineraries, not just lists of ideas
+- ❌ Booking platforms (we plan, you book elsewhere)
+- ❌ Solo AI planners (Wanderlog, TripIt are individual-first)
+- ❌ Generic collaboration (Notion + WhatsApp + Tricount)
+- ❌ Social networks (we execute trips, not chat endlessly)
 
-2. **Group Decision-Making System**
-   - Voting on scenarios (Day 1 vs Day 2) and on each activity
-   - Mechanisms to handle conflicts ("if we want whale watching, we need to remove X or increase budget by Y")
+**We ARE:**
 
-3. **Real-Time Collaboration + Expenses**
-   - Chat, presence, real-time editing on the itinerary
-   - Integrated Tricount-like: expenses are no longer a separate tool, but part of the trip
+- ✅ The group decision engine for travel
+- ✅ Constraint-aware AI that understands compromises
+- ✅ All-in-one: plan + vote + track expenses
+- ✅ Real-time, mobile-first, works offline
 
-4. **Speed + Focus**
-   - Unique focus on **group travel** and its constraints, where big players are scattered and booking-oriented
-
----
-
-## Business Model
-
-### Current Phase: Free Product to Validate Usage
-
-**Voyagely is currently free.**
-
-**Objectives of this phase:**
-
-- Validate usage intensity (number of trips, number of active members, engagement on votes and planning)
-- Test acceptance and perceived value of advanced features (enhanced AI, exports, integrations)
-- Understand which features could justify payment later, without restricting the core experience
-
-**Future paths (to be decided later, after real usage):**
-
-- **Generous freemium** (core planning + expenses free, advanced AI / exports / integrations in Pro)
-- **One-time per trip** for certain cases (important trips)
-- **Complementary revenue**: booking commissions, financial partnerships, B2B offers for teams
+**Direct comps weak on**: True group constraints, voting workflows, integrated money.
 
 ---
 
-## Success Metrics
+## Technical Foundation (Completed)
 
-### Product-Market Fit Indicators
+✅ Modern stack: Vite/React/TS + Supabase (realtime, RLS)  
+✅ Testing: Vitest + Playwright  
+✅ Monitoring: Sentry + PostHog  
+✅ i18n: 21 languages  
+✅ Mobile-first PWA ready
 
-- **Collaboration rate:** >70% of trip members actively participate (votes, comments, modifications)
-- **Voting engagement:** >80% of proposed activities receive votes
-- **AI scenario acceptance:** >60% of groups adopt one of the AI itineraries as a base
-- **Viral coefficient:** >1.0 (each trip brings on average more than one new group)
-
-### Business Health (Post-Free)
-
-To be measured once a paid model is introduced: conversion to paid, churn, CAC/LTV
+**In progress**: Constraint engine, voting, AI itineraries, Tricount integration
 
 ---
 
-## Current Status & Next Steps
+## Business Model (Phase 1: Free)
 
-### ✅ Completed / Underway
+**Current**: 100% free to validate usage patterns
 
-- Modern technical foundation (React, TypeScript, Supabase, realtime, tests, monitoring)
-- Basic flows: trip creation, members, activities, AI itinerary, initial voting, chat
+**Future options** (post-MVP validation):
 
-### 🎯 Next Steps
+- Freemium generous (core free, Pro for frequency/power users)
+- Trip-based one-time payments
+- Booking commissions (affiliates)
+- B2B teams/enterprise
+- Financial partnerships (group cards)
 
-- Complete MVP of the constraint engine (budget, children, preferences, pace)
-- MVP of integrated group expense system
-- Voting loops: day-by-day scenarios + votes per activity, with simple UI
-- "100% free" phase to observe usage and refine the business model
+**Pricing philosophy**: Tricount-inspired (core forever free, monetize extensions)
 
 ---
 
-## Conclusion
+## Key Metrics
 
-Voyagely is positioned to own the "Group Decision & Planning Platform for Travel" category. By focusing on constraint-based group collaboration, voting on AI proposals, and integrated expenses, we address a real, underserved problem that existing players ignore.
+**Product-Market Fit:**
 
-**Our advantage:** Constraint-aware planning engine, group decision-making system, and integrated collaboration + expenses.
+- > 70% trip member participation (votes/chat/expenses)
+- > 60% AI scenario adoption rate
+- > 80% activity voting coverage
+- Viral coefficient >1.0
 
-**Our opportunity:** Underserved group travel planning market with clear pain points and no dominant player.
+**Scale targets:**
 
-**Our mission:** Make group travel planning collaborative, not chaotic—from indecision to itinerary in minutes.
+- Phase 1 (3mo): 100 beta groups, 50 active trips
+- Phase 2 (6mo): 1K users, 500 trips/month
+- Phase 3 (12mo): 10K users, 5K trips/month
 
-**Our approach:** Start free, validate usage, then refine the business model based on real user behavior.
+---
+
+## Roadmap Highlights
+
+**Phase 1 MVP (Months 1-3)** – Launch beta:
+
+- Constraint engine (budget/kids/preferences)
+- AI scenarios + day-by-day voting
+- Real-time chat/presence
+- Tricount-like expenses
+
+**Phase 2 (4-6)** – Road-ready:
+
+- Offline PWA, mobile UX
+- Advanced expenses (settle-up, categories)
+- Templates/sharing
+
+**Phase 3 (7-12)** – Scale:
+
+- Advanced AI (learning/conflict resolution)
+- Team features
+- Monetization experiments
+
+---
+
+## Investment Requirements
+
+**MVP Completion (3 months):** $150K
+
+- 2-3 engineers → beta launch
+- Infrastructure: ~$500/month
+
+**Growth (6-12 months):** $500-800K
+
+- 5-7 engineers + design
+- Marketing scale-up
+
+---
+
+## Why Now
+
+1. **AI timing**: Constraint-aware group planning newly feasible
+2. **Market gap**: Group travel exploding, no category leader
+3. **Tech ready**: Supabase realtime + modern AI = perfect stack
+4. **Founder execution**: Foundation built, clear path to MVP
+
+---
+
+**Voyagely owns "group decision platform for travel" – the missing layer between chaos and perfect trips.**
 
 ---
 
 **For detailed roadmaps, technical architecture, and strategic analysis, see:**
 
 - [Strategic Positioning](./STRATEGIC_POSITIONING.md)
-- [Development Roadmap](./roadmap/)
+- [Product & Development Roadmap](./roadmap/product-roadmap.md)
 - [Technical Architecture](./architecture_design.md)
+- [Issues Tracker](./issues/ISSUES.md)
