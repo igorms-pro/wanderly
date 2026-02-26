@@ -73,7 +73,7 @@ BEGIN
   FROM public.preferences
   WHERE user_id = auth.uid()
     AND key = pref_key;
-  
+
   RETURN pref_value;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -91,7 +91,7 @@ BEGIN
     value = EXCLUDED.value,
     updated_at = NOW()
   RETURNING id INTO pref_id;
-  
+
   RETURN pref_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -122,10 +122,7 @@ BEGIN
     p_metadata
   )
   RETURNING id INTO log_id;
-  
+
   RETURN log_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
-
-
