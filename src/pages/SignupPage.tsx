@@ -24,9 +24,9 @@ export default function SignupPage() {
 
   const refreshUser = useStore((state) => state.refreshUser);
   const signInWithOAuth = useStore((state) => state.signInWithOAuth);
-  const { showToast } = useToast();
+  const { addToast } = useToast();
   const navigate = useNavigate();
-  const [oauthLoading, setOauthLoading] = useState<'google' | null>(null); // 'facebook' quand FB réactivé
+  const [oauthLoading, setOauthLoading] = useState<'google' | 'facebook' | null>(null);
   const hasSupabase =
     !!import.meta.env.VITE_SUPABASE_URL && !!import.meta.env.VITE_SUPABASE_ANON_KEY;
 
@@ -229,7 +229,7 @@ export default function SignupPage() {
 
   const handleOAuth = async (provider: 'google' | 'facebook') => {
     if (!hasSupabase) {
-      showToast(t('auth.failedToSignIn'), 'error');
+      addToast({ message: t('auth.failedToSignIn'), variant: 'error' });
       return;
     }
     setOauthLoading(provider);
@@ -239,15 +239,17 @@ export default function SignupPage() {
       setOauthLoading(null);
       const msg = res.error.toLowerCase();
       if (msg.includes('facebook')) {
-        showToast(
-          msg.includes('cancel') ? t('auth.oauthFacebookCancelled') : t('auth.oauthFacebookError'),
-          'error',
-        );
+        addToast({
+          message: msg.includes('cancel')
+            ? t('auth.oauthFacebookCancelled')
+            : t('auth.oauthFacebookError'),
+          variant: 'error',
+        });
       } else {
-        showToast(
-          msg.includes('cancel') ? t('auth.oauthCancelled') : t('auth.oauthError'),
-          'error',
-        );
+        addToast({
+          message: msg.includes('cancel') ? t('auth.oauthCancelled') : t('auth.oauthError'),
+          variant: 'error',
+        });
       }
     }
   };

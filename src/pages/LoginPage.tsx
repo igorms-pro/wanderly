@@ -15,12 +15,12 @@ import { GoogleIcon } from '@/features/auth/components/GoogleIcon';
 
 export default function LoginPage() {
   const { t } = useTranslation();
-  const { showToast } = useToast();
+  const { addToast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [oauthLoading, setOauthLoading] = useState<'google' | null>(null); // 'facebook' quand FB réactivé
+  const [oauthLoading, setOauthLoading] = useState<'google' | 'facebook' | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const location = useLocation();
@@ -55,14 +55,14 @@ export default function LoginPage() {
     } else if (oauthErrorDescription) {
       message = oauthErrorDescription;
     }
-    showToast(message, 'error');
+    addToast({ message, variant: 'error' });
 
     const next = new URLSearchParams(searchParams);
     next.delete('error');
     next.delete('error_description');
     next.delete('error_code');
     navigate({ pathname: '/login', search: next.toString() }, { replace: true });
-  }, [searchParams, navigate, t, showToast]);
+  }, [searchParams, navigate, t, addToast]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -93,7 +93,7 @@ export default function LoginPage() {
 
   const handleOAuth = async (provider: 'google' | 'facebook') => {
     if (!hasSupabase) {
-      showToast(t('auth.failedToSignIn'), 'error');
+      addToast({ message: t('auth.failedToSignIn'), variant: 'error' });
       return;
     }
     setOauthLoading(provider);
@@ -103,15 +103,17 @@ export default function LoginPage() {
       setOauthLoading(null);
       const msg = res.error.toLowerCase();
       if (msg.includes('facebook')) {
-        showToast(
-          msg.includes('cancel') ? t('auth.oauthFacebookCancelled') : t('auth.oauthFacebookError'),
-          'error',
-        );
+        addToast({
+          message: msg.includes('cancel')
+            ? t('auth.oauthFacebookCancelled')
+            : t('auth.oauthFacebookError'),
+          variant: 'error',
+        });
       } else {
-        showToast(
-          msg.includes('cancel') ? t('auth.oauthCancelled') : t('auth.oauthError'),
-          'error',
-        );
+        addToast({
+          message: msg.includes('cancel') ? t('auth.oauthCancelled') : t('auth.oauthError'),
+          variant: 'error',
+        });
       }
       return;
     }
