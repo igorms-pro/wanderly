@@ -90,7 +90,7 @@ Groups get:
 ✅ i18n: 21 languages  
 ✅ Mobile-first PWA ready
 
-**In progress**: Constraint engine, voting, AI itineraries, Tricount integration
+**In progress**: Constraint engine, voting, AI itineraries (planning-first – expenses come in Phase 2)
 
 ---
 
@@ -129,17 +129,17 @@ Groups get:
 
 ## Roadmap Highlights
 
-**Phase 1 MVP (Months 1-3)** – Launch beta:
+**Phase 1 MVP (Months 1-3)** – Launch beta (planning only):
 
 - Constraint engine (budget/kids/preferences)
 - AI scenarios + day-by-day voting
 - Real-time chat/presence
-- Tricount-like expenses
 
-**Phase 2 (4-6)** – Road-ready:
+**Phase 2 (4-6)** – Road-ready (planning + money):
 
-- Offline PWA, mobile UX
+- Tricount-like group expenses (MVP inside the app)
 - Advanced expenses (settle-up, categories)
+- Offline PWA, mobile UX
 - Templates/sharing
 
 **Phase 3 (7-12)** – Scale:
