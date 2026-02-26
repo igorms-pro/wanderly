@@ -268,6 +268,8 @@
     "createTrip": "Create Trip"
   },
   "landing": {
+    "metaTitle": "Voyagely – AI-Powered Travel Planning for Groups",
+    "metaDescription": "Plan your perfect trip with AI-powered itineraries. Collaborate with friends, vote on activities, and plan together in real time. Free to start.",
     "heroTitle": "Plan Your Perfect Trip",
     "heroSubtitle": "with AI-Powered Itineraries",
     "heroDescription": "Create personalized travel itineraries in seconds, collaborate with friends, and make decisions together. Your dream vacation starts here.",

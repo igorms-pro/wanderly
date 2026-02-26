@@ -1,18 +1,28 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
 import { PostHogProvider } from './contexts/PostHogContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { useStore } from './lib/store';
 import { supabase } from './lib/supabase';
+import { Spinner } from './components/ui/Spinner';
 import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import DashboardPage from './pages/DashboardPage';
-import TripDetailPage from './pages/TripDetailPage';
+
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const SignupPage = lazy(() => import('./pages/SignupPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const TripDetailPage = lazy(() => import('./pages/TripDetailPage'));
 
 const queryClient = new QueryClient();
+
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-stone-50 dark:bg-stone-950">
+      <Spinner size="lg" />
+    </div>
+  );
+}
 
 function App() {
   const user = useStore((state) => state.user);
@@ -61,20 +71,22 @@ function App() {
         <ToastProvider>
           <QueryClientProvider client={queryClient}>
             <Router>
-              <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/signup" element={<SignupPage />} />
-                <Route
-                  path="/dashboard"
-                  element={user ? <DashboardPage /> : <Navigate to="/login" replace />}
-                />
-                <Route
-                  path="/trip/:tripId"
-                  element={user ? <TripDetailPage /> : <Navigate to="/login" replace />}
-                />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/signup" element={<SignupPage />} />
+                  <Route
+                    path="/dashboard"
+                    element={user ? <DashboardPage /> : <Navigate to="/login" replace />}
+                  />
+                  <Route
+                    path="/trip/:tripId"
+                    element={user ? <TripDetailPage /> : <Navigate to="/login" replace />}
+                  />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </Suspense>
             </Router>
           </QueryClientProvider>
         </ToastProvider>

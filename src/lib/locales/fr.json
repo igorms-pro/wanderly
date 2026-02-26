@@ -268,6 +268,8 @@
     "createTrip": "Créer le voyage"
   },
   "landing": {
+    "metaTitle": "Voyagely – Planification de voyage par l'IA pour les groupes",
+    "metaDescription": "Planifiez votre voyage parfait avec des itinéraires alimentés par l'IA. Collaborez en temps réel, votez sur les activités. Gratuit pour commencer.",
     "heroTitle": "Planifiez votre voyage parfait",
     "heroSubtitle": "avec des itinéraires alimentés par l'IA",
     "heroDescription": "Créez des itinéraires de voyage personnalisés en quelques secondes, collaborez avec vos amis et prenez des décisions ensemble. Vos vacances de rêve commencent ici.",
