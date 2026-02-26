@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import { Send, Loader2, Edit2, Trash2, X } from 'lucide-react';
 import { format } from 'date-fns';
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import { useTranslation } from 'react-i18next';
 
 interface MessageWithProfile extends Message {
   sender_name?: string;
@@ -17,6 +18,7 @@ interface TripChatProps {
 }
 
 export default function TripChat({ tripId, userRole }: TripChatProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -231,13 +233,13 @@ export default function TripChat({ tripId, userRole }: TripChatProps) {
       setEditText('');
     } catch (error) {
       console.error('Error updating message:', error);
-      alert('Failed to update message. Please try again.');
+      alert(t('errors.failedToUpdateMessage'));
     }
   };
 
   const handleDelete = async (messageId: string) => {
     if (!user) return;
-    if (!confirm('Are you sure you want to delete this message?')) return;
+    if (!confirm(t('chat.confirmDeleteMessage'))) return;
 
     try {
       // Check if user is moderator or owner
@@ -277,7 +279,7 @@ export default function TripChat({ tripId, userRole }: TripChatProps) {
     return (
       <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
         <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-600" />
-        <p className="mt-4 text-gray-600">Loading chat...</p>
+        <p className="mt-4 text-gray-600">{t('chat.loadingChat')}</p>
       </div>
     );
   }
@@ -289,15 +291,15 @@ export default function TripChat({ tripId, userRole }: TripChatProps) {
     >
       {/* Chat Header */}
       <div className="px-6 py-4 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">Trip Chat</h3>
-        <p className="text-sm text-gray-600">Discuss plans with your travel companions</p>
+        <h3 className="text-lg font-semibold text-gray-900">{t('chat.tripChatTitle')}</h3>
+        <p className="text-sm text-gray-600">{t('chat.tripChatSubtitle')}</p>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {messagesWithProfiles.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500">No messages yet. Start the conversation!</p>
+            <p className="text-gray-500">{t('chat.noMessagesYet')}</p>
           </div>
         ) : (
           messagesWithProfiles.map((message) => {
@@ -317,11 +319,11 @@ export default function TripChat({ tripId, userRole }: TripChatProps) {
                           message.sender_avatar ||
                           `https://api.dicebear.com/7.x/avataaars/svg?seed=${message.user_id}`
                         }
-                        alt="Avatar"
+                        alt={t('chat.avatarAlt')}
                         className="w-6 h-6 rounded-full mr-2"
                       />
                       <span className="text-xs font-medium text-gray-600">
-                        {message.sender_name || 'Unknown'}
+                        {message.sender_name || t('chat.unknownUser')}
                       </span>
                     </div>
                   )}
@@ -340,13 +342,13 @@ export default function TripChat({ tripId, userRole }: TripChatProps) {
                             onClick={() => handleSaveEdit(message.id)}
                             className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
                           >
-                            Save
+                            {t('common.save')}
                           </button>
                           <button
                             onClick={handleCancelEdit}
                             className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-300"
                           >
-                            Cancel
+                            {t('common.cancel')}
                           </button>
                         </div>
                       </div>
