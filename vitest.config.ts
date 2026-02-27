@@ -14,6 +14,11 @@ export default defineConfig({
     setupFiles: ['src/test/setup.ts'],
     globals: true,
     css: true,
+    // Ensure Supabase auth is considered "configured" in tests
+    define: {
+      'import.meta.env.VITE_SUPABASE_URL': '"http://localhost:54321"',
+      'import.meta.env.VITE_SUPABASE_ANON_KEY': '"test-anon-key"',
+    },
     exclude: [
       '**/node_modules/**',
       '**/e2e/**',
