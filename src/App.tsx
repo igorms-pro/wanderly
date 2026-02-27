@@ -6,6 +6,7 @@ import { PostHogProvider } from './contexts/PostHogContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { useStore } from './lib/store';
 import { supabase } from './lib/supabase';
+import { createUserSession } from './lib/sessionTracking';
 import { Spinner } from './components/ui/Spinner';
 import LandingPage from './pages/LandingPage';
 
@@ -56,6 +57,13 @@ function App() {
               url.searchParams.delete('type');
               url.searchParams.delete('redirect_to');
               window.history.replaceState({}, document.title, url.pathname + url.search);
+            }
+
+            // Track user session (similar to OneLink)
+            if (session?.user?.id) {
+              createUserSession({ userId: session.user.id }).catch((error) => {
+                console.error('Error creating user session:', error);
+              });
             }
           }
           // User signed in or token refreshed, refresh user profile
