@@ -42,9 +42,10 @@ function getDeviceInfo() {
  */
 export async function createUserSession(params: CreateSessionParams): Promise<string | null> {
   try {
+    const client = supabase as any;
     const deviceInfo = getDeviceInfo();
 
-    const { data: existingSession, error: checkError } = await supabase
+    const { data: existingSession, error: checkError } = await client
       .from('user_sessions')
       .select('id')
       .eq('user_id', params.userId)
@@ -56,10 +57,10 @@ export async function createUserSession(params: CreateSessionParams): Promise<st
       .single();
 
     if (existingSession && !checkError) {
-      const { error: updateError } = await supabase
+      const { error: updateError } = await client
         .from('user_sessions')
         .update({ last_activity: new Date().toISOString() })
-        .eq('id', existingSession.id);
+        .eq('id', (existingSession as any).id);
 
       if (updateError) {
         console.error('Error updating session activity:', updateError);
@@ -69,7 +70,7 @@ export async function createUserSession(params: CreateSessionParams): Promise<st
       return existingSession.id;
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await client
       .from('user_sessions')
       .insert({
         user_id: params.userId,
@@ -82,12 +83,12 @@ export async function createUserSession(params: CreateSessionParams): Promise<st
       .select('id')
       .single();
 
-    if (error) {
+    if (error || !data) {
       console.error('Error creating user session:', error);
       return null;
     }
 
-    return data?.id ?? null;
+    return (data as any).id ?? null;
   } catch (error) {
     console.error('Error creating user session:', error);
     return null;
@@ -106,9 +107,10 @@ interface LogLoginAttemptParams {
  */
 export async function logLoginAttempt(params: LogLoginAttemptParams): Promise<void> {
   try {
+    const client = supabase as any;
     const deviceInfo = getDeviceInfo();
 
-    await supabase.from('login_history').insert({
+    await client.from('login_history').insert({
       user_id: params.userId ?? null,
       email: params.email,
       status: params.status,
