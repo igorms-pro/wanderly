@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { expect, afterEach, vi } from 'vitest';
+import { expect, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import '../lib/i18n'; // Initialize i18n for tests
 import { setupServer } from 'msw/node';
