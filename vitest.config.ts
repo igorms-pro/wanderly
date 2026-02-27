@@ -14,6 +14,11 @@ export default defineConfig({
     setupFiles: ['src/test/setup.ts'],
     globals: true,
     css: true,
+    // Expose on process.env and import.meta.env so hasSupabase is true in auth tests (CI has no .env)
+    env: {
+      VITE_SUPABASE_URL: 'https://test.supabase.co',
+      VITE_SUPABASE_ANON_KEY: 'test-anon-key',
+    },
     exclude: [
       '**/node_modules/**',
       '**/e2e/**',

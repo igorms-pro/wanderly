@@ -309,6 +309,76 @@ export interface Database {
           deleted_at?: string | null;
         };
       };
+      user_sessions: {
+        Row: {
+          id: string;
+          user_id: string;
+          device_os: string | null;
+          device_browser: string | null;
+          ip_address: string | null;
+          city: string | null;
+          country: string | null;
+          last_activity: string;
+          created_at: string;
+          revoked_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          device_os?: string | null;
+          device_browser?: string | null;
+          ip_address?: string | null;
+          city?: string | null;
+          country?: string | null;
+          last_activity?: string;
+          created_at?: string;
+          revoked_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          device_os?: string | null;
+          device_browser?: string | null;
+          ip_address?: string | null;
+          city?: string | null;
+          country?: string | null;
+          last_activity?: string;
+          created_at?: string;
+          revoked_at?: string | null;
+        };
+      };
+      login_history: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          email: string;
+          status: string;
+          ip_address: string | null;
+          device_info: string | null;
+          user_agent: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          email: string;
+          status: string;
+          ip_address?: string | null;
+          device_info?: string | null;
+          user_agent?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string | null;
+          email?: string;
+          status?: string;
+          ip_address?: string | null;
+          device_info?: string | null;
+          user_agent?: string | null;
+          created_at?: string;
+        };
+      };
       invitations: {
         Row: {
           id: string; // UUID

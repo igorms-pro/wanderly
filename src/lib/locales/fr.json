@@ -43,6 +43,14 @@
     "emailPlaceholder": "vous@exemple.com",
     "passwordPlaceholder": "Entrez votre mot de passe",
     "failedToSignIn": "Échec de la connexion",
+    "or": "ou",
+    "continueWithGoogle": "Continuer avec Google",
+    "continueWithFacebook": "Continuer avec Facebook",
+    "oauthError": "La connexion a échoué. Veuillez réessayer.",
+    "oauthCancelled": "La connexion a été annulée.",
+    "oauthFacebookError": "La connexion avec Facebook a échoué. Veuillez réessayer.",
+    "oauthFacebookCancelled": "La connexion avec Facebook a été annulée.",
+    "oauthLoading": "Connexion...",
     "joinTitle": "Rejoindre Voyagely",
     "joinSubtitle": "Commencez à planifier des voyages incroyables avec l'assistance de l'IA",
     "createAccount": "Créer un compte",
@@ -69,7 +77,11 @@
     "passwordRequirements": "Le mot de passe ne répond pas aux exigences",
     "noUserReturned": "Aucun utilisateur retourné lors de l'inscription. Veuillez réessayer.",
     "profileCreationDelayed": "La création du profil prend plus de temps que prévu. Veuillez essayer de vous connecter - votre compte a peut-être été créé avec succès.",
-    "failedToLoadProfile": "Échec du chargement du profil utilisateur. Veuillez essayer de vous connecter."
+    "failedToLoadProfile": "Échec du chargement du profil utilisateur. Veuillez essayer de vous connecter.",
+    "signInWithEmail": "Se connecter avec e-mail",
+    "sendMagicLink": "Envoyer le lien",
+    "magicLinkSent": "Lien magique envoyé ! Vérifiez votre e-mail.",
+    "magicLinkSending": "Envoi en cours..."
   },
   "navigation": {
     "dashboard": "Tableau de bord",

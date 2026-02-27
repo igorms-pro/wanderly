@@ -43,6 +43,14 @@
     "emailPlaceholder": "you@example.com",
     "passwordPlaceholder": "Enter your password",
     "failedToSignIn": "Failed to sign in",
+    "or": "or",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithFacebook": "Continue with Facebook",
+    "oauthError": "Sign-in failed. Please try again.",
+    "oauthCancelled": "Sign-in was cancelled.",
+    "oauthFacebookError": "Sign-in with Facebook failed. Please try again.",
+    "oauthFacebookCancelled": "Sign-in with Facebook was cancelled.",
+    "oauthLoading": "Connecting...",
     "joinTitle": "Join Voyagely",
     "joinSubtitle": "Start planning amazing trips with AI assistance",
     "createAccount": "Create Account",
@@ -69,7 +77,11 @@
     "passwordRequirements": "Password does not meet requirements",
     "noUserReturned": "No user returned from sign up. Please try again.",
     "profileCreationDelayed": "Profile creation is taking longer than expected. Please try signing in - your account may have been created successfully.",
-    "failedToLoadProfile": "Failed to load user profile. Please try signing in."
+    "failedToLoadProfile": "Failed to load user profile. Please try signing in.",
+    "signInWithEmail": "Sign in with email",
+    "sendMagicLink": "Send link",
+    "magicLinkSent": "Magic link sent! Check your email.",
+    "magicLinkSending": "Sending..."
   },
   "navigation": {
     "dashboard": "Dashboard",

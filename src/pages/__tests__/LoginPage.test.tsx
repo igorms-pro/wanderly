@@ -5,25 +5,14 @@ import { BrowserRouter } from 'react-router-dom';
 import LoginPage from '../LoginPage';
 import { useStore } from '../../lib/store';
 
-// Mock dependencies
 vi.mock('../../lib/store');
-vi.mock('../../lib/sentry', () => ({
-  setSentryUser: vi.fn(),
-}));
-vi.mock('../../lib/analytics', () => ({
-  Analytics: {
-    identify: vi.fn(),
-  },
-}));
+vi.mock('../../lib/sentry', () => ({ setSentryUser: vi.fn() }));
+vi.mock('../../lib/analytics', () => ({ Analytics: { identify: vi.fn() } }));
 
-// Mock useNavigate and useLocation
 const mockNavigate = vi.fn();
-const mockLocation = {
-  state: null,
-  pathname: '/login',
-  search: '',
-  hash: '',
-};
+const mockLocation = { state: null, pathname: '/login', search: '', hash: '' };
+const mockSearchParams = new URLSearchParams();
+const mockSetSearchParams = vi.fn();
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
@@ -31,17 +20,33 @@ vi.mock('react-router-dom', async () => {
     ...actual,
     useNavigate: () => mockNavigate,
     useLocation: () => mockLocation,
+    useSearchParams: () => [mockSearchParams, mockSetSearchParams],
   };
 });
 
+vi.mock('@/contexts/ToastContext', () => ({
+  useToast: () => ({ addToast: vi.fn() }),
+}));
+
 describe('LoginPage', () => {
-  const mockSetUser = vi.fn();
+  const mockSignInWithOAuth = vi.fn();
+  const mockSignInWithMagicLink = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useStore as any).mockImplementation((selector: any) => {
+    (useStore as unknown as { getState: () => object }).getState = () => ({
+      user: {
+        id: '1',
+        email: 'test@example.com',
+        display_name: 'Test',
+        avatar_url: '',
+        created_at: '',
+      },
+    });
+    (useStore as any).mockImplementation((selector: (s: any) => any) => {
       const state = {
-        setUser: mockSetUser,
+        signInWithOAuth: mockSignInWithOAuth,
+        signInWithMagicLink: mockSignInWithMagicLink,
       };
       return selector(state);
     });
@@ -59,76 +64,50 @@ describe('LoginPage', () => {
     expect(screen.getByTestId('login-form')).toBeInTheDocument();
     expect(screen.getByTestId('login-form-title')).toBeInTheDocument();
     expect(screen.getByTestId('login-email-input')).toBeInTheDocument();
-    expect(screen.getByTestId('login-password-input')).toBeInTheDocument();
-    expect(screen.getByTestId('login-submit-button')).toBeInTheDocument();
+    expect(screen.getByTestId('login-send-magic-link')).toBeInTheDocument();
+    expect(screen.getByText(/Continue with Google/i)).toBeInTheDocument();
     expect(screen.getByTestId('login-signup-link')).toBeInTheDocument();
   });
 
-  it('has pre-filled email and password', () => {
-    render(
-      <BrowserRouter>
-        <LoginPage />
-      </BrowserRouter>,
-    );
-
-    const emailInput = screen.getByTestId('login-email-input') as HTMLInputElement;
-    const passwordInput = screen.getByTestId('login-password-input') as HTMLInputElement;
-
-    expect(emailInput.value).toBe('demo@voyagely.com');
-    expect(passwordInput.value).toBe('demo123');
-  });
-
-  it('allows user to change email and password', async () => {
+  it('sends magic link when email form is submitted', async () => {
     const user = userEvent.setup();
+    mockSignInWithMagicLink.mockResolvedValueOnce({});
+
     render(
       <BrowserRouter>
         <LoginPage />
       </BrowserRouter>,
     );
 
-    const emailInput = screen.getByTestId('login-email-input') as HTMLInputElement;
-    const passwordInput = screen.getByTestId('login-password-input') as HTMLInputElement;
-
-    await user.clear(emailInput);
-    await user.type(emailInput, 'test@example.com');
-    await user.clear(passwordInput);
-    await user.type(passwordInput, 'newpassword');
-
-    expect(emailInput.value).toBe('test@example.com');
-    expect(passwordInput.value).toBe('newpassword');
-  });
-
-  it('submits form and navigates to dashboard', async () => {
-    const user = userEvent.setup();
-    render(
-      <BrowserRouter>
-        <LoginPage />
-      </BrowserRouter>,
-    );
-
-    const submitButton = screen.getByTestId('login-submit-button');
-    await user.click(submitButton);
+    await user.type(screen.getByTestId('login-email-input'), 'test@example.com');
+    await user.click(screen.getByTestId('login-send-magic-link'));
 
     await waitFor(() => {
-      expect(mockSetUser).toHaveBeenCalled();
-      expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
+      expect(mockSignInWithMagicLink).toHaveBeenCalledWith('test@example.com');
+    });
+    // Like OneLink: form stays visible, email cleared after success
+    expect((screen.getByTestId('login-email-input') as HTMLInputElement).value).toBe('');
+  });
+
+  it('calls signInWithOAuth when Google button is clicked', async () => {
+    const user = userEvent.setup();
+    mockSignInWithOAuth.mockResolvedValueOnce({});
+
+    render(
+      <BrowserRouter>
+        <LoginPage />
+      </BrowserRouter>,
+    );
+
+    await user.click(screen.getByText(/Continue with Google/i));
+
+    await waitFor(() => {
+      expect(mockSignInWithOAuth).toHaveBeenCalledWith('google');
     });
   });
 
-  it('shows error message when error occurs', () => {
-    render(
-      <BrowserRouter>
-        <LoginPage />
-      </BrowserRouter>,
-    );
-
-    // Error message should not be visible initially
-    expect(screen.queryByTestId('login-error-message')).not.toBeInTheDocument();
-  });
-
   it('shows success message when provided', () => {
-    // Update mock location with success message
-    mockLocation.state = { message: 'Account created successfully!' };
+    (mockLocation as any).state = { message: 'Account created successfully!' };
 
     render(
       <BrowserRouter>
@@ -139,7 +118,6 @@ describe('LoginPage', () => {
     expect(screen.getByTestId('login-success-message')).toBeInTheDocument();
     expect(screen.getByText('Account created successfully!')).toBeInTheDocument();
 
-    // Reset for other tests
-    mockLocation.state = null;
+    (mockLocation as any).state = null;
   });
 });

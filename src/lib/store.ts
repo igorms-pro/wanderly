@@ -22,11 +22,14 @@ interface AppState {
   // Auth state
   user: User | null;
   setUser: (user: User | null) => void;
+  authInitialized: boolean;
 
   // Auth functions
   initializeAuth: () => Promise<void>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  signInWithOAuth: (provider: 'google' | 'facebook') => Promise<{ error?: string }>;
+  signInWithMagicLink: (email: string) => Promise<{ error?: string }>;
 
   // Trips state
   trips: Trip[];
@@ -107,6 +110,7 @@ export const useStore = create<AppState>((set, get) => ({
   // Auth state
   user: null,
   setUser: (user) => set({ user }),
+  authInitialized: false,
 
   // Auth functions
   initializeAuth: async () => {
@@ -176,6 +180,57 @@ export const useStore = create<AppState>((set, get) => ({
       console.error('Error initializing auth:', error);
       set({ user: null });
       clearSentryUser();
+    } finally {
+      set({ authInitialized: true });
+    }
+  },
+
+  signInWithOAuth: async (provider: 'google' | 'facebook') => {
+    try {
+      const hasSupabaseConfig =
+        import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY;
+      if (!hasSupabaseConfig) {
+        return { error: 'Auth is not configured.' };
+      }
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/dashboard`,
+        },
+      });
+      if (error) {
+        const msg = error.message.toLowerCase();
+        if (msg.includes('cancelled') || msg.includes('denied')) {
+          return { error: 'Sign in was cancelled.' };
+        }
+        return { error: error.message };
+      }
+      return {};
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
+      return { error: message };
+    }
+  },
+
+  signInWithMagicLink: async (email: string) => {
+    try {
+      const hasSupabaseConfig =
+        import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY;
+      if (!hasSupabaseConfig) {
+        return { error: 'Auth is not configured.' };
+      }
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email.trim(),
+        options: {
+          emailRedirectTo: `${origin}/dashboard`,
+        },
+      });
+      if (error) return { error: error.message };
+      return {};
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to send link.';
+      return { error: message };
     }
   },
 
