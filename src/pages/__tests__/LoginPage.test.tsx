@@ -25,12 +25,12 @@ vi.mock('react-router-dom', async () => {
 });
 
 vi.mock('@/contexts/ToastContext', () => ({
-  useToast: () => ({ showToast: vi.fn() }),
+  useToast: () => ({ addToast: vi.fn() }),
 }));
 
 describe('LoginPage', () => {
-  const mockSignInWithPassword = vi.fn();
   const mockSignInWithOAuth = vi.fn();
+  const mockSignInWithMagicLink = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -45,8 +45,8 @@ describe('LoginPage', () => {
     });
     (useStore as any).mockImplementation((selector: (s: any) => any) => {
       const state = {
-        signInWithPassword: mockSignInWithPassword,
         signInWithOAuth: mockSignInWithOAuth,
+        signInWithMagicLink: mockSignInWithMagicLink,
       };
       return selector(state);
     });
@@ -64,43 +64,14 @@ describe('LoginPage', () => {
     expect(screen.getByTestId('login-form')).toBeInTheDocument();
     expect(screen.getByTestId('login-form-title')).toBeInTheDocument();
     expect(screen.getByTestId('login-email-input')).toBeInTheDocument();
-    expect(screen.getByTestId('login-password-input')).toBeInTheDocument();
-    expect(screen.getByTestId('login-submit-button')).toBeInTheDocument();
+    expect(screen.getByTestId('login-send-magic-link')).toBeInTheDocument();
+    expect(screen.getByText(/Continue with Google/i)).toBeInTheDocument();
     expect(screen.getByTestId('login-signup-link')).toBeInTheDocument();
   });
 
-  it('renders Google OAuth button', () => {
-    render(
-      <BrowserRouter>
-        <LoginPage />
-      </BrowserRouter>,
-    );
-
-    expect(screen.getByText(/Continue with Google/i)).toBeInTheDocument();
-    // Facebook commenté en attendant vérif app FB
-  });
-
-  it('allows user to enter email and password', async () => {
+  it('sends magic link when email form is submitted', async () => {
     const user = userEvent.setup();
-    render(
-      <BrowserRouter>
-        <LoginPage />
-      </BrowserRouter>,
-    );
-
-    const emailInput = screen.getByTestId('login-email-input');
-    const passwordInput = screen.getByTestId('login-password-input');
-
-    await user.type(emailInput, 'test@example.com');
-    await user.type(passwordInput, 'newpassword');
-
-    expect((emailInput as HTMLInputElement).value).toBe('test@example.com');
-    expect((passwordInput as HTMLInputElement).value).toBe('newpassword');
-  });
-
-  it('submits form and navigates to dashboard when sign-in succeeds', async () => {
-    const user = userEvent.setup();
-    mockSignInWithPassword.mockResolvedValueOnce({});
+    mockSignInWithMagicLink.mockResolvedValueOnce({});
 
     render(
       <BrowserRouter>
@@ -109,18 +80,18 @@ describe('LoginPage', () => {
     );
 
     await user.type(screen.getByTestId('login-email-input'), 'test@example.com');
-    await user.type(screen.getByTestId('login-password-input'), 'password');
-    await user.click(screen.getByTestId('login-submit-button'));
+    await user.click(screen.getByTestId('login-send-magic-link'));
 
     await waitFor(() => {
-      expect(mockSignInWithPassword).toHaveBeenCalledWith('test@example.com', 'password');
-      expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true });
+      expect(mockSignInWithMagicLink).toHaveBeenCalledWith('test@example.com');
     });
+    // Like OneLink: form stays visible, email cleared after success
+    expect((screen.getByTestId('login-email-input') as HTMLInputElement).value).toBe('');
   });
 
-  it('shows error when sign-in fails', async () => {
+  it('calls signInWithOAuth when Google button is clicked', async () => {
     const user = userEvent.setup();
-    mockSignInWithPassword.mockResolvedValueOnce({ error: 'Invalid credentials' });
+    mockSignInWithOAuth.mockResolvedValueOnce({});
 
     render(
       <BrowserRouter>
@@ -128,12 +99,10 @@ describe('LoginPage', () => {
       </BrowserRouter>,
     );
 
-    await user.type(screen.getByTestId('login-email-input'), 'test@example.com');
-    await user.type(screen.getByTestId('login-password-input'), 'password');
-    await user.click(screen.getByTestId('login-submit-button'));
+    await user.click(screen.getByText(/Continue with Google/i));
 
     await waitFor(() => {
-      expect(screen.getByTestId('login-error-message')).toHaveTextContent('Invalid credentials');
+      expect(mockSignInWithOAuth).toHaveBeenCalledWith('google');
     });
   });
 

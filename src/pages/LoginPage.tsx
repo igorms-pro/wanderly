@@ -1,10 +1,8 @@
-import { useState, FormEvent, useEffect } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate, Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '../lib/store';
 import { Plane, CheckCircle2 } from 'lucide-react';
-import { setSentryUser } from '../lib/sentry';
-import { Analytics } from '../lib/analytics';
 import { Layout } from '../components/Layout';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -17,16 +15,15 @@ export default function LoginPage() {
   const { t } = useTranslation();
   const { addToast } = useToast();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<'google' | 'facebook' | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const signInWithPassword = useStore((state) => state.signInWithPassword);
   const signInWithOAuth = useStore((state) => state.signInWithOAuth);
+  const signInWithMagicLink = useStore((state) => state.signInWithMagicLink);
   const navigate = useNavigate();
 
   const hasSupabase =
@@ -64,31 +61,23 @@ export default function LoginPage() {
     navigate({ pathname: '/login', search: next.toString() }, { replace: true });
   }, [searchParams, navigate, t, addToast]);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleMagicLink = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
-
+    if (!email.trim()) return;
     if (!hasSupabase) {
-      setError(t('auth.failedToSignIn'));
-      setLoading(false);
+      addToast({ message: t('auth.failedToSignIn'), variant: 'error' });
       return;
     }
-
-    const res = await signInWithPassword(email.trim(), password);
-    setLoading(false);
-
+    setEmailLoading(true);
+    const res = await signInWithMagicLink(email.trim());
+    setEmailLoading(false);
     if (res.error) {
       setError(res.error);
       return;
     }
-
-    const user = useStore.getState().user;
-    if (user) {
-      setSentryUser({ id: user.id, email: user.email, username: user.display_name });
-      Analytics.identify(user.id, { email: user.email, displayName: user.display_name });
-    }
-    navigate('/dashboard', { replace: true });
+    addToast({ message: t('auth.magicLinkSent'), variant: 'success' });
+    setEmail('');
   };
 
   const handleOAuth = async (provider: 'google' | 'facebook') => {
@@ -166,7 +155,11 @@ export default function LoginPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4" data-testid="login-form-element">
+            <form
+              onSubmit={handleMagicLink}
+              className="space-y-4 mb-6"
+              data-testid="login-email-form"
+            >
               <Input
                 id="login-email"
                 type="email"
@@ -174,29 +167,18 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                disabled={loading}
+                disabled={emailLoading}
                 placeholder={t('auth.emailPlaceholder')}
                 data-testid="login-email-input"
               />
-              <Input
-                id="login-password"
-                type="password"
-                label={t('auth.password')}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={loading}
-                placeholder={t('auth.passwordPlaceholder')}
-                data-testid="login-password-input"
-              />
               <Button
                 type="submit"
-                disabled={loading}
+                disabled={emailLoading}
                 className="w-full"
-                loading={loading}
-                data-testid="login-submit-button"
+                loading={emailLoading}
+                data-testid="login-send-magic-link"
               >
-                {loading ? t('auth.signingIn') : t('auth.signInButton')}
+                {emailLoading ? t('auth.magicLinkSending') : t('auth.sendMagicLink')}
               </Button>
             </form>
 
@@ -216,7 +198,7 @@ export default function LoginPage() {
                 type="button"
                 variant="outline"
                 className="w-full bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 border-stone-300 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-700"
-                disabled={loading || oauthLoading !== null}
+                disabled={emailLoading || oauthLoading !== null}
                 onClick={() => handleOAuth('google')}
                 loading={oauthLoading === 'google'}
                 leftIcon={<GoogleIcon className="w-5 h-5" />}
@@ -227,7 +209,7 @@ export default function LoginPage() {
               <Button
                 type="button"
                 className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white border-0 focus:ring-[#1877F2]"
-                disabled={loading || oauthLoading !== null}
+                disabled={emailLoading || oauthLoading !== null}
                 onClick={() => handleOAuth('facebook')}
                 loading={oauthLoading === 'facebook'}
                 leftIcon={<FacebookIcon className="w-5 h-5 text-white" />}

@@ -77,7 +77,11 @@
     "passwordRequirements": "Le mot de passe ne répond pas aux exigences",
     "noUserReturned": "Aucun utilisateur retourné lors de l'inscription. Veuillez réessayer.",
     "profileCreationDelayed": "La création du profil prend plus de temps que prévu. Veuillez essayer de vous connecter - votre compte a peut-être été créé avec succès.",
-    "failedToLoadProfile": "Échec du chargement du profil utilisateur. Veuillez essayer de vous connecter."
+    "failedToLoadProfile": "Échec du chargement du profil utilisateur. Veuillez essayer de vous connecter.",
+    "signInWithEmail": "Se connecter avec e-mail",
+    "sendMagicLink": "Envoyer le lien",
+    "magicLinkSent": "Lien magique envoyé ! Vérifiez votre e-mail.",
+    "magicLinkSending": "Envoi en cours..."
   },
   "navigation": {
     "dashboard": "Tableau de bord",

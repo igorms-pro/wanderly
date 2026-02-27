@@ -26,6 +26,7 @@ function PageLoader() {
 
 function App() {
   const user = useStore((state) => state.user);
+  const authInitialized = useStore((state) => state.authInitialized);
   const initializeAuth = useStore((state) => state.initializeAuth);
   const refreshUser = useStore((state) => state.refreshUser);
 
@@ -44,6 +45,19 @@ function App() {
         data: { subscription },
       } = supabase.auth.onAuthStateChange(async (event, session) => {
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          if (event === 'SIGNED_IN' && typeof window !== 'undefined') {
+            const url = new URL(window.location.href);
+            const hasCode = url.searchParams.has('code');
+            const hasToken = url.searchParams.has('token');
+            const hasType = url.searchParams.has('type');
+            if (hasCode || hasToken || hasType || url.hash) {
+              url.searchParams.delete('code');
+              url.searchParams.delete('token');
+              url.searchParams.delete('type');
+              url.searchParams.delete('redirect_to');
+              window.history.replaceState({}, document.title, url.pathname + url.search);
+            }
+          }
           // User signed in or token refreshed, refresh user profile
           await refreshUser();
         } else if (event === 'SIGNED_OUT') {
@@ -78,11 +92,27 @@ function App() {
                   <Route path="/signup" element={<SignupPage />} />
                   <Route
                     path="/dashboard"
-                    element={user ? <DashboardPage /> : <Navigate to="/login" replace />}
+                    element={
+                      !authInitialized ? (
+                        <PageLoader />
+                      ) : user ? (
+                        <DashboardPage />
+                      ) : (
+                        <Navigate to="/login" replace />
+                      )
+                    }
                   />
                   <Route
                     path="/trip/:tripId"
-                    element={user ? <TripDetailPage /> : <Navigate to="/login" replace />}
+                    element={
+                      !authInitialized ? (
+                        <PageLoader />
+                      ) : user ? (
+                        <TripDetailPage />
+                      ) : (
+                        <Navigate to="/login" replace />
+                      )
+                    }
                   />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>

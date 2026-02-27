@@ -77,7 +77,11 @@
     "passwordRequirements": "Password does not meet requirements",
     "noUserReturned": "No user returned from sign up. Please try again.",
     "profileCreationDelayed": "Profile creation is taking longer than expected. Please try signing in - your account may have been created successfully.",
-    "failedToLoadProfile": "Failed to load user profile. Please try signing in."
+    "failedToLoadProfile": "Failed to load user profile. Please try signing in.",
+    "signInWithEmail": "Sign in with email",
+    "sendMagicLink": "Send link",
+    "magicLinkSent": "Magic link sent! Check your email.",
+    "magicLinkSending": "Sending..."
   },
   "navigation": {
     "dashboard": "Dashboard",
