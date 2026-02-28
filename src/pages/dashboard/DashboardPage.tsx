@@ -29,7 +29,7 @@ export default function DashboardPage() {
   const user = useStore((state) => state.user);
   const trips = useStore((state) => state.trips);
   const loadTrips = useStore((state) => state.loadTrips);
-  const signOut = useStore((state) => state.signOut);
+  const signOut = useStore((s) => s.signOut);
   const deleteTrip = useStore((state) => state.deleteTrip);
   const updateTrip = useStore((state) => state.updateTrip);
   const showCreateTripModal = useStore((state) => state.showCreateTripModal);

@@ -18,8 +18,8 @@ export default function SignupPage() {
   const [emailLoading, setEmailLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<'google' | 'facebook' | null>(null);
 
-  const signInWithOAuth = useStore((state) => state.signInWithOAuth);
-  const signInWithMagicLink = useStore((state) => state.signInWithMagicLink);
+  const signInWithOAuth = useStore((s) => s.signInWithOAuth);
+  const signInWithMagicLink = useStore((s) => s.signInWithMagicLink);
   const { addToast } = useToast();
   const hasSupabase =
     !!import.meta.env.VITE_SUPABASE_URL && !!import.meta.env.VITE_SUPABASE_ANON_KEY;

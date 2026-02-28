@@ -22,12 +22,20 @@ export default function LoginPage() {
 
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const signInWithOAuth = useStore((state) => state.signInWithOAuth);
-  const signInWithMagicLink = useStore((state) => state.signInWithMagicLink);
+  const signInWithOAuth = useStore((s) => s.signInWithOAuth);
+  const signInWithMagicLink = useStore((s) => s.signInWithMagicLink);
+  const user = useStore((s) => s.user);
+  const authInitialized = useStore((s) => s.authInitialized);
   const navigate = useNavigate();
 
   const hasSupabase =
     !!import.meta.env.VITE_SUPABASE_URL && !!import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  useEffect(() => {
+    if (authInitialized && user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [authInitialized, user, navigate]);
 
   // Success message from signup redirect
   useEffect(() => {
