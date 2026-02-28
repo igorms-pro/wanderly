@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Trip } from '@/lib/mock-supabase';
-import { Globe, TrendingUp, MapPin } from 'lucide-react';
+import { Globe, TrendingUp, ClipboardList } from 'lucide-react';
 
 interface TripStatsProps {
   trips: Trip[];
@@ -12,9 +12,9 @@ export default function TripStats({ trips }: TripStatsProps) {
 
   const stats = useMemo(() => {
     const now = new Date();
-    const upcoming = trips.filter((trip) => new Date(trip.start_date) > now).length;
-    const destinations = new Set(trips.map((trip) => trip.destination_text)).size;
-    return { total: trips.length, upcoming, destinations };
+    const upcoming = trips.filter((t) => new Date(t.start_date) > now).length;
+    const planned = trips.filter((t) => t.status === 'planned').length;
+    return { total: trips.length, upcoming, planned };
   }, [trips]);
 
   const items = [
@@ -31,9 +31,9 @@ export default function TripStats({ trips }: TripStatsProps) {
       gradient: 'from-emerald-500 to-teal-500',
     },
     {
-      icon: MapPin,
-      label: t('trip.countriesVisited'),
-      value: stats.destinations,
+      icon: ClipboardList,
+      label: t('trip.plannedTrips'),
+      value: stats.planned,
       gradient: 'from-amber-500 to-orange-500',
     },
   ];

@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect, lazy, Suspense } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
 import { PostHogProvider } from './contexts/PostHogContext';
@@ -25,60 +25,70 @@ function PageLoader() {
   );
 }
 
+const DASHBOARD_HMR_EVENT = 'voyagely-dashboard-hmr';
+
 function App() {
   const user = useStore((state) => state.user);
   const authInitialized = useStore((state) => state.authInitialized);
   const initializeAuth = useStore((state) => state.initializeAuth);
   const refreshUser = useStore((state) => state.refreshUser);
+  const [dashboardKey, setDashboardKey] = useState(0);
+
+  // HMR: when dashboard (or its deps) is updated, remount so new code is shown
+  useEffect(() => {
+    if (import.meta.hot) {
+      const handler = () => setDashboardKey((k) => k + 1);
+      window.addEventListener(DASHBOARD_HMR_EVENT, handler);
+      return () => window.removeEventListener(DASHBOARD_HMR_EVENT, handler);
+    }
+  }, []);
+  useEffect(() => {
+    if (import.meta.hot) {
+      import.meta.hot.accept('./pages/dashboard/index.ts', () => {
+        window.dispatchEvent(new Event(DASHBOARD_HMR_EVENT));
+      });
+    }
+  }, []);
 
   useEffect(() => {
-    // Only initialize auth if Supabase is configured
-    // In CI/test environments without env vars, skip auth initialization
+    // Always call so authInitialized is set (with or without Supabase)
+    initializeAuth();
+
     const hasSupabaseConfig =
       import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-    if (hasSupabaseConfig) {
-      // Initialize auth on mount - check existing session and load profile
-      initializeAuth();
+    if (!hasSupabaseConfig) return;
 
-      // Set up auth state change listener
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          if (event === 'SIGNED_IN' && typeof window !== 'undefined') {
-            const url = new URL(window.location.href);
-            const hasCode = url.searchParams.has('code');
-            const hasToken = url.searchParams.has('token');
-            const hasType = url.searchParams.has('type');
-            if (hasCode || hasToken || hasType || url.hash) {
-              url.searchParams.delete('code');
-              url.searchParams.delete('token');
-              url.searchParams.delete('type');
-              url.searchParams.delete('redirect_to');
-              window.history.replaceState({}, document.title, url.pathname + url.search);
-            }
-
-            // Track user session (similar to OneLink)
-            if (session?.user?.id) {
-              createUserSession({ userId: session.user.id }).catch((error) => {
-                console.error('Error creating user session:', error);
-              });
-            }
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        if (event === 'SIGNED_IN' && typeof window !== 'undefined') {
+          const url = new URL(window.location.href);
+          const hasCode = url.searchParams.has('code');
+          const hasToken = url.searchParams.has('token');
+          const hasType = url.searchParams.has('type');
+          if (hasCode || hasToken || hasType || url.hash) {
+            url.searchParams.delete('code');
+            url.searchParams.delete('token');
+            url.searchParams.delete('type');
+            url.searchParams.delete('redirect_to');
+            window.history.replaceState({}, document.title, url.pathname + url.search);
           }
-          // User signed in or token refreshed, refresh user profile
-          await refreshUser();
-        } else if (event === 'SIGNED_OUT') {
-          // User signed out, refresh will clear the user state
-          await refreshUser();
-        }
-      });
 
-      // Cleanup subscription on unmount
-      return () => {
-        subscription.unsubscribe();
-      };
-    }
+          if (session?.user?.id) {
+            createUserSession({ userId: session.user.id }).catch((error) => {
+              console.error('Error creating user session:', error);
+            });
+          }
+        }
+        await refreshUser();
+      } else if (event === 'SIGNED_OUT') {
+        await refreshUser();
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, [initializeAuth, refreshUser]);
 
   return (
@@ -104,7 +114,7 @@ function App() {
                       !authInitialized ? (
                         <PageLoader />
                       ) : user ? (
-                        <DashboardPage />
+                        <DashboardPage key={dashboardKey} />
                       ) : (
                         <Navigate to="/login" replace />
                       )

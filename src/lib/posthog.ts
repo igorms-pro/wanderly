@@ -1,11 +1,15 @@
 import posthog from 'posthog-js';
 
+const isPlaceholder = (s: string) =>
+  !s || s.includes('your-') || s.includes('placeholder') || s.length < 10;
+
 export const initializePostHog = () => {
   const key = import.meta.env.VITE_POSTHOG_KEY;
   const host = import.meta.env.VITE_POSTHOG_HOST || 'https://us.i.posthog.com';
 
-  if (!key) {
-    console.warn('PostHog key not found. Analytics will be disabled.');
+  if (!key || isPlaceholder(key)) {
+    if (import.meta.env.DEV && key)
+      console.warn('PostHog key looks like a placeholder. Analytics disabled.');
     return;
   }
 
