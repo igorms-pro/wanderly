@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Trip } from '@/lib/mock-supabase';
-import { Globe, TrendingUp, ClipboardList } from 'lucide-react';
+import { Globe, CalendarCheck, Archive } from 'lucide-react';
 
 interface TripStatsProps {
   trips: Trip[];
@@ -11,10 +11,9 @@ export default function TripStats({ trips }: TripStatsProps) {
   const { t } = useTranslation();
 
   const stats = useMemo(() => {
-    const now = new Date();
-    const upcoming = trips.filter((t) => new Date(t.start_date) > now).length;
-    const planned = trips.filter((t) => t.status === 'planned').length;
-    return { total: trips.length, upcoming, planned };
+    const planned = trips.filter((trip) => trip.status === 'planned').length;
+    const archived = trips.filter((trip) => trip.status === 'archived').length;
+    return { total: trips.length, planned, archived };
   }, [trips]);
 
   const items = [
@@ -25,16 +24,16 @@ export default function TripStats({ trips }: TripStatsProps) {
       gradient: 'from-violet-500 to-indigo-500',
     },
     {
-      icon: TrendingUp,
-      label: t('trip.upcomingTrips'),
-      value: stats.upcoming,
+      icon: CalendarCheck,
+      label: t('trip.planned'),
+      value: stats.planned,
       gradient: 'from-emerald-500 to-teal-500',
     },
     {
-      icon: ClipboardList,
-      label: t('trip.plannedTrips'),
-      value: stats.planned,
-      gradient: 'from-amber-500 to-orange-500',
+      icon: Archive,
+      label: t('trip.archived'),
+      value: stats.archived,
+      gradient: 'from-stone-500 to-stone-600',
     },
   ];
 

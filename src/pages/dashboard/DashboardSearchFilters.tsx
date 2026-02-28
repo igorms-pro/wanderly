@@ -24,7 +24,6 @@ export function DashboardSearchFilters({
   const statusFilters: { key: StatusFilter; label: string }[] = [
     { key: 'all', label: t('trip.all') },
     { key: 'planned', label: t('trip.planned') },
-    { key: 'locked', label: t('trip.locked') },
     { key: 'archived', label: t('trip.archived') },
   ];
 
