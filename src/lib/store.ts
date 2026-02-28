@@ -24,6 +24,7 @@ interface AppState {
   user: User | null;
   setUser: (user: User | null) => void;
   authInitialized: boolean;
+  setAuthInitialized: (v: boolean) => void;
 
   // Auth functions
   initializeAuth: () => Promise<void>;
@@ -117,6 +118,7 @@ export const useStore = create<AppState>()(
       user: null,
       setUser: (user) => set({ user }),
       authInitialized: false,
+      setAuthInitialized: (v) => set({ authInitialized: v }),
 
       // Auth functions
       initializeAuth: async () => {
@@ -893,7 +895,8 @@ export const useStore = create<AppState>()(
     {
       name: AUTH_STORAGE_KEY,
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ user: state.user, authInitialized: state.authInitialized }),
+      // Only persist authInitialized so we don't overwrite a fresh Google OAuth user with stale null on rehydration
+      partialize: (state) => ({ authInitialized: state.authInitialized }),
     },
   ),
 );

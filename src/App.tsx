@@ -51,44 +51,96 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // Always call so authInitialized is set (with or without Supabase)
-    initializeAuth();
-
     const hasSupabaseConfig =
       import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-    if (!hasSupabaseConfig) return;
+    if (import.meta.env.DEV) {
+      console.log('[Auth] init', { hasSupabaseConfig });
+    }
 
+    if (!hasSupabaseConfig) {
+      initializeAuth();
+      return;
+    }
+
+    let mounted = true;
+    let sessionInitialized = false;
+
+    const setAuthInitialized = useStore.getState().setAuthInitialized;
+    const setUser = useStore.getState().setUser;
+
+    const done = () => {
+      if (!mounted || sessionInitialized) return;
+      sessionInitialized = true;
+      setAuthInitialized(true);
+    };
+
+    // Same as OneLink: onAuthStateChange is the source of truth; INITIAL_SESSION / SIGNED_IN / SIGNED_OUT set loading done
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        if (event === 'SIGNED_IN' && typeof window !== 'undefined') {
-          const url = new URL(window.location.href);
-          const hasCode = url.searchParams.has('code');
-          const hasToken = url.searchParams.has('token');
-          const hasType = url.searchParams.has('type');
-          if (hasCode || hasToken || hasType || url.hash) {
-            url.searchParams.delete('code');
-            url.searchParams.delete('token');
-            url.searchParams.delete('type');
-            url.searchParams.delete('redirect_to');
-            window.history.replaceState({}, document.title, url.pathname + url.search);
-          }
+      if (!mounted) return;
 
-          if (session?.user?.id) {
-            createUserSession({ userId: session.user.id }).catch((error) => {
-              console.error('Error creating user session:', error);
-            });
-          }
+      if (import.meta.env.DEV) {
+        console.log(
+          '[Auth] onAuthStateChange',
+          event,
+          session?.user?.id ? 'session ok' : 'no session',
+        );
+      }
+
+      // Update user state for all events (like OneLink setSession)
+      if (session?.user) {
+        await refreshUser();
+      } else {
+        setUser(null);
+      }
+
+      // Mark session as initialized when we receive INITIAL_SESSION or SIGNED_IN/SIGNED_OUT (like OneLink)
+      if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        done();
+      }
+
+      // Clean up URL after successful sign-in (like OneLink: hash + query code)
+      if (event === 'SIGNED_IN' && typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        const oauthError = url.searchParams.get('error');
+        if (oauthError) {
+          url.searchParams.delete('error');
+          url.searchParams.delete('error_description');
+          url.searchParams.delete('error_code');
+          window.history.replaceState(null, '', url.toString());
+          return;
         }
-        await refreshUser();
-      } else if (event === 'SIGNED_OUT') {
-        await refreshUser();
+        const isMagicLinkRedirect = url.hash || url.searchParams.has('code');
+        if (isMagicLinkRedirect) {
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+
+        if (session?.user?.id) {
+          createUserSession({ userId: session.user.id }).catch((error) => {
+            console.error('[Auth] Error creating session:', error);
+          });
+        }
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Like OneLink: getSession() fallback; if INITIAL_SESSION doesn't fire within 1s, set loading false
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (!mounted) return;
+      if (error && import.meta.env.DEV) {
+        console.error('[Auth] Error getting session:', error);
+      }
+      if (data.session) {
+        refreshUser();
+      }
+      setTimeout(() => done(), 1000);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [initializeAuth, refreshUser]);
 
   return (
