@@ -49,6 +49,7 @@ interface AppState {
     status?: 'planned' | 'locked' | 'archived';
     budget_cents?: number;
     currency?: string;
+    constraints?: Record<string, any>;
   }) => Promise<Trip>;
   updateTrip: (tripId: string, updates: Partial<Trip>) => Promise<void>;
   deleteTrip: (tripId: string) => Promise<void>;
@@ -386,6 +387,7 @@ export const useStore = create<AppState>((set, get) => ({
         status: trip.status,
         budget_cents: trip.budget_cents ?? undefined,
         currency: trip.currency ?? undefined,
+        constraints: trip.constraints ?? undefined,
         created_at: trip.created_at,
         updated_at: trip.updated_at,
       }));
@@ -417,6 +419,7 @@ export const useStore = create<AppState>((set, get) => ({
           status: tripData.status || 'planned',
           budget_cents: tripData.budget_cents ?? null,
           currency: tripData.currency ?? null,
+          constraints: tripData.constraints ?? null,
         } as any)
         .select()
         .single();
@@ -442,6 +445,7 @@ export const useStore = create<AppState>((set, get) => ({
         status: tripFromDb.status,
         budget_cents: tripFromDb.budget_cents ?? undefined,
         currency: tripFromDb.currency ?? undefined,
+        constraints: tripFromDb.constraints ?? undefined,
         created_at: tripFromDb.created_at,
         updated_at: tripFromDb.updated_at,
       };
@@ -468,6 +472,7 @@ export const useStore = create<AppState>((set, get) => ({
       if (updates.budget_cents !== undefined)
         updateData.budget_cents = updates.budget_cents ?? null;
       if (updates.currency !== undefined) updateData.currency = updates.currency ?? null;
+      if (updates.constraints !== undefined) updateData.constraints = updates.constraints ?? null;
 
       const { data: trip, error } = await supabase
         .from('trips')
@@ -498,6 +503,7 @@ export const useStore = create<AppState>((set, get) => ({
         status: tripData.status,
         budget_cents: tripData.budget_cents ?? undefined,
         currency: tripData.currency ?? undefined,
+        constraints: tripData.constraints ?? undefined,
         created_at: tripData.created_at,
         updated_at: tripData.updated_at,
       };

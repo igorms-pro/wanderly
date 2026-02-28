@@ -12,7 +12,7 @@ import LandingPage from './pages/LandingPage';
 
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
-const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const DashboardPage = lazy(() => import('./pages/dashboard'));
 const TripDetailPage = lazy(() => import('./pages/TripDetailPage'));
 
 const queryClient = new QueryClient();
