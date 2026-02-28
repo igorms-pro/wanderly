@@ -65,7 +65,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   if (!ready) {
     return (
       <div
-        className={`${sizeClasses[size]} bg-white dark:bg-white/10 border border-gray-300 dark:border-white/20 rounded-lg flex items-center justify-center shadow-sm dark:shadow-none`}
+        className={`${sizeClasses[size]} bg-white dark:bg-white/10 rounded-lg flex items-center justify-center`}
       >
         <span className="text-xs">...</span>
       </div>
@@ -87,7 +87,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className={`${sizeClasses[size]} bg-white dark:bg-white/10 border border-gray-300 dark:border-white/20 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-100 dark:hover:bg-white/20 transition shadow-sm dark:shadow-none`}
+          className={`${sizeClasses[size]} bg-white dark:bg-white/10 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-100 dark:hover:bg-white/20 transition`}
           aria-label={t('settings.languageSelection')}
           aria-expanded={isOpen}
         >
@@ -126,7 +126,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   return (
     <button
       onClick={() => changeLanguage(nextLanguage)}
-      className={`${sizeClasses[size]} bg-white dark:bg-white/10 border border-gray-300 dark:border-white/20 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-100 dark:hover:bg-white/20 transition shadow-sm dark:shadow-none`}
+      className={`${sizeClasses[size]} bg-white dark:bg-white/10 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-100 dark:hover:bg-white/20 transition`}
       aria-label={t('settings.languageSelection')}
       title={t('settings.languageSelection')}
     >
