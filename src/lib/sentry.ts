@@ -1,11 +1,15 @@
 import * as Sentry from '@sentry/react';
 
+const isPlaceholderDsn = (s: string) =>
+  !s || s.includes('your-') || s.includes('placeholder') || s.length < 20;
+
 export const initializeSentry = () => {
   const dsn = import.meta.env.VITE_SENTRY_DSN;
   const environment = import.meta.env.VITE_APP_ENV || import.meta.env.MODE;
 
-  if (!dsn) {
-    console.warn('Sentry DSN not found. Error tracking will be disabled.');
+  if (!dsn || isPlaceholderDsn(dsn)) {
+    if (import.meta.env.DEV && dsn)
+      console.warn('Sentry DSN looks like a placeholder. Error tracking disabled.');
     return;
   }
 

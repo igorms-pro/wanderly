@@ -21,6 +21,7 @@ export interface Trip {
   status: 'planned' | 'locked' | 'archived';
   budget_cents?: number;
   currency?: string;
+  constraints?: Record<string, any>;
   created_at: string;
   updated_at: string;
 }

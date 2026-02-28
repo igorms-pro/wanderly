@@ -1,65 +1,79 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '@/lib/store';
 import { generateItinerary, ItineraryRequest } from '@/lib/openai-service';
+import { X, Sparkles, Loader2, ChevronRight, ChevronLeft, AlertCircle } from 'lucide-react';
 import {
-  X,
-  Sparkles,
-  Loader2,
-  Calendar,
-  MapPin,
-  Users,
-  DollarSign,
-  AlertCircle,
-} from 'lucide-react';
+  TripFormData,
+  StepDestination,
+  StepTravelers,
+  StepStyle,
+  StepInterests,
+} from './CreateTripSteps';
 
 interface CreateTripModalProps {
   onClose: () => void;
 }
+
+const TOTAL_STEPS = 4;
+
+const INTEREST_LABELS: Record<string, string> = {
+  cultureMuseums: 'Culture & Museums',
+  foodDining: 'Food & Dining',
+  natureOutdoors: 'Nature & Outdoors',
+  adventure: 'Adventure',
+  shopping: 'Shopping',
+  nightlife: 'Nightlife',
+  history: 'History',
+  relaxation: 'Relaxation',
+};
 
 export default function CreateTripModal({ onClose }: CreateTripModalProps) {
   const { t } = useTranslation();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const navigate = useNavigate();
 
   const user = useStore((state) => state.user);
   const createTrip = useStore((state) => state.createTrip);
   const setCurrentTrip = useStore((state) => state.setCurrentTrip);
-  const setActivities = useStore((state) => state.setActivities);
 
-  // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<TripFormData>({
     destination: '',
     startDate: '',
     endDate: '',
     groupSize: 2,
-    pace: 'balanced' as 'relaxed' | 'balanced' | 'packed',
+    hasChildren: false,
+    pace: 'balanced',
     budget: '',
     currency: 'USD',
-    interests: [] as string[],
+    interests: [],
   });
 
-  const interestOptions = [
-    'cultureMuseums',
-    'foodDining',
-    'natureOutdoors',
-    'adventure',
-    'shopping',
-    'nightlife',
-    'history',
-    'relaxation',
-  ];
+  const updateForm = (updates: Partial<TripFormData>) =>
+    setFormData((prev) => ({ ...prev, ...updates }));
 
-  const handleInterestToggle = (interest: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      interests: prev.interests.includes(interest)
-        ? prev.interests.filter((i) => i !== interest)
-        : [...prev.interests, interest],
-    }));
+  const clearError = (field: string) => setFieldErrors((prev) => ({ ...prev, [field]: '' }));
+
+  const validateStep = useCallback(
+    (s: number): boolean => {
+      const errors: Record<string, string> = {};
+      if (s === 1) {
+        if (!formData.destination.trim()) errors.destination = t('tripModal.destinationRequired');
+        if (!formData.startDate || !formData.endDate) errors.dates = t('tripModal.datesRequired');
+        else if (formData.endDate < formData.startDate) errors.dates = t('tripModal.dateError');
+      }
+      setFieldErrors(errors);
+      return Object.keys(errors).length === 0;
+    },
+    [formData, t],
+  );
+
+  const handleNext = () => {
+    if (validateStep(step)) setStep((s) => Math.min(s + 1, TOTAL_STEPS));
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -70,7 +84,14 @@ export default function CreateTripModal({ onClose }: CreateTripModalProps) {
     setError(null);
 
     try {
-      // Create trip using Supabase
+      const constraints = {
+        budget_per_person_cents: formData.budget ? parseInt(formData.budget) * 100 : null,
+        has_children: formData.hasChildren,
+        pace: formData.pace,
+        preferences: formData.interests,
+        group_size: formData.groupSize,
+      };
+
       const trip = await createTrip({
         title: `${formData.destination} Adventure`,
         destination_text: formData.destination,
@@ -79,11 +100,11 @@ export default function CreateTripModal({ onClose }: CreateTripModalProps) {
         status: 'planned',
         budget_cents: formData.budget ? parseInt(formData.budget) * 100 : undefined,
         currency: formData.currency,
+        constraints,
       });
 
       setCurrentTrip(trip);
 
-      // Generate itinerary with AI
       const request: ItineraryRequest = {
         destination: formData.destination,
         startDate: formData.startDate,
@@ -92,27 +113,10 @@ export default function CreateTripModal({ onClose }: CreateTripModalProps) {
         pace: formData.pace,
         budget: formData.budget ? parseInt(formData.budget) : undefined,
         currency: formData.currency,
-        interests: formData.interests.map((i) => {
-          // Map back to original format for API
-          const mapping: Record<string, string> = {
-            cultureMuseums: 'Culture & Museums',
-            foodDining: 'Food & Dining',
-            natureOutdoors: 'Nature & Outdoors',
-            adventure: 'Adventure',
-            shopping: 'Shopping',
-            nightlife: 'Nightlife',
-            history: 'History',
-            relaxation: 'Relaxation',
-          };
-          return mapping[i] || i;
-        }),
+        interests: formData.interests.map((i) => INTEREST_LABELS[i] || i),
       };
 
-      // Note: Activities creation will be handled in a future agent
-      // For now, just generate the itinerary (can be saved later)
       await generateItinerary(request);
-
-      // Navigate to trip page
       navigate(`/trip/${trip.id}`);
       onClose();
     } catch (err: any) {
@@ -123,199 +127,137 @@ export default function CreateTripModal({ onClose }: CreateTripModalProps) {
     }
   };
 
+  const stepLabels = [
+    t('tripModal.stepDestination'),
+    t('tripModal.stepTravelers'),
+    t('tripModal.stepStyle'),
+    t('tripModal.stepInterests'),
+  ];
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl dark:shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="bg-white dark:bg-stone-900 rounded-3xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center">
-            <Sparkles className="w-6 h-6 text-blue-600 dark:text-blue-400 mr-2" />
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              {t('tripModal.createTripWithAI')}
-            </h2>
-          </div>
+        <div className="relative px-6 pt-6 pb-4">
           <button
             onClick={onClose}
-            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition"
+            className="absolute top-4 right-4 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 transition p-1 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100">
+                {t('tripModal.createTripWithAI')}
+              </h2>
+              <p className="text-xs text-stone-500 dark:text-stone-400">
+                {t('tripModal.stepOf', { current: step, total: TOTAL_STEPS })}
+              </p>
+            </div>
+          </div>
+          {/* Step indicator */}
+          <div className="flex items-center gap-1">
+            {stepLabels.map((label, i) => (
+              <div key={label} className="flex-1 flex flex-col items-center gap-1.5">
+                <div
+                  className={`h-1.5 w-full rounded-full transition-all duration-300 ${
+                    i + 1 <= step
+                      ? 'bg-gradient-to-r from-violet-500 to-indigo-500'
+                      : 'bg-stone-200 dark:bg-stone-700'
+                  }`}
+                />
+                <span
+                  className={`text-[10px] font-medium transition-colors ${
+                    i + 1 <= step
+                      ? 'text-violet-600 dark:text-violet-400'
+                      : 'text-stone-400 dark:text-stone-500'
+                  }`}
+                >
+                  {label}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Error Message */}
         {error && (
-          <div className="mx-6 mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start">
-            <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 mr-2 flex-shrink-0 mt-0.5" />
+          <div className="mx-6 mb-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
             <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
           </div>
         )}
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Destination */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              <MapPin className="w-4 h-4 inline mr-1" />
-              {t('tripModal.destination')}
-            </label>
-            <input
-              type="text"
-              value={formData.destination}
-              onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
-              required
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              placeholder={t('tripModal.destinationPlaceholder')}
+        {/* Form body — each step is a pure component */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 pb-2">
+          {step === 1 && (
+            <StepDestination
+              formData={formData}
+              onChange={updateForm}
+              fieldErrors={fieldErrors}
+              onClearError={clearError}
             />
-          </div>
+          )}
+          {step === 2 && <StepTravelers formData={formData} onChange={updateForm} />}
+          {step === 3 && <StepStyle formData={formData} onChange={updateForm} />}
+          {step === 4 && <StepInterests formData={formData} onChange={updateForm} />}
+        </form>
 
-          {/* Dates */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <Calendar className="w-4 h-4 inline mr-1" />
-                {t('tripModal.startDate')}
-              </label>
-              <input
-                type="date"
-                value={formData.startDate}
-                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                required
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t('tripModal.endDate')}
-              </label>
-              <input
-                type="date"
-                value={formData.endDate}
-                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                required
-                min={formData.startDate}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              />
-            </div>
-          </div>
-
-          {/* Group Size */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              <Users className="w-4 h-4 inline mr-1" />
-              {t('tripModal.groupSize')}
-            </label>
-            <input
-              type="number"
-              value={formData.groupSize}
-              onChange={(e) => setFormData({ ...formData, groupSize: parseInt(e.target.value) })}
-              required
-              min="1"
-              max="20"
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-            />
-          </div>
-
-          {/* Travel Pace */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('tripModal.travelPace')}
-            </label>
-            <div className="grid grid-cols-3 gap-3">
-              {(['relaxed', 'balanced', 'packed'] as const).map((pace) => (
-                <button
-                  key={pace}
-                  type="button"
-                  onClick={() => setFormData({ ...formData, pace })}
-                  className={`px-4 py-3 rounded-lg border-2 font-medium transition ${
-                    formData.pace === pace
-                      ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                      : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                  }`}
-                >
-                  {t(`tripModal.${pace}`)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Budget */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              <DollarSign className="w-4 h-4 inline mr-1" />
-              {t('tripModal.budgetPerPerson')}
-            </label>
-            <div className="flex space-x-2">
-              <select
-                value={formData.currency}
-                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                className="px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              >
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="GBP">GBP</option>
-                <option value="JPY">JPY</option>
-              </select>
-              <input
-                type="number"
-                value={formData.budget}
-                onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                placeholder={t('tripModal.budgetPlaceholder')}
-              />
-            </div>
-          </div>
-
-          {/* Interests */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('tripModal.interests')}
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {interestOptions.map((interest) => (
-                <button
-                  key={interest}
-                  type="button"
-                  onClick={() => handleInterestToggle(interest)}
-                  className={`px-4 py-2 rounded-lg border font-medium text-sm transition ${
-                    formData.interests.includes(interest)
-                      ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                      : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                  }`}
-                >
-                  {t(`tripModal.${interest}`)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Submit Button */}
-          <div className="flex space-x-3 pt-4">
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-stone-100 dark:border-stone-800 flex gap-3">
+          {step > 1 ? (
+            <button
+              type="button"
+              onClick={() => setStep((s) => s - 1)}
+              className="flex items-center gap-1.5 px-5 py-3 border-2 border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 rounded-xl font-medium hover:bg-stone-50 dark:hover:bg-stone-800 transition"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              {t('tripModal.back')}
+            </button>
+          ) : (
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+              className="px-5 py-3 border-2 border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 rounded-xl font-medium hover:bg-stone-50 dark:hover:bg-stone-800 transition"
             >
               {t('common.cancel')}
             </button>
+          )}
+          {step < TOTAL_STEPS ? (
+            <button
+              type="button"
+              onClick={handleNext}
+              className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-violet-700 hover:to-indigo-700 transition shadow-md hover:shadow-lg"
+            >
+              {t('tripModal.next')}
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          ) : (
             <button
               type="submit"
+              onClick={handleSubmit}
               disabled={loading}
-              className="flex-1 px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-violet-700 hover:to-indigo-700 transition shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin" />
                   {t('tripModal.generatingItinerary')}
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-5 h-5 mr-2" />
+                  <Sparkles className="w-5 h-5" />
                   {t('tripModal.createTrip')}
                 </>
               )}
             </button>
-          </div>
-        </form>
+          )}
+        </div>
       </div>
     </div>
   );
