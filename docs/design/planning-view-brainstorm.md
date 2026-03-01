@@ -4,6 +4,24 @@
 
 ---
 
+## 0. En base : ce qu’on a vs ce qu’il manque (pour l’“event” / activité)
+
+| Besoin vue Planning                            | En base aujourd’hui                                                                                       | Manque                                                                                     |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| **Budget voyage**                              | `trips.budget_cents`, `trips.constraints` (budget_total_cents, budget_per_person_cents), `trips.currency` | Rien, on a tout.                                                                           |
+| **Contraintes** (rythme, enfants, préférences) | `trips.constraints` (pace, has_children, preferences, must_dos, no_gos)                                   | Rien.                                                                                      |
+| **Lieu** (activité)                            | `activities.place_id`, `lat`, `lon`, `title`                                                              | Lieu structuré (nom, adresse) → optionnel, via places_cache plus tard.                     |
+| **Horaire**                                    | `activities.start_time`, `end_time`                                                                       | Rien.                                                                                      |
+| **Coût exact**                                 | `activities.cost_cents`, `currency`                                                                       | Rien.                                                                                      |
+| **Coût fourchette**                            | —                                                                                                         | `cost_min_cents`, `cost_max_cents` sur `activities`.                                       |
+| **Transport** (comment on y va)                | —                                                                                                         | Champs transport sur `activities` (type, durée, coût ou note).                             |
+| **Qui participe** (par activité)               | —                                                                                                         | Table `activity_participants(activity_id, user_id)` = users connectés (login obligatoire). |
+| **Statut / votes**                             | `activities.status`, table `votes`                                                                        | Rien.                                                                                      |
+
+→ **Migration à prévoir** : ajouter sur `activities` les champs transport + fourchette de coût, et une table “qui participe” par activité (voir §3.2 et migration `009_activity_planning_fields.sql`).
+
+---
+
 ## 1. Objectif de la vue Planning
 
 - **Une seule vue** où le groupe voit et construit le plan du voyage : activités, qui participe, combien ça coûte, comment on s’y rend, et comment tout ça respecte le budget et les contraintes.
@@ -42,30 +60,25 @@
 
 ### 3.1 Déjà en place
 
-- **Trip** : `destination_text`, `start_date`, `end_date`, `status`, `constraints` (JSONB : budget, pace, has_children, preferences, must_dos, no_gos).
+- **Trip** : `destination_text`, `start_date`, `end_date`, `status`, `budget_cents`, `currency`, `constraints` (JSONB : budget_per_person_cents, budget_total_cents, pace, has_children, preferences, must_dos, no_gos).
 - **Activity** : `trip_id`, `itinerary_day_id`, `place_id`, `title`, `description`, `category`, `start_time`, `end_time`, `cost_cents`, `currency`, `lat`, `lon`, `status`, `source`.
 - **Votes** : `activity_id`, `user_id`, `choice` (up/down).
 - **Trip members** : qui est dans le voyage (owner, editor, viewer, moderator).
 
-### 3.2 À ajouter / préciser (pour la vue Planning)
+### 3.2 À ajouter en base (pour avoir tout pour l’event)
 
-- **Coût en fourchette** (optionnel)
-  - Soit : `cost_min_cents` / `cost_max_cents` sur `activities` (et garder `cost_cents` pour “prix unique”).
-  - Affichage : “5–15 €”, “gratuit”, “~10 €”.
-
-- **Transport / trajet** (optionnel)
-  - Option A : champs sur l’activité (`transport_type`, `transport_duration_minutes`, `transport_cost_cents`).
-  - Option B : entité “leg” ou “segment” entre deux activités (origine, destination, mode, durée, coût).
-  - À trancher selon complexité (MVP : champ simple “comment on y va” texte ou type prédéfini).
-
+- **Coût en fourchette** (activités)
+  - Colonnes : `cost_min_cents`, `cost_max_cents` (INTEGER NULL) sur `activities`.
+  - Si les deux sont NULL, on utilise `cost_cents` (prix unique). Sinon afficher “X–Y €”.
+- **Transport** (activités)
+  - MVP : `transport_notes` (TEXT) et/ou `transport_type` (TEXT, ex. foot / car / train / taxi), `transport_duration_minutes` (INTEGER), `transport_cost_cents` (INTEGER), tous NULLable.
+  - Plus tard : segments entre activités si besoin.
 - **Qui participe à quelle activité**
-  - Option A : “tous les membres” par défaut, pas de détail.
-  - Option B : table `activity_participants (activity_id, user_id)` ou champ JSONB sur activity.
-  - Permet d’afficher “Marie, Paul, Jean” ou “3/5 participants” et d’alimenter l’IA (“plan pour 3 personnes ce jour-là”).
-
+  - Table `activity_participants (activity_id, user_id)` avec RLS. **Participants = users** (on force login/création de compte pour l’itinéraire).
+  - Si vide pour une activité = “tous les membres du trip” par défaut.
+  - Voir aussi `docs/design/invite-and-participants-flow.md` (flux lien d’invite → signup → rejoindre le voyage).
 - **Lieu structuré**
-  - Aujourd’hui : `place_id` (texte), `lat`/`lon`.
-  - Plus tard : nom, adresse, lien détail lieu (places_cache ou API) pour afficher “Lieu” proprement dans la vue.
+  - Garder `place_id`, `lat`, `lon` ; nom/adresse via `places_cache` ou API plus tard.
 
 ---
 
@@ -107,22 +120,22 @@
 
 ## 7. Résumé “ce qu’on doit voir” (checklist)
 
-- [ ] **Lieu** : par activité (nom, lien carte si possible).
-- [ ] **Qui du voyage participe** : par activité (ou “tous”) — besoin données (participants par activité).
-- [ ] **Budget voyage** : rappel du budget (total ou/pers) depuis les contraintes.
-- [ ] **Coût par activité** : montant exact ou fourchette (X–Y €) ; “gratuit” si 0.
-- [ ] **Dépenses cumulées** : somme des coûts vs budget (barre ou indicateur).
-- [ ] **Transport** : au moins type ou texte “comment on y va” (MVP) ; plus tard trajets détaillés.
-- [ ] **Contraintes** : résumé court (rythme, enfants, préférences) visible dans la vue.
-- [ ] **Statut et votes** : afficher votes + boutons seulement si activité pas encore validée par admin (et pas tous les votes) ; sinon badge “Validé” ou “Rejeté” uniquement.
-- [ ] **Création IA** : bouton + flow qui utilise les contraintes et renvoie des activités avec lieu, horaire, coût (ou range).
+- **Lieu** : par activité (nom, lien carte si possible).
+- **Qui du voyage participe** : par activité (ou “tous”) — besoin données (participants par activité).
+- **Budget voyage** : rappel du budget (total ou/pers) depuis les contraintes.
+- **Coût par activité** : montant exact ou fourchette (X–Y €) ; “gratuit” si 0.
+- **Dépenses cumulées** : somme des coûts vs budget (barre ou indicateur).
+- **Transport** : au moins type ou texte “comment on y va” (MVP) ; plus tard trajets détaillés.
+- **Contraintes** : résumé court (rythme, enfants, préférences) visible dans la vue.
+- **Statut et votes** : afficher votes + boutons seulement si activité pas encore validée par admin (et pas tous les votes) ; sinon badge “Validé” ou “Rejeté” uniquement.
+- **Création IA** : bouton + flow qui utilise les contraintes et renvoie des activités avec lieu, horaire, coût (ou range).
 
 ---
 
 ## 8. Prochaines étapes possibles
 
 1. **Valider** cette liste avec le produit / l’équipe (priorisation : MVP vs plus tard).
-2. **Schéma** : décider champs “range” (cost_min/max), transport (champ simple vs entité), participants par activité.
+2. **Schéma** : appliquer la migration `009_activity_planning_fields.sql` (fourchette coût, transport, activity_participants).
 3. **Maquettes** : une vue “jour” et une vue “voyage” qui montrent lieu, participants, budget, coût, transport.
 4. **IA** : s’assurer que le prompt et le parsing produisent (ou pourront produire) lieu, coût, fourchette, et optionnellement transport.
 5. **Itérer** : commencer par affichage (lecture seule) puis édition, puis génération IA, puis alertes budget.
