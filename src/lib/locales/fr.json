@@ -214,6 +214,7 @@
     "failedToCreateActivity": "Échec de la création de l'activité. Veuillez réessayer.",
     "failedToVote": "Échec du vote. Veuillez réessayer.",
     "failedToUpdateMessage": "Échec de la mise à jour du message. Veuillez réessayer.",
+    "invalidDates": "La date de fin doit être égale ou postérieure à la date de début.",
     "failedToDeleteMessage": "Échec de la suppression du message. Veuillez réessayer."
   },
   "dashboard": {
@@ -226,6 +227,7 @@
     "errorLoadingTrip": "Erreur lors du chargement du voyage",
     "backToDashboard": "Retour au tableau de bord",
     "tripTitlePlaceholder": "Titre du voyage",
+    "titleRequired": "Le titre est requis.",
     "destinationPlaceholder": "Destination",
     "edit": "Modifier",
     "deleting": "Suppression...",
@@ -244,7 +246,17 @@
     "member": "membre",
     "members": "membres",
     "aiSuggested": "Suggéré par l'IA",
-    "perPerson": "par personne"
+    "perPerson": "par personne",
+    "statusPlanned": "Prévu",
+    "statusLocked": "Verrouillé",
+    "statusArchived": "Archivé",
+    "roleOwner": "Propriétaire",
+    "roleEditor": "Éditeur",
+    "roleViewer": "Lecteur",
+    "roleModerator": "Modérateur",
+    "withChildren": "Avec enfants",
+    "savedSuccess": "Voyage mis à jour.",
+    "deleteSuccess": "Voyage supprimé."
   },
   "activityModal": {
     "addActivity": "Ajouter une activité",
