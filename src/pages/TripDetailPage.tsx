@@ -192,6 +192,8 @@ export default function TripDetailPage() {
         {activeTab === 'explore' && <NearbyPlaces destination={currentTrip.destination_text} />}
         {activeTab === 'itinerary' && (
           <TripDetailItinerary
+            startDate={currentTrip.start_date}
+            endDate={currentTrip.end_date}
             canEdit={canEdit()}
             canVote={!!user}
             activitiesByDate={activitiesByDate}

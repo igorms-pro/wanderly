@@ -256,7 +256,12 @@
     "roleModerator": "Modérateur",
     "withChildren": "Avec enfants",
     "savedSuccess": "Voyage mis à jour.",
-    "deleteSuccess": "Voyage supprimé."
+    "deleteSuccess": "Voyage supprimé.",
+    "itineraryViewList": "Liste",
+    "itineraryViewCalendar": "Calendrier",
+    "itineraryViewVoyage": "Voyage",
+    "timelineComingSoon": "Vue timeline à venir.",
+    "close": "Fermer"
   },
   "activityModal": {
     "addActivity": "Ajouter une activité",

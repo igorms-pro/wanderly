@@ -256,7 +256,12 @@
     "roleModerator": "Moderator",
     "withChildren": "With children",
     "savedSuccess": "Trip updated successfully.",
-    "deleteSuccess": "Trip deleted."
+    "deleteSuccess": "Trip deleted.",
+    "itineraryViewList": "List",
+    "itineraryViewCalendar": "Calendar",
+    "itineraryViewVoyage": "Voyage",
+    "timelineComingSoon": "Timeline view coming soon.",
+    "close": "Close"
   },
   "activityModal": {
     "addActivity": "Add Activity",
