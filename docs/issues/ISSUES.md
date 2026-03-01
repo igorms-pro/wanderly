@@ -2,8 +2,7 @@
 
 > Goal: Build a complete SaaS travel planning platform with AI-powered itineraries, real-time collaboration, and seamless user experience.
 
-**Last Updated:** January 2025  
-**Roadmap Alignment:** [Product & Development Roadmap](../roadmap/product-roadmap.md)
+**Last Updated:** February 2025
 
 ---
 
@@ -672,61 +671,72 @@ Complete dashboard with trip list, filters, search, create trip flow, constraint
 
 ### Description
 
-Complete trip detail screen core: header, tabs, trip info, edit/delete trip.
+Complete trip detail screen core: header, tabs, trip info, edit/delete trip. Vue itinéraire : liste/calendrier/timeline, dépenses cumulées vs budget, statut/votes (proposé → votes ; validé/rejeté → badge uniquement).
+
+**Décisions (intégrées ici, pas de doc séparé « planning brainstorm »)**
+
+- Lien d’invitation : à faire dans l’issue **création du trip** (ou issue dédiée invite).
+- Lieu structuré (place API nom/adresse) : **nouvelle issue** dédiée.
+- IA itinéraire : plus tard ; l’IA propose le plan, le groupe valide ou propose ; pas de pré-validation admin.
+- `activity_participants` : optionnel (par défaut = tous les membres du trip). Voir migration 009 et `docs/design/invite-and-participants-flow.md`.
 
 ### Tasks
 
 #### Trip Header
 
-- [ ] 🟡 **Complete trip header**:
-  - [x] 🟢 Display trip title
-  - [x] 🟢 Display trip dates
-  - [x] 🟢 Display destination
-  - [ ] 🔴 Display constraints summary
-  - [ ] 🔴 Display member list with roles
-  - [ ] 🔴 Role badge (owner, editor, viewer, moderator)
-  - [ ] 🔴 Status badge (planned, locked, archived)
-  - [ ] 🔴 Edit button (based on role)
-  - [ ] 🔴 Delete button (owner only)
+- [x] 🟢 **Complete trip header**:
+  - [x] Display trip title
+  - [x] Display trip dates
+  - [x] Display destination
+  - [x] Display constraints summary (rythme, budget, enfants dans hero)
+  - [x] Display member list with roles (count + role badges in hero)
+  - [x] Role badge (owner, editor, viewer, moderator)
+  - [x] Status badge (planned, locked, archived)
+  - [x] Edit button (based on role)
+  - [x] Delete button (owner only)
 
 #### Edit Trip
 
-- [ ] 🟡 **Complete edit trip functionality**:
-  - [x] 🟢 Edit basic info (title, dates, destination)
-  - [ ] 🔴 Edit constraints:
-    - [ ] Budget
-    - [ ] Group size
-    - [ ] Children
-    - [ ] Preferences
-    - [ ] Pace
-  - [ ] 🔴 Form validation
-  - [ ] 🔴 Success feedback
-  - [ ] 🔴 Error handling
-  - [ ] 🔴 Real-time updates
+- [x] 🟢 **Complete edit trip functionality**:
+  - [x] Edit basic info (title, dates, destination)
+  - [x] Edit constraints (budget, currency, pace, has_children, preferences)
+  - [x] Form validation
+  - [x] Success feedback (toast)
+  - [x] Error handling
+  - [ ] 🔴 Real-time updates (optional)
 
 #### Delete Trip
 
-- [ ] 🟡 **Complete delete trip functionality**:
-  - [ ] 🔴 Confirmation modal
-  - [ ] 🔴 Owner-only permission
-  - [ ] 🔴 Success feedback
-  - [ ] 🔴 Navigate to dashboard after delete
+- [x] 🟢 **Complete delete trip functionality**:
+  - [x] Confirmation modal
+  - [x] Owner-only permission
+  - [x] Success feedback
+  - [x] Navigate to dashboard after delete
 
 #### Tab Navigation
 
-- [ ] 🟡 **Complete tab navigation**:
-  - [x] 🟢 Itinerary tab
-  - [x] 🟢 Chat tab
-  - [x] 🟢 Weather tab
-  - [x] 🟢 Explore tab
-  - [ ] 🔴 Tab state persistence
-  - [ ] 🔴 Tab animations
-  - [ ] 🔴 Mobile bottom navigation
+- [x] 🟢 **Complete tab navigation**:
+  - [x] Itinerary tab
+  - [x] Chat tab
+  - [x] Weather tab
+  - [x] Explore tab
+  - [x] Tab state persistence (URL + storage)
+  - [ ] 🔴 Tab animations (optional)
+  - [x] 🟢 Mobile bottom navigation (dock)
+
+#### Vue Itinéraire (dans le cadre #8)
+
+- [x] 🟢 Liste par jour (expand/collapse), vue Calendrier, vue Voyage (timeline)
+- [x] 🟢 Barre sticky : dépenses cumulées vs budget (X € utilisés / Y € budget, indicateur OK/dépassement)
+- [x] 🟢 Statut/votes : si activité **proposée** → afficher votes (X pour, Y contre) + boutons ; si **validée/rejetée** → badge uniquement (Validé / Rejeté)
+- [x] 🟢 Affichage coût par activité en vue expandable (exact ou fourchette cost_min/max, gratuit)
+- [x] 🟢 Affichage transport par activité en vue expandable (notes/type/durée)
+- [x] 🟢 Résumé contraintes dans la vue itinéraire (rythme, enfants, préférences + nombre de membres)
 
 #### Trip Members
 
 - [ ] 🔴 **Add trip members management**:
-  - [ ] Invite members (email or link)
+  - [ ] Invite members (email or link) — voir issue création trip / invite
   - [ ] Display member list
   - [ ] Change member roles (owner only)
   - [ ] Remove members (owner only)
@@ -740,14 +750,23 @@ Complete trip detail screen core: header, tabs, trip info, edit/delete trip.
   - [ ] Modals
   - [ ] Error messages
 
+### Ce qu’il manque pour fermer l’issue #8
+
+1. ~~**Header**~~ : fait (contraintes, membres, rôles, statut dans hero).
+2. ~~**Vue itinéraire**~~ : fait (coût fourchette, transport, résumé contraintes + membres dans l’onglet itinéraire ; vue expandable par activité).
+3. **Trip members** : gestion des membres (invite par email/lien, liste détaillée, changement de rôles, retrait, avatars / présence) — voir issue création trip ou issue dédiée invite.
+4. **i18n** : vérifier que tous les textes de l’écran trip detail sont bien internationalisés (onglets, boutons, modales, erreurs).
+5. **Optionnel** : animations d’onglets ; real-time updates après edit.
+
 ### Acceptance Criteria
 
-- [ ] Trip header displays correctly with all info
-- [ ] Edit trip works with constraints
-- [ ] Delete trip works (owner only)
-- [ ] Tab navigation works
-- [ ] Member management works
-- [ ] All text is internationalized
+- [x] Trip header displays correctly with all info (including constraints summary and members)
+- [x] Edit trip works with constraints
+- [x] Delete trip works (owner only)
+- [x] Tab navigation works (with persistence and mobile dock)
+- [x] Vue itinéraire : dépenses, contraintes, coût/transport par activité en vue expandable
+- [ ] Member management (invite, roles, remove) — délégué à une autre issue
+- [ ] All text is internationalized (vérification)
 - [ ] Design system is applied
 - [ ] Tests pass (unit + E2E)
 

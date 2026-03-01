@@ -20,14 +20,14 @@ export interface ForecastData {
 export async function getWeatherForecast(
   city: string,
   startDate: string,
-  endDate: string
+  endDate: string,
 ): Promise<ForecastData> {
   try {
     // Get coordinates for the city
     const geoResponse = await axios.get(
       `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(
-        city
-      )}&limit=1&appid=${OPENWEATHER_API_KEY}`
+        city,
+      )}&limit=1&appid=${OPENWEATHER_API_KEY}`,
     );
 
     if (!geoResponse.data || geoResponse.data.length === 0) {
@@ -38,17 +38,17 @@ export async function getWeatherForecast(
 
     // Get 7-day forecast
     const forecastResponse = await axios.get(
-      `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${OPENWEATHER_API_KEY}`
+      `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${OPENWEATHER_API_KEY}`,
     );
 
     // Process forecast data
     const dailyForecasts: WeatherData[] = [];
     const start = new Date(startDate);
     const end = new Date(endDate);
-    
+
     // Group by date
     const forecastByDate: { [key: string]: any[] } = {};
-    
+
     forecastResponse.data.list.forEach((item: any) => {
       const date = item.dt_txt.split(' ')[0];
       if (!forecastByDate[date]) {
@@ -63,7 +63,7 @@ export async function getWeatherForecast(
       if (itemDate >= start && itemDate <= end) {
         const dayData = forecastByDate[date];
         const noonData = dayData.find((d) => d.dt_txt.includes('12:00:00')) || dayData[0];
-        
+
         dailyForecasts.push({
           temp: Math.round(noonData.main.temp),
           feelsLike: Math.round(noonData.main.feels_like),
@@ -88,7 +88,7 @@ function generateMockWeather(startDate: string, endDate: string): ForecastData {
   const start = new Date(startDate);
   const end = new Date(endDate);
   const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-  
+
   const daily: WeatherData[] = [];
   const weatherConditions = [
     { description: 'clear sky', icon: '01d', tempRange: [18, 25] },
@@ -101,8 +101,10 @@ function generateMockWeather(startDate: string, endDate: string): ForecastData {
     const currentDate = new Date(start);
     currentDate.setDate(currentDate.getDate() + i);
     const weather = weatherConditions[i % weatherConditions.length];
-    const temp = Math.floor(Math.random() * (weather.tempRange[1] - weather.tempRange[0]) + weather.tempRange[0]);
-    
+    const temp = Math.floor(
+      Math.random() * (weather.tempRange[1] - weather.tempRange[0]) + weather.tempRange[0],
+    );
+
     daily.push({
       temp,
       feelsLike: temp - 2,

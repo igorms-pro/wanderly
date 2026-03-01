@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { getWeatherForecast, WeatherData, getWeatherIconUrl } from '../lib/weather-service';
 import { Cloud, Droplets, Wind, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -13,11 +13,7 @@ export default function WeatherWidget({ destination, startDate, endDate }: Weath
   const [weather, setWeather] = useState<WeatherData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadWeather();
-  }, [destination, startDate, endDate]);
-
-  const loadWeather = async () => {
+  const loadWeather = useCallback(async () => {
     setLoading(true);
     try {
       const forecast = await getWeatherForecast(destination, startDate, endDate);
@@ -27,7 +23,11 @@ export default function WeatherWidget({ destination, startDate, endDate }: Weath
     } finally {
       setLoading(false);
     }
-  };
+  }, [destination, startDate, endDate]);
+
+  useEffect(() => {
+    loadWeather();
+  }, [loadWeather]);
 
   if (loading) {
     return (
@@ -64,7 +64,7 @@ export default function WeatherWidget({ destination, startDate, endDate }: Weath
                 <div className="text-sm font-medium text-gray-700 mb-2">
                   {format(new Date(day.date), 'EEE, MMM d')}
                 </div>
-                
+
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center">
                     <img

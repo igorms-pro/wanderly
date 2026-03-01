@@ -1,7 +1,8 @@
 // Google Places API Service
 import axios from 'axios';
 
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyCO0kKndUNlmQi3B5mxy4dblg_8WYcuKuk';
+const GOOGLE_MAPS_API_KEY =
+  import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyCO0kKndUNlmQi3B5mxy4dblg_8WYcuKuk';
 
 export interface PlaceDetails {
   name: string;
@@ -47,7 +48,7 @@ export interface NearbyPlace {
 
 export async function searchPlaces(
   query: string,
-  location?: { lat: number; lng: number }
+  location?: { lat: number; lng: number },
 ): Promise<NearbyPlace[]> {
   try {
     const params: any = {
@@ -60,10 +61,9 @@ export async function searchPlaces(
       params.radius = 5000; // 5km radius
     }
 
-    const response = await axios.get(
-      'https://maps.googleapis.com/maps/api/place/textsearch/json',
-      { params }
-    );
+    const response = await axios.get('https://maps.googleapis.com/maps/api/place/textsearch/json', {
+      params,
+    });
 
     if (response.data.status === 'OK') {
       return response.data.results.slice(0, 10);
@@ -80,7 +80,7 @@ export async function getNearbyPlaces(
   lat: number,
   lng: number,
   type: string = 'tourist_attraction',
-  radius: number = 5000
+  radius: number = 5000,
 ): Promise<NearbyPlace[]> {
   try {
     const response = await axios.get(
@@ -92,7 +92,7 @@ export async function getNearbyPlaces(
           type,
           key: GOOGLE_MAPS_API_KEY,
         },
-      }
+      },
     );
 
     if (response.data.status === 'OK') {
@@ -108,16 +108,14 @@ export async function getNearbyPlaces(
 
 export async function getPlaceDetails(placeId: string): Promise<PlaceDetails | null> {
   try {
-    const response = await axios.get(
-      'https://maps.googleapis.com/maps/api/place/details/json',
-      {
-        params: {
-          place_id: placeId,
-          fields: 'name,formatted_address,rating,user_ratings_total,price_level,types,photos,opening_hours,geometry',
-          key: GOOGLE_MAPS_API_KEY,
-        },
-      }
-    );
+    const response = await axios.get('https://maps.googleapis.com/maps/api/place/details/json', {
+      params: {
+        place_id: placeId,
+        fields:
+          'name,formatted_address,rating,user_ratings_total,price_level,types,photos,opening_hours,geometry',
+        key: GOOGLE_MAPS_API_KEY,
+      },
+    });
 
     if (response.data.status === 'OK') {
       return response.data.result;
@@ -134,17 +132,16 @@ export function getPlacePhotoUrl(photoReference: string, maxWidth: number = 400)
   return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidth}&photo_reference=${photoReference}&key=${GOOGLE_MAPS_API_KEY}`;
 }
 
-export async function geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
+export async function geocodeAddress(
+  address: string,
+): Promise<{ lat: number; lng: number } | null> {
   try {
-    const response = await axios.get(
-      'https://maps.googleapis.com/maps/api/geocode/json',
-      {
-        params: {
-          address,
-          key: GOOGLE_MAPS_API_KEY,
-        },
-      }
-    );
+    const response = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
+      params: {
+        address,
+        key: GOOGLE_MAPS_API_KEY,
+      },
+    });
 
     if (response.data.status === 'OK' && response.data.results.length > 0) {
       const location = response.data.results[0].geometry.location;
@@ -184,7 +181,7 @@ export function getMockNearbyPlaces(destination: string): NearbyPlace[] {
         vicinity: '6 Parvis Notre-Dame',
         rating: 4.7,
         types: ['church', 'tourist_attraction'],
-        geometry: { location: { lat: 48.8530, lng: 2.3499 } },
+        geometry: { location: { lat: 48.853, lng: 2.3499 } },
       },
     ],
     default: [

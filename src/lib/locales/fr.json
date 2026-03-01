@@ -267,7 +267,13 @@
     "votesNet": "votes",
     "expensesCumulative": "Dépenses cumulées",
     "activityValidated": "Validé",
-    "activityRejected": "Rejeté"
+    "activityRejected": "Rejeté",
+    "costFree": "Gratuit",
+    "constraintsSummary": "Contexte du voyage",
+    "upvote": "Voter pour",
+    "downvote": "Voter contre",
+    "removeUpvote": "Retirer le vote pour",
+    "removeDownvote": "Retirer le vote contre"
   },
   "activityModal": {
     "addActivity": "Ajouter une activité",

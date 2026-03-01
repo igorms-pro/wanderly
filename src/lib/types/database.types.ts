@@ -57,10 +57,10 @@ export interface Database {
           status: 'planned' | 'locked' | 'archived';
           budget_cents: number | null; // INTEGER
           currency: string | null;
-          constraints: Json | null; // JSONB - trip-level planning constraints
+          constraints: Json | null; // JSONB - use TripConstraints for typed access
           created_at: string; // TIMESTAMPTZ
-          updated_at: string; // TIMESTAMPTZ
-          deleted_at: string | null; // TIMESTAMPTZ
+          updated_at?: string; // TIMESTAMPTZ (optional: API may omit)
+          deleted_at?: string | null; // TIMESTAMPTZ (optional: API may omit)
         };
         Insert: {
           id?: string;
@@ -186,23 +186,29 @@ export interface Database {
       activities: {
         Row: {
           id: string; // UUID
-          itinerary_day_id: string | null; // UUID, references itinerary_days(id)
+          itinerary_day_id?: string | null; // UUID (optional: API may omit)
           trip_id: string; // UUID, references trips(id)
-          place_id: string | null;
+          place_id?: string | null;
           title: string;
           description: string | null;
           category: string | null;
-          start_time: string | null; // TIME
-          end_time: string | null; // TIME
-          cost_cents: number | null; // INTEGER
-          currency: string | null;
-          lat: number | null; // DECIMAL(10, 8)
-          lon: number | null; // DECIMAL(11, 8)
+          start_time?: string | null; // TIME
+          end_time?: string | null; // TIME
+          cost_cents?: number | null; // INTEGER
+          cost_min_cents?: number | null; // migration 009
+          cost_max_cents?: number | null; // migration 009
+          currency?: string | null;
+          transport_type?: string | null; // migration 009
+          transport_notes?: string | null; // migration 009
+          transport_duration_minutes?: number | null; // migration 009
+          transport_cost_cents?: number | null; // migration 009
+          lat?: number | null; // DECIMAL(10, 8)
+          lon?: number | null; // DECIMAL(11, 8)
           status: 'proposed' | 'confirmed' | 'rejected';
           source: 'manual' | 'ai' | 'import';
           created_at: string; // TIMESTAMPTZ
-          updated_at: string; // TIMESTAMPTZ
-          deleted_at: string | null; // TIMESTAMPTZ
+          updated_at?: string; // TIMESTAMPTZ (optional: API may omit)
+          deleted_at?: string | null; // TIMESTAMPTZ (optional: API may omit)
         };
         Insert: {
           id?: string;
@@ -215,7 +221,13 @@ export interface Database {
           start_time?: string | null;
           end_time?: string | null;
           cost_cents?: number | null;
+          cost_min_cents?: number | null;
+          cost_max_cents?: number | null;
           currency?: string | null;
+          transport_type?: string | null;
+          transport_notes?: string | null;
+          transport_duration_minutes?: number | null;
+          transport_cost_cents?: number | null;
           lat?: number | null;
           lon?: number | null;
           status?: 'proposed' | 'confirmed' | 'rejected';
@@ -235,7 +247,13 @@ export interface Database {
           start_time?: string | null;
           end_time?: string | null;
           cost_cents?: number | null;
+          cost_min_cents?: number | null;
+          cost_max_cents?: number | null;
           currency?: string | null;
+          transport_type?: string | null;
+          transport_notes?: string | null;
+          transport_duration_minutes?: number | null;
+          transport_cost_cents?: number | null;
           lat?: number | null;
           lon?: number | null;
           status?: 'proposed' | 'confirmed' | 'rejected';
@@ -251,7 +269,7 @@ export interface Database {
           activity_id: string; // UUID, references activities(id)
           user_id: string; // UUID, references auth.users(id)
           choice: 'up' | 'down';
-          idempotency_key: string | null;
+          idempotency_key?: string | null; // optional: API may omit
           created_at: string; // TIMESTAMPTZ
         };
         Insert: {
@@ -275,14 +293,14 @@ export interface Database {
         Row: {
           id: string; // UUID
           trip_id: string; // UUID, references trips(id)
-          user_id: string | null; // UUID, references auth.users(id)
+          user_id?: string | null; // UUID, references auth.users(id)
           content: string;
-          message_type: 'text' | 'system' | 'attachment';
-          client_msg_id: string | null;
-          reply_to: string | null; // UUID, references messages(id)
+          message_type?: 'text' | 'system' | 'attachment';
+          client_msg_id?: string | null;
+          reply_to?: string | null; // UUID, references messages(id)
           created_at: string; // TIMESTAMPTZ
-          updated_at: string; // TIMESTAMPTZ
-          deleted_at: string | null; // TIMESTAMPTZ
+          updated_at?: string; // TIMESTAMPTZ (optional: API may omit)
+          deleted_at?: string | null; // TIMESTAMPTZ (optional: API may omit)
         };
         Insert: {
           id?: string;
@@ -453,7 +471,7 @@ export interface Database {
   };
 }
 
-// Helper type aliases matching the mock-supabase.ts interfaces
+// Helper type aliases from Supabase schema
 export type Profile = Database['public']['Tables']['profiles']['Row'];
 export type Trip = Database['public']['Tables']['trips']['Row'];
 export type TripMember = Database['public']['Tables']['trip_members']['Row'];
@@ -464,3 +482,23 @@ export type Vote = Database['public']['Tables']['votes']['Row'];
 export type Message = Database['public']['Tables']['messages']['Row'];
 export type Invitation = Database['public']['Tables']['invitations']['Row'];
 export type AuditLog = Database['public']['Tables']['audit_logs']['Row'];
+
+/** Shape of trip.constraints JSONB (for type-safe access in UI). */
+export type TripConstraints = {
+  pace?: 'relaxed' | 'balanced' | 'packed';
+  budget_per_person_cents?: number;
+  budget_total_cents?: number;
+  has_children?: boolean;
+  preferences?: string;
+  must_dos?: string[];
+  no_gos?: string[];
+};
+
+/** App-level user (from Profile + auth). Used in store and UI. */
+export type User = {
+  id: string;
+  email: string;
+  display_name: string;
+  avatar_url: string;
+  created_at: string;
+};

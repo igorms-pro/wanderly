@@ -267,7 +267,13 @@
     "votesNet": "votes",
     "expensesCumulative": "Cumulative expenses",
     "activityValidated": "Validated",
-    "activityRejected": "Rejected"
+    "activityRejected": "Rejected",
+    "costFree": "Free",
+    "constraintsSummary": "Trip context",
+    "upvote": "Upvote",
+    "downvote": "Downvote",
+    "removeUpvote": "Remove upvote",
+    "removeDownvote": "Remove downvote"
   },
   "activityModal": {
     "addActivity": "Add Activity",

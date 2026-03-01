@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, FormEvent, useCallback } from 'react';
 import { useStore } from '@/lib/store';
-import { Message } from '@/lib/mock-supabase';
+import type { Message } from '@/lib/types/database.types';
 import { supabase } from '@/lib/supabase';
 import { Send, Loader2, Edit2, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';

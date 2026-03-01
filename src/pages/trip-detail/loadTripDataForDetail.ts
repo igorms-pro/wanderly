@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import type { Trip } from '@/lib/mock-supabase';
+import type { Trip, TripConstraints } from '@/lib/types/database.types';
 import type { GetState } from '@/lib/store/types';
 
 type Tab = 'itinerary' | 'chat' | 'weather' | 'explore';
@@ -56,14 +56,15 @@ export async function loadTripDataForDetail(params: LoadTripDataParams): Promise
       start_date: tripData.start_date,
       end_date: tripData.end_date,
       status: tripData.status,
-      budget_cents: tripData.budget_cents ?? undefined,
-      currency: tripData.currency ?? undefined,
-      constraints: tripData.constraints ?? undefined,
+      budget_cents: tripData.budget_cents ?? null,
+      currency: tripData.currency ?? null,
+      constraints: tripData.constraints ?? null,
       created_at: tripData.created_at,
       updated_at: tripData.updated_at,
+      deleted_at: tripData.deleted_at ?? null,
     };
     setCurrentTrip(mappedTrip);
-    const c = mappedTrip.constraints;
+    const c = mappedTrip.constraints as TripConstraints | null;
     setEditForm(() => ({
       title: mappedTrip.title,
       destination_text: mappedTrip.destination_text,

@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { ThumbsUp, ThumbsDown, Clock, DollarSign, Sparkles } from 'lucide-react';
-import type { Activity } from '@/lib/mock-supabase';
+import type { Activity } from '@/lib/types/database.types';
 
 interface TripTimelineProps {
   sortedDates: string[];

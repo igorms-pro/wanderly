@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useStore } from '../store';
 import { supabase } from '../supabase';
-import type { Activity, Vote } from '../mock-supabase';
+import type { Activity, Vote } from '../types/database.types';
 
 // Mock Supabase
 vi.mock('../supabase', () => ({

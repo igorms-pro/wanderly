@@ -12,7 +12,7 @@ import {
   Lock,
   ClipboardList,
 } from 'lucide-react';
-import type { Trip } from '@/lib/mock-supabase';
+import type { Trip, TripConstraints } from '@/lib/types/database.types';
 import type { TripMember } from '@/lib/types/database.types';
 import { formatBudget } from '@/features/trips/utils/trip-helpers';
 
@@ -40,32 +40,41 @@ export function TripDetailHeroView({ currentTrip, tripMembers, t }: TripDetailHe
         </span>
         {currentTrip.constraints && (
           <>
-            {currentTrip.constraints.pace && (
+            {(currentTrip.constraints as TripConstraints).pace && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/20 text-white text-xs font-medium">
-                {currentTrip.constraints.pace === 'relaxed' ? (
+                {(currentTrip.constraints as TripConstraints).pace === 'relaxed' ? (
                   <Coffee className="w-3 h-3" />
-                ) : currentTrip.constraints.pace === 'packed' ? (
+                ) : (currentTrip.constraints as TripConstraints).pace === 'packed' ? (
                   <Zap className="w-3 h-3" />
                 ) : (
                   <Gauge className="w-3 h-3" />
                 )}
-                {t(`tripModal.${currentTrip.constraints.pace}`)}
+                {t(`tripModal.${(currentTrip.constraints as TripConstraints).pace}`)}
               </span>
             )}
-            {currentTrip.constraints.budget_per_person_cents && currentTrip.currency && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/20 text-white text-xs font-medium">
-                <DollarSign className="w-3 h-3" />
-                {formatBudget(
-                  currentTrip.constraints.budget_per_person_cents,
-                  currentTrip.currency,
-                )}{' '}
-                {t('tripDetail.perPerson')}
-              </span>
-            )}
-            {currentTrip.constraints.has_children && (
+            {(currentTrip.constraints as TripConstraints).budget_per_person_cents &&
+              currentTrip.currency && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/20 text-white text-xs font-medium">
+                  <DollarSign className="w-3 h-3" />
+                  {formatBudget(
+                    (currentTrip.constraints as TripConstraints).budget_per_person_cents!,
+                    currentTrip.currency,
+                  )}{' '}
+                  {t('tripDetail.perPerson')}
+                </span>
+              )}
+            {(currentTrip.constraints as TripConstraints).has_children && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/20 text-white text-xs font-medium">
                 <Baby className="w-3 h-3" />
                 {t('tripDetail.withChildren')}
+              </span>
+            )}
+            {(currentTrip.constraints as TripConstraints).preferences && (
+              <span
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/20 text-white text-xs font-medium max-w-[180px] truncate"
+                title={String((currentTrip.constraints as TripConstraints).preferences)}
+              >
+                {String((currentTrip.constraints as TripConstraints).preferences)}
               </span>
             )}
           </>

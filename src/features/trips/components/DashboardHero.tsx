@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Sparkles } from 'lucide-react';
-import { User } from '@/lib/mock-supabase';
+import type { User } from '@/lib/types/database.types';
 
 interface DashboardHeroProps {
   user: User;

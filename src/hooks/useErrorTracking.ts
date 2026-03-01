@@ -67,24 +67,21 @@ export const useErrorTracking = () => {
   );
 
   // Capture trip-related errors
-  const captureTripError = useCallback(
-    (error: Error, tripId: string, action: string) => {
-      Sentry.captureException(error, {
-        tags: {
-          errorType: 'trip',
+  const captureTripError = useCallback((error: Error, tripId: string, action: string) => {
+    Sentry.captureException(error, {
+      tags: {
+        errorType: 'trip',
+        action,
+      },
+      contexts: {
+        trip: {
+          tripId,
           action,
+          error: error.message,
         },
-        contexts: {
-          trip: {
-            tripId,
-            action,
-            error: error.message,
-          },
-        },
-      });
-    },
-    [],
-  );
+      },
+    });
+  }, []);
 
   // Capture itinerary generation errors
   const captureItineraryError = useCallback(

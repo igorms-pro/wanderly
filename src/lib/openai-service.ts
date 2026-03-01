@@ -47,11 +47,17 @@ export interface GeneratedItinerary {
   days: ItineraryDay[];
 }
 
-export async function generateItinerary(
-  request: ItineraryRequest
-): Promise<GeneratedItinerary> {
-  const { destination, startDate, endDate, groupSize, pace = 'balanced', budget, interests = [] } = request;
-  
+export async function generateItinerary(request: ItineraryRequest): Promise<GeneratedItinerary> {
+  const {
+    destination,
+    startDate,
+    endDate,
+    groupSize,
+    pace = 'balanced',
+    budget,
+    interests = [],
+  } = request;
+
   // Calculate number of days
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -111,7 +117,8 @@ Ensure activities are scheduled logically (breakfast in morning, dinner in eveni
       messages: [
         {
           role: 'system',
-          content: 'You are a professional travel planner. Provide detailed, realistic, and well-structured travel itineraries in JSON format.',
+          content:
+            'You are a professional travel planner. Provide detailed, realistic, and well-structured travel itineraries in JSON format.',
         },
         {
           role: 'user',
@@ -139,19 +146,19 @@ Ensure activities are scheduled logically (breakfast in morning, dinner in eveni
 // Generate mock itinerary for demo purposes
 function generateMockItinerary(request: ItineraryRequest): GeneratedItinerary {
   const { destination, startDate, endDate, groupSize } = request;
-  
+
   const start = new Date(startDate);
   const end = new Date(endDate);
   const numDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
   const days: ItineraryDay[] = [];
-  
+
   for (let i = 0; i < numDays; i++) {
     const currentDate = new Date(start);
     currentDate.setDate(currentDate.getDate() + i);
-    
+
     const activities: DayActivity[] = [];
-    
+
     if (i === 0) {
       // Arrival day - lighter schedule
       activities.push({
@@ -164,7 +171,8 @@ function generateMockItinerary(request: ItineraryRequest): GeneratedItinerary {
       });
       activities.push({
         title: 'Welcome Dinner at Local Restaurant',
-        description: 'Experience authentic local cuisine at a highly-rated restaurant in the city center. Try signature dishes and meet your fellow travelers.',
+        description:
+          'Experience authentic local cuisine at a highly-rated restaurant in the city center. Try signature dishes and meet your fellow travelers.',
         category: 'food',
         startTime: '19:00',
         endTime: '21:00',
@@ -172,7 +180,8 @@ function generateMockItinerary(request: ItineraryRequest): GeneratedItinerary {
       });
       activities.push({
         title: 'Evening City Walk',
-        description: 'Take a leisurely walk around the neighborhood to get oriented and discover local shops and cafes.',
+        description:
+          'Take a leisurely walk around the neighborhood to get oriented and discover local shops and cafes.',
         category: 'exploration',
         startTime: '21:30',
         endTime: '23:00',
@@ -232,7 +241,8 @@ function generateMockItinerary(request: ItineraryRequest): GeneratedItinerary {
       });
       activities.push({
         title: 'Afternoon Museum Visit',
-        description: 'Visit a world-class museum showcasing local art, history, or science exhibits.',
+        description:
+          'Visit a world-class museum showcasing local art, history, or science exhibits.',
         category: 'culture',
         startTime: '15:00',
         endTime: '17:30',
@@ -248,14 +258,15 @@ function generateMockItinerary(request: ItineraryRequest): GeneratedItinerary {
       });
       activities.push({
         title: 'Dinner and Evening Entertainment',
-        description: 'Enjoy dinner followed by local entertainment - music, dance, or theater performance.',
+        description:
+          'Enjoy dinner followed by local entertainment - music, dance, or theater performance.',
         category: 'entertainment',
         startTime: '19:30',
         endTime: '22:00',
         estimatedCost: 60,
       });
     }
-    
+
     days.push({
       date: currentDate.toISOString().split('T')[0],
       dayIndex: i + 1,

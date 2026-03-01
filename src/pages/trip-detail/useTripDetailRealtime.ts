@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '@/lib/store';
-import { Activity, Vote, Trip } from '@/lib/mock-supabase';
+import type { Activity, Vote, Trip } from '@/lib/types/database.types';
 import {
   subscribeToTrip,
   subscribeToMessages,

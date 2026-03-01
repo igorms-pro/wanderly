@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, List, Calendar, Map } from 'lucide-react';
-import type { Activity } from '@/lib/mock-supabase';
+import type { Activity } from '@/lib/types/database.types';
 import { ItineraryDayBlock } from './ItineraryDayBlock';
 import { TripWeekGrid } from './TripWeekGrid';
 import { TripTimeline } from './TripTimeline';
@@ -8,6 +8,12 @@ import { TripTimeline } from './TripTimeline';
 const ITINERARY_VIEW_KEY = 'tripDetail:itineraryView';
 
 export type ItineraryViewMode = 'list' | 'calendar' | 'timeline';
+
+export interface ConstraintsSummary {
+  pace?: 'relaxed' | 'balanced' | 'packed';
+  has_children?: boolean;
+  preferences?: string;
+}
 
 interface TripDetailItineraryProps {
   startDate: string;
@@ -25,6 +31,8 @@ interface TripDetailItineraryProps {
   totalSpentCents?: number;
   budgetCents?: number | null;
   currency?: string;
+  constraintsSummary?: ConstraintsSummary | null;
+  membersCount?: number;
 }
 
 export function TripDetailItinerary({
@@ -43,6 +51,8 @@ export function TripDetailItinerary({
   totalSpentCents = 0,
   budgetCents = null,
   currency = 'EUR',
+  constraintsSummary,
+  membersCount = 0,
 }: TripDetailItineraryProps) {
   const [viewMode, setViewMode] = useState<ItineraryViewMode>(() => {
     try {
@@ -74,35 +84,71 @@ export function TripDetailItinerary({
   const budgetFormatted = budgetCents != null ? (budgetCents / 100).toFixed(0) : null;
   const overBudget = budgetCents != null && totalSpentCents > budgetCents;
 
+  const hasConstraints =
+    constraintsSummary &&
+    (constraintsSummary.pace ||
+      constraintsSummary.has_children ||
+      (constraintsSummary.preferences && constraintsSummary.preferences.trim() !== ''));
+
+  const showContextBlock = hasConstraints || membersCount > 0;
+
   return (
     <div className="space-y-6">
-      {/* Dépenses cumulées : somme des coûts vs budget */}
-      {(totalSpentCents > 0 || budgetCents != null) && (
-        <div
-          className={`rounded-xl border px-4 py-3 flex items-center justify-between ${
-            overBudget
-              ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
-              : 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700'
-          }`}
-        >
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            {t('tripDetail.expensesCumulative')}
-          </span>
-          <span className="text-sm font-semibold tabular-nums">
-            {spentFormatted} {currency}
-            {budgetFormatted != null && (
-              <span
-                className={
-                  overBudget
-                    ? ' text-red-600 dark:text-red-400'
-                    : ' text-gray-500 dark:text-gray-400'
-                }
-              >
-                {' '}
-                / {budgetFormatted} {currency}
+      {/* Résumé contraintes + membres + dépenses */}
+      {(showContextBlock || totalSpentCents > 0 || budgetCents != null) && (
+        <div className="space-y-3">
+          {showContextBlock && (
+            <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-4 py-3">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {t('tripDetail.constraintsSummary')}
               </span>
-            )}
-          </span>
+              {hasConstraints && (
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  {[
+                    constraintsSummary!.pace && t(`tripModal.${constraintsSummary!.pace}`),
+                    constraintsSummary!.has_children && t('tripDetail.withChildren'),
+                    constraintsSummary!.preferences?.trim(),
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </p>
+              )}
+              {membersCount > 0 && (
+                <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
+                  {membersCount}{' '}
+                  {membersCount === 1 ? t('tripDetail.member') : t('tripDetail.members')}
+                </p>
+              )}
+            </div>
+          )}
+          {(totalSpentCents > 0 || budgetCents != null) && (
+            <div
+              className={`rounded-xl border px-4 py-3 flex items-center justify-between ${
+                overBudget
+                  ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                  : 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700'
+              }`}
+            >
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {t('tripDetail.expensesCumulative')}
+              </span>
+              <span className="text-sm font-semibold tabular-nums">
+                {spentFormatted} {currency}
+                {budgetFormatted != null && (
+                  <span
+                    className={
+                      overBudget
+                        ? ' text-red-600 dark:text-red-400'
+                        : ' text-gray-500 dark:text-gray-400'
+                    }
+                  >
+                    {' '}
+                    / {budgetFormatted} {currency}
+                  </span>
+                )}
+              </span>
+            </div>
+          )}
         </div>
       )}
 
@@ -171,6 +217,7 @@ export function TripDetailItinerary({
               getUserVote={getUserVote}
               onVote={onVote}
               t={t}
+              currency={currency}
             />
           ))}
         </div>
@@ -194,6 +241,7 @@ export function TripDetailItinerary({
               getUserVote={getUserVote}
               onVote={onVote}
               t={t}
+              currency={currency}
               showClose
               onClose={() => setSelectedDate(null)}
             />

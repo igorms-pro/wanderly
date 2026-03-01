@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useStore } from '@/lib/store';
 import { useToast } from '@/contexts/ToastContext';
 import { supabase } from '@/lib/supabase';
-import { Activity, Vote } from '@/lib/mock-supabase';
+import type { Activity, Vote } from '@/lib/types/database.types';
 import { TripMember } from '@/lib/types/database.types';
 import { useTripDetailRealtime } from './useTripDetailRealtime';
 import { loadTripDataForDetail } from './loadTripDataForDetail';

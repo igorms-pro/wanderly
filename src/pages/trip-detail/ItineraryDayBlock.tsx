@@ -8,8 +8,9 @@ import {
   Sparkles,
   ChevronDown,
   ChevronUp,
+  Car,
 } from 'lucide-react';
-import type { Activity } from '@/lib/mock-supabase';
+import type { Activity } from '@/lib/types/database.types';
 
 interface ItineraryDayBlockProps {
   date: string;
@@ -20,8 +21,21 @@ interface ItineraryDayBlockProps {
   getUserVote: (activityId: string) => 'up' | 'down' | null;
   onVote: (activityId: string, choice: 'up' | 'down') => void;
   t: (key: string) => string;
+  currency?: string;
   showClose?: boolean;
   onClose?: () => void;
+}
+
+function formatActivityCost(activity: Activity, currency: string, tFree: string): string | null {
+  const min = activity.cost_min_cents ?? activity.cost_cents;
+  const max = activity.cost_max_cents ?? activity.cost_cents;
+  if (min == null && max == null) return null;
+  const lo = min ?? 0;
+  const hi = max ?? 0;
+  if (lo === 0 && hi === 0) return tFree;
+  const fmt = (c: number) => `${(c / 100).toFixed(0)} ${currency}`;
+  if (lo === hi) return fmt(lo);
+  return `${fmt(lo)} – ${fmt(hi)}`;
 }
 
 export function ItineraryDayBlock({
@@ -33,6 +47,7 @@ export function ItineraryDayBlock({
   getUserVote,
   onVote,
   t,
+  currency = 'EUR',
   showClose,
   onClose,
 }: ItineraryDayBlockProps) {
@@ -151,10 +166,30 @@ export function ItineraryDayBlock({
                     </p>
                   )}
                   <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
-                    {activity.cost_cents !== undefined && (
+                    {(() => {
+                      const costLabel = formatActivityCost(
+                        activity,
+                        activity.currency ?? currency,
+                        t('tripDetail.costFree'),
+                      );
+                      return costLabel ? (
+                        <div key="cost" className="flex items-center">
+                          <DollarSign className="w-4 h-4 mr-1" />
+                          {costLabel}
+                        </div>
+                      ) : null;
+                    })()}
+                    {(activity.transport_type || activity.transport_notes) && (
                       <div className="flex items-center">
-                        <DollarSign className="w-4 h-4 mr-1" />$
-                        {(activity.cost_cents / 100).toFixed(2)} {t('tripDetail.perPerson')}
+                        <Car className="w-4 h-4 mr-1" />
+                        <span>
+                          {[activity.transport_type, activity.transport_notes]
+                            .filter(Boolean)
+                            .join(' · ')}
+                          {activity.transport_duration_minutes != null &&
+                            activity.transport_duration_minutes > 0 &&
+                            ` (${activity.transport_duration_minutes} min)`}
+                        </span>
                       </div>
                     )}
                     {activity.category && (

@@ -1,5 +1,5 @@
 import { Edit, Trash2 } from 'lucide-react';
-import type { Trip } from '@/lib/mock-supabase';
+import type { Trip } from '@/lib/types/database.types';
 import type { TripMember } from '@/lib/types/database.types';
 import { TripDetailHeroView } from './TripDetailHeroView';
 import { TripDetailEditForm } from './TripDetailEditForm';

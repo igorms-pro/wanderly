@@ -132,7 +132,9 @@ export default function TripDetailPage() {
         onStartEdit={() => setIsEditing(true)}
         onCancelEdit={() => {
           setIsEditing(false);
-          const c = currentTrip.constraints;
+          const c = currentTrip.constraints as
+            | import('@/lib/types/database.types').TripConstraints
+            | null;
           setEditForm({
             title: currentTrip.title,
             destination_text: currentTrip.destination_text,
@@ -206,15 +208,29 @@ export default function TripDetailPage() {
             t={t}
             totalSpentCents={Object.values(activitiesByDate)
               .flat()
-              .reduce((s, a) => s + (a.cost_cents ?? 0), 0)}
-            budgetCents={
-              (currentTrip.constraints?.budget_total_cents as number | undefined) ??
-              (typeof currentTrip.constraints?.budget_per_person_cents === 'number' &&
-              tripMembers.length > 0
-                ? (currentTrip.constraints.budget_per_person_cents as number) * tripMembers.length
-                : null)
-            }
+              .reduce((s, a) => s + (a.cost_max_cents ?? a.cost_min_cents ?? a.cost_cents ?? 0), 0)}
+            budgetCents={(() => {
+              const c = currentTrip.constraints as
+                | import('@/lib/types/database.types').TripConstraints
+                | null;
+              return (
+                c?.budget_total_cents ??
+                (typeof c?.budget_per_person_cents === 'number' && tripMembers.length > 0
+                  ? c.budget_per_person_cents * tripMembers.length
+                  : null) ??
+                null
+              );
+            })()}
             currency={currentTrip.currency ?? 'EUR'}
+            constraintsSummary={(() => {
+              const c = currentTrip.constraints as
+                | import('@/lib/types/database.types').TripConstraints
+                | null;
+              return c
+                ? { pace: c.pace, has_children: c.has_children, preferences: c.preferences }
+                : null;
+            })()}
+            membersCount={tripMembers.length}
           />
         )}
         {activeTab === 'chat' && tripId && <TripChat tripId={tripId} userRole={getUserRole()} />}

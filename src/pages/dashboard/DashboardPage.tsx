@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '@/lib/store';
-import { Trip } from '@/lib/mock-supabase';
+import type { Trip } from '@/lib/types/database.types';
 import { supabase } from '@/lib/supabase';
 import { subscribeToTrips, RealtimePayload, unsubscribeFromChannel } from '@/lib/realtime-service';
 import { RealtimeChannel } from '@supabase/supabase-js';

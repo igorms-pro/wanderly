@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import { useStore } from './store';
-import type { User } from './mock-supabase';
+import type { User } from './types/database.types';
 import { createUserSession } from './sessionTracking';
 
 function authUserToStoreUser(a: SupabaseUser): User {

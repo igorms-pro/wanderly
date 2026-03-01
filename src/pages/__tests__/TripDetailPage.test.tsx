@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { ToastProvider } from '../../contexts/ToastContext';
 import TripDetailPage from '../TripDetailPage';
 import { useStore } from '../../lib/store';
-import type { Vote, Activity } from '../../lib/mock-supabase';
+import type { Vote, Activity } from '../../lib/types/database.types';
 
 // Mock dependencies
 vi.mock('../../lib/store');

@@ -4,7 +4,7 @@ import { Plane, LogOut } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { DashboardHeaderMobile } from './DashboardHeaderMobile';
-import type { User } from '@/lib/mock-supabase';
+import type { User } from '@/lib/types/database.types';
 
 export interface DashboardHeaderProps {
   user: User | null;

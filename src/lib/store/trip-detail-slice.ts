@@ -1,4 +1,4 @@
-import { Activity, Vote } from '../mock-supabase';
+import type { Activity, Vote } from '../types/database.types';
 import { supabase } from '../supabase';
 import type { AppState, CreateActivityData, SetState, GetState } from './types';
 
