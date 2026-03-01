@@ -40,8 +40,10 @@ COMMENT ON COLUMN public.activities.transport_duration_minutes IS 'Optional dura
 COMMENT ON COLUMN public.activities.transport_cost_cents IS 'Optional cost of transport in cents';
 
 -- ============================================================================
--- ACTIVITY_PARTICIPANTS: qui participe à quelle activité
+-- ACTIVITY_PARTICIPANTS: qui participe à quelle activité (optionnel)
 -- ============================================================================
+-- Utilisé seulement si on veut afficher "X et Y font cette activité" (sous-ensemble des membres).
+-- Par défaut = tous les membres du trip ; la table peut rester vide au début.
 CREATE TABLE IF NOT EXISTS public.activity_participants (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   activity_id UUID NOT NULL REFERENCES public.activities(id) ON DELETE CASCADE ON UPDATE CASCADE,

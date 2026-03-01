@@ -18,7 +18,7 @@
 | **Qui participe** (par activité)               | —                                                                                                         | Table `activity_participants(activity_id, user_id)` = users connectés (login obligatoire). |
 | **Statut / votes**                             | `activities.status`, table `votes`                                                                        | Rien.                                                                                      |
 
-→ **Migration à prévoir** : ajouter sur `activities` les champs transport + fourchette de coût, et une table “qui participe” par activité (voir §3.2 et migration `009_activity_planning_fields.sql`).
+→ **Migration 009** déjà faite : `activities` a transport + fourchette de coût ; table **activity_participants** (optionnelle) pour “qui fait cette activité” quand ce n’est pas tout le groupe — par défaut on considère “tous les membres du trip”. Si on n’utilise pas cette finesse tout de suite, la table reste en base pour plus tard.
 
 ---
 
@@ -73,12 +73,11 @@
 - **Transport** (activités)
   - MVP : `transport_notes` (TEXT) et/ou `transport_type` (TEXT, ex. foot / car / train / taxi), `transport_duration_minutes` (INTEGER), `transport_cost_cents` (INTEGER), tous NULLable.
   - Plus tard : segments entre activités si besoin.
-- **Qui participe à quelle activité**
-  - Table `activity_participants (activity_id, user_id)` avec RLS. **Participants = users** (on force login/création de compte pour l’itinéraire).
-  - Si vide pour une activité = “tous les membres du trip” par défaut.
+- **Qui participe à quelle activité** (optionnel)
+  - Table `activity_participants (activity_id, user_id)` en base (migration 009). Utile seulement si on veut afficher “Marie et Paul font cette activité” (sous-ensemble des membres). **Par défaut** = tous les membres du trip, pas besoin de remplir la table.
   - Voir aussi `docs/design/invite-and-participants-flow.md` (flux lien d’invite → signup → rejoindre le voyage).
 - **Lieu structuré**
-  - Garder `place_id`, `lat`, `lon` ; nom/adresse via `places_cache` ou API plus tard.
+  - **Nouvelle issue** : place API direct (nom, adresse). Garder pour l’instant `place_id`, `lat`, `lon`.
 
 ---
 
@@ -102,19 +101,12 @@
 
 ---
 
-## 6. Création de planning avec l’IA
+## 6. Création de planning avec l’IA (plus tard)
 
-- **Inputs** :
-  - Trip : destination, dates, contraintes (budget, rythme, enfants, préférences, must_dos, no_gos).
-  - Optionnel : nombre de scénarios (1–3), préférence “relax / équilibré / intense”.
-- **Outputs** :
-  - Un ou plusieurs scénarios (itineraries + itinerary_days + activities).
-  - Chaque activité : titre, lieu (place_id / nom), créneau, coût (ou fourchette), éventuellement transport.
-- **Workflow** :
-  - Bouton “Générer un itinéraire” dans la vue Planning.
-  - Choix des contraintes (ou reprise des contraintes du trip).
-  - Appel backend → IA → parsing / validation → enregistrement en base.
-  - Affichage dans la même vue (liste / calendrier / timeline) avec tout ce qu’on doit voir (lieu, qui participe, budget, coût, transport si dispo).
+- **À la base** : l’IA génère l’itinéraire en premier ; ensuite nous on valide ou on propose autre chose. Pas d’admin qui pré-valide la planif IA avant le vote — tout le monde vote / propose.
+- **Inputs** : Trip (destination, dates, contraintes). **Outputs** : scénario(s) avec activités (titre, lieu, créneau, coût, transport si dispo).
+- **Workflow** : bouton “Générer un itinéraire” → backend IA → parsing → enregistrement → affichage ; puis votes / propositions du groupe.
+- Détail d’implémentation à prévoir dans une issue dédiée.
 
 ---
 
@@ -132,13 +124,17 @@
 
 ---
 
-## 8. Prochaines étapes possibles
+## 8. Décisions / issues ailleurs
 
-1. **Valider** cette liste avec le produit / l’équipe (priorisation : MVP vs plus tard).
-2. **Schéma** : appliquer la migration `009_activity_planning_fields.sql` (fourchette coût, transport, activity_participants).
-3. **Maquettes** : une vue “jour” et une vue “voyage” qui montrent lieu, participants, budget, coût, transport.
-4. **IA** : s’assurer que le prompt et le parsing produisent (ou pourront produire) lieu, coût, fourchette, et optionnellement transport.
-5. **Itérer** : commencer par affichage (lecture seule) puis édition, puis génération IA, puis alertes budget.
+- **Lien d’invitation** (générer lien, page `/join/:code`, accepter → trip_members) : à faire dans l’**issue création du trip** (ou issue dédiée invite).
+- **Lieu structuré** (nom, adresse lieu) : **nouvelle issue** “place API direct”.
+- **IA itinéraire** : plus tard ; rappel : l’IA fait le plan en premier, puis le groupe valide ou propose autre chose ; pas de pré-validation admin avant vote.
+
+## 9. Prochaines étapes possibles
+
+1. **Maquettes** : vue “jour” et “voyage” avec lieu, budget, coût, transport (activity_participants optionnel).
+2. **Itérer** : affichage (lecture seule) puis édition des champs 009 (transport, fourchette coût).
+3. **IA** : issue dédiée quand on attaque la génération d’itinéraire.
 
 ---
 
