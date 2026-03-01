@@ -3,6 +3,7 @@ import { Plus, List, Calendar, Map } from 'lucide-react';
 import type { Activity } from '@/lib/mock-supabase';
 import { ItineraryDayBlock } from './ItineraryDayBlock';
 import { TripWeekGrid } from './TripWeekGrid';
+import { TripTimeline } from './TripTimeline';
 
 const ITINERARY_VIEW_KEY = 'tripDetail:itineraryView';
 
@@ -158,11 +159,17 @@ export function TripDetailItinerary({
           )}
         </div>
       ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm dark:shadow-lg p-12 text-center">
-          <p className="text-gray-600 dark:text-gray-300">{t('tripDetail.itineraryViewVoyage')}</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-            {t('tripDetail.timelineComingSoon')}
-          </p>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm dark:shadow-lg p-6 sm:p-8">
+          <TripTimeline
+            sortedDates={sortedDates}
+            activitiesByDate={activitiesByDate}
+            canVote={canVote}
+            votingActivityId={votingActivityId}
+            getVoteCounts={getVoteCounts}
+            getUserVote={getUserVote}
+            onVote={onVote}
+            t={t}
+          />
         </div>
       )}
     </div>
