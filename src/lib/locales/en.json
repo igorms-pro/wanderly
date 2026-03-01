@@ -28,6 +28,7 @@
     "signIn": "Sign In",
     "signUp": "Sign Up",
     "signOut": "Sign Out",
+    "myAccount": "My account",
     "email": "Email",
     "password": "Password",
     "confirmPassword": "Confirm Password",
@@ -184,6 +185,7 @@
     "conditions": "Conditions"
   },
   "settings": {
+    "theme": "Theme",
     "language": "Language",
     "languageSelection": "Select Language",
     "english": "English",

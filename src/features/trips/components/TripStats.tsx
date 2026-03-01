@@ -38,19 +38,25 @@ export default function TripStats({ trips }: TripStatsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-4 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
       {items.map((stat) => (
         <div
           key={stat.label}
-          className="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200/50 dark:border-stone-800/50"
+          className="bg-white dark:bg-stone-900 rounded-xl sm:rounded-2xl p-4 sm:p-5 border border-stone-200/50 dark:border-stone-800/50 flex items-center gap-4 sm:block"
         >
           <div
-            className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center mb-3`}
+            className={`w-10 h-10 sm:w-10 sm:h-10 flex-shrink-0 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center sm:mb-3`}
           >
             <stat.icon className="w-5 h-5 text-white" />
           </div>
-          <p className="text-2xl font-bold text-stone-900 dark:text-stone-100">{stat.value}</p>
-          <p className="text-sm text-stone-500 dark:text-stone-400">{stat.label}</p>
+          <div className="min-w-0 flex-1 sm:flex-none">
+            <p className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100">
+              {stat.value}
+            </p>
+            <p className="text-sm text-stone-500 dark:text-stone-400 sm:mt-0 truncate">
+              {stat.label}
+            </p>
+          </div>
         </div>
       ))}
     </div>

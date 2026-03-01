@@ -28,6 +28,7 @@
     "signIn": "Se connecter",
     "signUp": "S'inscrire",
     "signOut": "Se déconnecter",
+    "myAccount": "Mon compte",
     "email": "E-mail",
     "password": "Mot de passe",
     "confirmPassword": "Confirmer le mot de passe",
@@ -184,6 +185,7 @@
     "conditions": "Conditions"
   },
   "settings": {
+    "theme": "Thème",
     "language": "Langue",
     "languageSelection": "Sélectionner la langue",
     "english": "Anglais",
