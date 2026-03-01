@@ -261,7 +261,13 @@
     "itineraryViewCalendar": "Calendar",
     "itineraryViewVoyage": "Voyage",
     "timelineComingSoon": "Timeline view coming soon.",
-    "close": "Close"
+    "close": "Close",
+    "votesFor": "for",
+    "votesAgainst": "against",
+    "votesNet": "votes",
+    "expensesCumulative": "Cumulative expenses",
+    "activityValidated": "Validated",
+    "activityRejected": "Rejected"
   },
   "activityModal": {
     "addActivity": "Add Activity",

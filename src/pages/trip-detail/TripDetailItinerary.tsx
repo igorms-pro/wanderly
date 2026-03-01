@@ -22,6 +22,9 @@ interface TripDetailItineraryProps {
   onVote: (activityId: string, choice: 'up' | 'down') => void;
   onAddActivity: () => void;
   t: (key: string) => string;
+  totalSpentCents?: number;
+  budgetCents?: number | null;
+  currency?: string;
 }
 
 export function TripDetailItinerary({
@@ -37,6 +40,9 @@ export function TripDetailItinerary({
   onVote,
   onAddActivity,
   t,
+  totalSpentCents = 0,
+  budgetCents = null,
+  currency = 'EUR',
 }: TripDetailItineraryProps) {
   const [viewMode, setViewMode] = useState<ItineraryViewMode>(() => {
     try {
@@ -64,9 +70,44 @@ export function TripDetailItinerary({
     { id: 'timeline', label: t('tripDetail.itineraryViewVoyage'), icon: Map },
   ];
 
+  const spentFormatted = (totalSpentCents / 100).toFixed(0);
+  const budgetFormatted = budgetCents != null ? (budgetCents / 100).toFixed(0) : null;
+  const overBudget = budgetCents != null && totalSpentCents > budgetCents;
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Dépenses cumulées : somme des coûts vs budget */}
+      {(totalSpentCents > 0 || budgetCents != null) && (
+        <div
+          className={`rounded-xl border px-4 py-3 flex items-center justify-between ${
+            overBudget
+              ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+              : 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700'
+          }`}
+        >
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t('tripDetail.expensesCumulative')}
+          </span>
+          <span className="text-sm font-semibold tabular-nums">
+            {spentFormatted} {currency}
+            {budgetFormatted != null && (
+              <span
+                className={
+                  overBudget
+                    ? ' text-red-600 dark:text-red-400'
+                    : ' text-gray-500 dark:text-gray-400'
+                }
+              >
+                {' '}
+                / {budgetFormatted} {currency}
+              </span>
+            )}
+          </span>
+        </div>
+      )}
+
+      {/* Sticky bar on desktop when scrolling (below header + tabs) */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 md:sticky md:top-44 md:z-10 md:py-3 md:-mx-4 md:px-4 lg:-mx-6 lg:px-6 md:bg-white dark:md:bg-gray-900 md:border-b md:border-gray-200 dark:md:border-gray-700 md:shadow-sm">
         <div
           className="flex rounded-xl bg-gray-100 dark:bg-gray-700 p-1"
           role="tablist"

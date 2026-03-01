@@ -107,36 +107,52 @@ export function TripTimeline({
                           </div>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => onVote(activity.id, 'up')}
-                            disabled={votingActivityId === activity.id || !canVote}
-                            aria-label={userVote === 'up' ? 'Remove upvote' : 'Upvote'}
-                            className={`p-1.5 rounded-lg transition ${
-                              userVote === 'up'
-                                ? 'bg-green-100 dark:bg-green-900/30 text-green-600'
-                                : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-green-600'
-                            } disabled:opacity-50`}
-                          >
-                            <ThumbsUp className="w-4 h-4" />
-                          </button>
-                          <span className="text-sm font-medium w-6 text-center">
-                            {upvotes - downvotes > 0 ? '+' : ''}
-                            {upvotes - downvotes}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => onVote(activity.id, 'down')}
-                            disabled={votingActivityId === activity.id || !canVote}
-                            aria-label={userVote === 'down' ? 'Remove downvote' : 'Downvote'}
-                            className={`p-1.5 rounded-lg transition ${
-                              userVote === 'down'
-                                ? 'bg-red-100 dark:bg-red-900/30 text-red-600'
-                                : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-red-600'
-                            } disabled:opacity-50`}
-                          >
-                            <ThumbsDown className="w-4 h-4" />
-                          </button>
+                          {activity.status === 'proposed' ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => onVote(activity.id, 'up')}
+                                disabled={votingActivityId === activity.id || !canVote}
+                                aria-label={userVote === 'up' ? 'Remove upvote' : 'Upvote'}
+                                className={`p-1.5 rounded-lg transition ${
+                                  userVote === 'up'
+                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-600'
+                                    : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-green-600'
+                                } disabled:opacity-50`}
+                              >
+                                <ThumbsUp className="w-4 h-4" />
+                              </button>
+                              <span className="text-sm font-medium w-6 text-center">
+                                {upvotes - downvotes > 0 ? '+' : ''}
+                                {upvotes - downvotes}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => onVote(activity.id, 'down')}
+                                disabled={votingActivityId === activity.id || !canVote}
+                                aria-label={userVote === 'down' ? 'Remove downvote' : 'Downvote'}
+                                className={`p-1.5 rounded-lg transition ${
+                                  userVote === 'down'
+                                    ? 'bg-red-100 dark:bg-red-900/30 text-red-600'
+                                    : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-red-600'
+                                } disabled:opacity-50`}
+                              >
+                                <ThumbsDown className="w-4 h-4" />
+                              </button>
+                            </>
+                          ) : (
+                            <span
+                              className={`text-xs font-medium ${
+                                activity.status === 'confirmed'
+                                  ? 'text-green-600 dark:text-green-400'
+                                  : 'text-red-600 dark:text-red-400'
+                              }`}
+                            >
+                              {activity.status === 'confirmed'
+                                ? t('tripDetail.activityValidated')
+                                : t('tripDetail.activityRejected')}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>

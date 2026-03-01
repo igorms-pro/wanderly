@@ -204,6 +204,17 @@ export default function TripDetailPage() {
             onVote={handleVote}
             onAddActivity={() => setShowAddActivityModal(true)}
             t={t}
+            totalSpentCents={Object.values(activitiesByDate)
+              .flat()
+              .reduce((s, a) => s + (a.cost_cents ?? 0), 0)}
+            budgetCents={
+              (currentTrip.constraints?.budget_total_cents as number | undefined) ??
+              (typeof currentTrip.constraints?.budget_per_person_cents === 'number' &&
+              tripMembers.length > 0
+                ? (currentTrip.constraints.budget_per_person_cents as number) * tripMembers.length
+                : null)
+            }
+            currency={currentTrip.currency ?? 'EUR'}
           />
         )}
         {activeTab === 'chat' && tripId && <TripChat tripId={tripId} userRole={getUserRole()} />}

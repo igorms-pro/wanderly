@@ -1,5 +1,14 @@
+import { useState, useCallback } from 'react';
 import { format } from 'date-fns';
-import { ThumbsUp, ThumbsDown, Clock, DollarSign, Sparkles } from 'lucide-react';
+import {
+  ThumbsUp,
+  ThumbsDown,
+  Clock,
+  DollarSign,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import type { Activity } from '@/lib/mock-supabase';
 
 interface ItineraryDayBlockProps {
@@ -11,7 +20,6 @@ interface ItineraryDayBlockProps {
   getUserVote: (activityId: string) => 'up' | 'down' | null;
   onVote: (activityId: string, choice: 'up' | 'down') => void;
   t: (key: string) => string;
-  /** If true, show a close button and compact header (e.g. in calendar day detail) */
   showClose?: boolean;
   onClose?: () => void;
 }
@@ -28,6 +36,17 @@ export function ItineraryDayBlock({
   showClose,
   onClose,
 }: ItineraryDayBlockProps) {
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+
+  const toggleExpanded = useCallback((id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
   const formatTime = (timeStr: string) => {
     const normalized = timeStr.includes('T') ? timeStr : `2000-01-01T${timeStr}`;
     return format(new Date(normalized), 'h:mm a');
@@ -63,45 +82,85 @@ export function ItineraryDayBlock({
         {sorted.map((activity) => {
           const { upvotes, downvotes } = getVoteCounts(activity.id);
           const userVote = getUserVote(activity.id);
+          const isExpanded = expandedIds.has(activity.id);
 
           return (
             <div
               key={activity.id}
-              className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition"
+              className="transition hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                        {activity.title}
-                      </h4>
-                      <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">
-                        {activity.category}
+              {/* Collapsed row: title + time (+ vote summary). Click to expand. Like/dislike only when expanded. */}
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => toggleExpanded(activity.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleExpanded(activity.id);
+                  }
+                }}
+                className="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 cursor-pointer"
+              >
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
+                    {activity.title}
+                  </h4>
+                  <div className="flex items-center gap-2 mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    {activity.start_time && (
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-4 h-4 shrink-0" />
+                        {activity.end_time
+                          ? `${formatTime(activity.start_time)} – ${formatTime(activity.end_time)}`
+                          : formatTime(activity.start_time)}
                       </span>
-                    </div>
+                    )}
+                    {activity.status === 'proposed' && (upvotes > 0 || downvotes > 0) && (
+                      <span className="text-xs text-gray-400 dark:text-gray-500">
+                        {upvotes} {t('tripDetail.votesFor')} · {downvotes}{' '}
+                        {t('tripDetail.votesAgainst')}
+                      </span>
+                    )}
+                    {activity.status === 'confirmed' && (
+                      <span className="text-xs font-medium text-green-600 dark:text-green-400">
+                        {t('tripDetail.activityValidated')}
+                      </span>
+                    )}
+                    {activity.status === 'rejected' && (
+                      <span className="text-xs font-medium text-red-600 dark:text-red-400">
+                        {t('tripDetail.activityRejected')}
+                      </span>
+                    )}
                   </div>
+                </div>
+                <span className="shrink-0 text-gray-400 dark:text-gray-500" aria-hidden>
+                  {isExpanded ? (
+                    <ChevronUp className="w-5 h-5" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5" />
+                  )}
+                </span>
+              </div>
 
-                  <p className="text-gray-600 dark:text-gray-300 mb-3">{activity.description}</p>
-
-                  <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400">
-                    {activity.start_time && activity.end_time && (
-                      <div className="flex items-center">
-                        <Clock className="w-4 h-4 mr-1" />
-                        {formatTime(activity.start_time)} - {formatTime(activity.end_time)}
-                      </div>
-                    )}
-                    {activity.start_time && !activity.end_time && (
-                      <div className="flex items-center">
-                        <Clock className="w-4 h-4 mr-1" />
-                        {formatTime(activity.start_time)}
-                      </div>
-                    )}
+              {/* Expanded: description, meta, and like/dislike */}
+              {isExpanded && (
+                <div className="px-4 pb-5 sm:px-5 sm:pb-6 pt-0 border-t border-gray-100 dark:border-gray-700">
+                  {activity.description && (
+                    <p className="text-gray-600 dark:text-gray-300 mb-3 text-sm">
+                      {activity.description}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
                     {activity.cost_cents !== undefined && (
                       <div className="flex items-center">
                         <DollarSign className="w-4 h-4 mr-1" />$
                         {(activity.cost_cents / 100).toFixed(2)} {t('tripDetail.perPerson')}
                       </div>
+                    )}
+                    {activity.category && (
+                      <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">
+                        {activity.category}
+                      </span>
                     )}
                     {activity.source === 'ai' && (
                       <div className="flex items-center text-purple-600 dark:text-purple-400">
@@ -110,51 +169,74 @@ export function ItineraryDayBlock({
                       </div>
                     )}
                   </div>
+                  {/* Votes : seulement si pas encore validé par admin (status = proposed) */}
+                  {activity.status === 'proposed' ? (
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        {upvotes - downvotes > 0 ? '+' : ''}
+                        {upvotes - downvotes} {t('tripDetail.votesNet')}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onVote(activity.id, 'up');
+                          }}
+                          disabled={votingActivityId === activity.id || !canVote}
+                          aria-label={
+                            userVote === 'up'
+                              ? t('tripDetail.removeUpvote') || 'Remove upvote'
+                              : t('tripDetail.upvote') || 'Upvote'
+                          }
+                          className={`p-2 rounded-lg transition ${
+                            userVote === 'up'
+                              ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                              : 'text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-green-600 dark:hover:text-green-400'
+                          } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                          <ThumbsUp
+                            className={`w-5 h-5 ${votingActivityId === activity.id ? 'animate-pulse' : ''}`}
+                          />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onVote(activity.id, 'down');
+                          }}
+                          disabled={votingActivityId === activity.id || !canVote}
+                          aria-label={
+                            userVote === 'down'
+                              ? t('tripDetail.removeDownvote') || 'Remove downvote'
+                              : t('tripDetail.downvote') || 'Downvote'
+                          }
+                          className={`p-2 rounded-lg transition ${
+                            userVote === 'down'
+                              ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                              : 'text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-red-600 dark:hover:text-red-400'
+                          } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                          <ThumbsDown
+                            className={`w-5 h-5 ${votingActivityId === activity.id ? 'animate-pulse' : ''}`}
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-sm font-medium">
+                      {activity.status === 'confirmed' && (
+                        <span className="text-green-600 dark:text-green-400">
+                          {t('tripDetail.activityValidated')}
+                        </span>
+                      )}
+                      {activity.status === 'rejected' && (
+                        <span className="text-red-600 dark:text-red-400">
+                          {t('tripDetail.activityRejected')}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
-
-                <div className="ml-6 flex flex-col items-center space-y-2">
-                  <button
-                    onClick={() => onVote(activity.id, 'up')}
-                    disabled={votingActivityId === activity.id || !canVote}
-                    aria-label={
-                      userVote === 'up'
-                        ? t('tripDetail.removeUpvote') || 'Remove upvote'
-                        : t('tripDetail.upvote') || 'Upvote'
-                    }
-                    className={`p-2 rounded-lg transition ${
-                      userVote === 'up'
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                        : 'text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-green-600 dark:hover:text-green-400'
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                  >
-                    <ThumbsUp
-                      className={`w-5 h-5 ${votingActivityId === activity.id ? 'animate-pulse' : ''}`}
-                    />
-                  </button>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {upvotes - downvotes > 0 ? '+' : ''}
-                    {upvotes - downvotes}
-                  </span>
-                  <button
-                    onClick={() => onVote(activity.id, 'down')}
-                    disabled={votingActivityId === activity.id || !canVote}
-                    aria-label={
-                      userVote === 'down'
-                        ? t('tripDetail.removeDownvote') || 'Remove downvote'
-                        : t('tripDetail.downvote') || 'Downvote'
-                    }
-                    className={`p-2 rounded-lg transition ${
-                      userVote === 'down'
-                        ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                        : 'text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-red-600 dark:hover:text-red-400'
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                  >
-                    <ThumbsDown
-                      className={`w-5 h-5 ${votingActivityId === activity.id ? 'animate-pulse' : ''}`}
-                    />
-                  </button>
-                </div>
-              </div>
+              )}
             </div>
           );
         })}
