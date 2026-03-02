@@ -189,6 +189,7 @@ export interface Database {
           itinerary_day_id?: string | null; // UUID (optional: API may omit)
           trip_id: string; // UUID, references trips(id)
           place_id?: string | null;
+          place_name?: string | null; // migration 010: display name / address for Google Maps
           title: string;
           description: string | null;
           category: string | null;
@@ -202,6 +203,8 @@ export interface Database {
           transport_notes?: string | null; // migration 009
           transport_duration_minutes?: number | null; // migration 009
           transport_cost_cents?: number | null; // migration 009
+          organizer_notes?: string | null; // migration 010: e.g. "N'oubliez pas vos tongs"
+          packing_checklist?: Json | null; // migration 011: array of items to bring
           lat?: number | null; // DECIMAL(10, 8)
           lon?: number | null; // DECIMAL(11, 8)
           status: 'proposed' | 'confirmed' | 'rejected';
@@ -215,6 +218,7 @@ export interface Database {
           itinerary_day_id?: string | null;
           trip_id: string;
           place_id?: string | null;
+          place_name?: string | null;
           title: string;
           description?: string | null;
           category?: string | null;
@@ -228,6 +232,8 @@ export interface Database {
           transport_notes?: string | null;
           transport_duration_minutes?: number | null;
           transport_cost_cents?: number | null;
+          organizer_notes?: string | null;
+          packing_checklist?: Json | null;
           lat?: number | null;
           lon?: number | null;
           status?: 'proposed' | 'confirmed' | 'rejected';
@@ -241,6 +247,7 @@ export interface Database {
           itinerary_day_id?: string | null;
           trip_id?: string;
           place_id?: string | null;
+          place_name?: string | null;
           title?: string;
           description?: string | null;
           category?: string | null;
@@ -254,6 +261,8 @@ export interface Database {
           transport_notes?: string | null;
           transport_duration_minutes?: number | null;
           transport_cost_cents?: number | null;
+          organizer_notes?: string | null;
+          packing_checklist?: Json | null;
           lat?: number | null;
           lon?: number | null;
           status?: 'proposed' | 'confirmed' | 'rejected';

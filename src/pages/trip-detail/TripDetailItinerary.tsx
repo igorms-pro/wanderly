@@ -218,6 +218,7 @@ export function TripDetailItinerary({
               onVote={onVote}
               t={t}
               currency={currency}
+              tripMembersCount={membersCount}
             />
           ))}
         </div>
@@ -242,6 +243,7 @@ export function TripDetailItinerary({
               onVote={onVote}
               t={t}
               currency={currency}
+              tripMembersCount={membersCount}
               showClose
               onClose={() => setSelectedDate(null)}
             />
