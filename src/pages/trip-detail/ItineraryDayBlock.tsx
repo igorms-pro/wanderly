@@ -124,17 +124,17 @@ export function ItineraryDayBlock({
           const isExpanded = expandedIds.has(activity.id);
 
           const accentBorderClasses = [
-            'border-l-2 border-indigo-200 dark:border-indigo-500/60',
-            'border-l-2 border-emerald-200 dark:border-emerald-500/60',
-            'border-l-2 border-amber-200 dark:border-amber-500/60',
-          ];
+            // Indigo accent
+            'border-l-2 border-indigo-400 bg-indigo-50/80 hover:bg-indigo-100 dark:border-indigo-400 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/60',
+            // Emerald accent
+            'border-l-2 border-emerald-400 bg-emerald-50/80 hover:bg-emerald-100 dark:border-emerald-400 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60',
+            // Amber accent
+            'border-l-2 border-amber-400 bg-amber-50/80 hover:bg-amber-100 dark:border-amber-400 dark:bg-amber-950/40 dark:hover:bg-amber-900/60',
+          ] as const;
           const accentClass = accentBorderClasses[index % accentBorderClasses.length];
 
           return (
-            <div
-              key={activity.id}
-              className={`transition hover:bg-gray-50 dark:hover:bg-gray-700/50 ${accentClass}`}
-            >
+            <div key={activity.id} className={`transition ${accentClass}`}>
               {/* Collapsed row: title + time (+ vote summary). Click to expand. Like/dislike only when expanded. */}
               <div
                 role="button"
