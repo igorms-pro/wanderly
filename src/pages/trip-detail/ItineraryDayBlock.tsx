@@ -261,7 +261,13 @@ export function ItineraryDayBlock({
                                 {participantIds.slice(0, 6).map((uid) => {
                                   const profile = memberProfiles[uid];
                                   const name =
-                                    profile?.display_name?.trim() || uid.slice(0, 8) + '…';
+                                    profile?.display_name && profile.display_name.trim().length > 0
+                                      ? profile.display_name.trim()
+                                      : t('tripDetail.member');
+                                  const initial =
+                                    profile?.display_name && profile.display_name.trim().length > 0
+                                      ? profile.display_name.trim().charAt(0).toUpperCase()
+                                      : 'M';
                                   return (
                                     <span
                                       key={uid}
@@ -276,7 +282,7 @@ export function ItineraryDayBlock({
                                         />
                                       ) : (
                                         <span className="flex h-full w-full items-center justify-center text-[10px] font-medium text-gray-600 dark:text-gray-300">
-                                          {(profile?.display_name || '?').charAt(0).toUpperCase()}
+                                          {initial}
                                         </span>
                                       )}
                                     </span>
@@ -307,7 +313,14 @@ export function ItineraryDayBlock({
                                   : tripMembers.map((m) => m.user_id);
                               return participantIds.map((uid) => {
                                 const profile = memberProfiles[uid];
-                                const name = profile?.display_name?.trim() || uid.slice(0, 8) + '…';
+                                const name =
+                                  profile?.display_name && profile.display_name.trim().length > 0
+                                    ? profile.display_name.trim()
+                                    : t('tripDetail.member');
+                                const initial =
+                                  profile?.display_name && profile.display_name.trim().length > 0
+                                    ? profile.display_name.trim().charAt(0).toUpperCase()
+                                    : 'M';
                                 return (
                                   <li
                                     key={uid}
@@ -322,7 +335,7 @@ export function ItineraryDayBlock({
                                         />
                                       ) : (
                                         <span className="flex h-full w-full items-center justify-center text-xs font-medium text-gray-600 dark:text-gray-300">
-                                          {(profile?.display_name || '?').charAt(0).toUpperCase()}
+                                          {initial}
                                         </span>
                                       )}
                                     </span>

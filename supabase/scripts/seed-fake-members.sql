@@ -1,6 +1,6 @@
 -- =============================================================================
--- Lie les 5 faux comptes (alice → emma) au voyage Tokyo pour tester l’affichage
--- « All trip members » dans l’itinéraire.
+-- Lie les 5 faux comptes (alice → emma) au voyage Tokyo + force display_name en base.
+-- Pas de signup avec champ nom : par défaut display_name = partie avant @ de l’email.
 -- Trip Tokyo: cecf53f0-6244-4800-8ae8-3f76aa6e5524
 -- Exécuter dans Supabase → SQL Editor.
 -- =============================================================================
@@ -8,8 +8,7 @@
 -- UIDs des 5 faux comptes (auth.users)
 -- alice.voyagely+1@example.com, ben+2, carla+3, diego+4, emma+5
 
--- 1) S’assurer que les profils existent (si les users ont été créés à la main en DB,
---    le trigger on_auth_user_created n’a peut‑être pas été déclenché)
+-- 1) Profils des 5 faux comptes : prénoms explicites (Alice, Ben, …)
 INSERT INTO public.profiles (id, email, display_name)
 VALUES
   ('6f0d331d-8c63-44fa-b612-55a3cafa0ed2', 'alice.voyagely+1@example.com', 'Alice'),
@@ -21,7 +20,12 @@ ON CONFLICT (id) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   email = EXCLUDED.email;
 
--- 2) Les ajouter comme membres du voyage Tokyo (editor)
+-- 2) Tous les autres profils sans display_name → partie avant @ de l’email (pas de friction)
+UPDATE public.profiles
+SET display_name = trim(split_part(email, '@', 1))
+WHERE display_name IS NULL OR trim(display_name) = '';
+
+-- 3) Les ajouter comme membres du voyage Tokyo (editor)
 INSERT INTO public.trip_members (trip_id, user_id, role)
 SELECT
   'cecf53f0-6244-4800-8ae8-3f76aa6e5524'::uuid,
