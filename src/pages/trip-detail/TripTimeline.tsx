@@ -1,5 +1,16 @@
+import { useState } from 'react';
 import { format } from 'date-fns';
-import { ThumbsUp, ThumbsDown, Clock, DollarSign, Sparkles } from 'lucide-react';
+import {
+  ThumbsUp,
+  ThumbsDown,
+  Clock,
+  DollarSign,
+  Sparkles,
+  MapPin,
+  Car,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import type { Activity } from '@/lib/types/database.types';
 
 interface TripTimelineProps {
@@ -11,6 +22,7 @@ interface TripTimelineProps {
   getUserVote: (activityId: string) => 'up' | 'down' | null;
   onVote: (activityId: string, choice: 'up' | 'down') => void;
   t: (key: string) => string;
+  currency?: string;
 }
 
 export function TripTimeline({
@@ -22,10 +34,46 @@ export function TripTimeline({
   getUserVote,
   onVote,
   t,
+  currency = 'EUR',
 }: TripTimelineProps) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
   const formatTime = (timeStr: string) => {
     const normalized = timeStr.includes('T') ? timeStr : `2000-01-01T${timeStr}`;
     return format(new Date(normalized), 'HH:mm');
+  };
+
+  const formatActivityCost = (activity: Activity, defaultCurrency: string): string | null => {
+    const min = activity.cost_min_cents ?? activity.cost_cents;
+    const max = activity.cost_max_cents ?? activity.cost_cents;
+    if (min == null && max == null) return null;
+    const lo = min ?? 0;
+    const hi = max ?? 0;
+    const curr = activity.currency || defaultCurrency;
+    if (lo === 0 && hi === 0) return t('tripDetail.costFree');
+    const fmt = (c: number) => `${(c / 100).toFixed(0)} ${curr}`;
+    if (lo === hi) return fmt(lo);
+    return `${fmt(lo)} – ${fmt(hi)}`;
+  };
+
+  const getGoogleMapsUrl = (activity: Activity): string | null => {
+    if (activity.lat != null && activity.lon != null) {
+      return `https://www.google.com/maps?q=${activity.lat},${activity.lon}`;
+    }
+    const name = (activity.place_name || activity.title || '').trim();
+    if (name) {
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}`;
+    }
+    return null;
+  };
+
+  const getTransportLabel = (transportType: string | null | undefined): string => {
+    if (!transportType) return '';
+    const key = `tripDetail.transport${transportType
+      .charAt(0)
+      .toUpperCase()}${transportType.slice(1)}`;
+    const label = t(key);
+    return label !== key ? label : transportType;
   };
 
   return (
@@ -64,6 +112,7 @@ export function TripTimeline({
                   const { upvotes, downvotes } = getVoteCounts(activity.id);
                   const userVote = getUserVote(activity.id);
                   const isRight = i % 2 === 0;
+                  const isExpanded = expandedId === activity.id;
 
                   return (
                     <div
@@ -74,14 +123,40 @@ export function TripTimeline({
                     >
                       <div className="p-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                         <div className="min-w-0 flex-1">
-                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
-                            {activity.title}
-                          </h4>
-                          <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">
-                            {activity.category}
-                          </span>
-                          {activity.description && (
-                            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setExpandedId((prev) => (prev === activity.id ? null : activity.id))
+                            }
+                            className="w-full text-left"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0">
+                                <h4 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                                  {activity.title}
+                                </h4>
+                                {activity.place_name && (
+                                  <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400 truncate">
+                                    {activity.place_name}
+                                  </p>
+                                )}
+                              </div>
+                              <span className="ml-2 text-gray-400 dark:text-gray-500 shrink-0 mt-0.5">
+                                {isExpanded ? (
+                                  <ChevronUp className="w-4 h-4" />
+                                ) : (
+                                  <ChevronDown className="w-4 h-4" />
+                                )}
+                              </span>
+                            </div>
+                          </button>
+                          {activity.category && (
+                            <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">
+                              {activity.category}
+                            </span>
+                          )}
+                          {isExpanded && activity.description && (
+                            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
                               {activity.description}
                             </p>
                           )}
@@ -92,17 +167,51 @@ export function TripTimeline({
                                 {formatTime(activity.start_time)}
                               </span>
                             )}
-                            {activity.cost_cents !== undefined && (
-                              <span className="flex items-center gap-1">
-                                <DollarSign className="w-3 h-3" />$
-                                {(activity.cost_cents / 100).toFixed(0)}
-                              </span>
-                            )}
-                            {activity.source === 'ai' && (
-                              <span className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
-                                <Sparkles className="w-3 h-3" />
-                                {t('tripDetail.aiSuggested')}
-                              </span>
+                            {isExpanded && (
+                              <>
+                                <span className="flex items-center gap-1">
+                                  <DollarSign className="w-3 h-3" />
+                                  {formatActivityCost(activity, currency) ||
+                                    t('tripDetail.costNotSet')}
+                                </span>
+                                {activity.transport_type || activity.transport_notes ? (
+                                  <span className="flex items-center gap-1">
+                                    <Car className="w-3 h-3" />
+                                    {[
+                                      getTransportLabel(activity.transport_type),
+                                      activity.transport_notes,
+                                      activity.transport_duration_minutes != null &&
+                                      activity.transport_duration_minutes > 0
+                                        ? `${activity.transport_duration_minutes} min`
+                                        : null,
+                                    ]
+                                      .filter(Boolean)
+                                      .join(' · ')}
+                                  </span>
+                                ) : (
+                                  <span className="flex items-center gap-1">
+                                    <Car className="w-3 h-3" />
+                                    {t('tripDetail.transportNotSet')}
+                                  </span>
+                                )}
+                                {getGoogleMapsUrl(activity) && (
+                                  <a
+                                    href={getGoogleMapsUrl(activity) as string}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline"
+                                  >
+                                    <MapPin className="w-3 h-3" />
+                                    {t('tripDetail.viewOnGoogleMaps')}
+                                  </a>
+                                )}
+                                {activity.source === 'ai' && (
+                                  <span className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
+                                    <Sparkles className="w-3 h-3" />
+                                    {t('tripDetail.aiSuggested')}
+                                  </span>
+                                )}
+                              </>
                             )}
                           </div>
                         </div>

@@ -272,6 +272,7 @@ export function TripDetailItinerary({
             getUserVote={getUserVote}
             onVote={onVote}
             t={t}
+            currency={currency}
           />
         </div>
       )}
