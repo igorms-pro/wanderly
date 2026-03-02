@@ -1,5 +1,4 @@
-import { User } from '../mock-supabase';
-import { Profile } from '../types/database.types';
+import type { User, Profile } from '../types/database.types';
 import { supabase } from '../supabase';
 import { setSentryUser, clearSentryUser } from '../sentry';
 import { Analytics } from '../analytics';

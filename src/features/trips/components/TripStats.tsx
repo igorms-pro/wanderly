@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Trip } from '@/lib/mock-supabase';
+import type { Trip } from '@/lib/types/database.types';
 import { Globe, CalendarCheck, Archive } from 'lucide-react';
 
 interface TripStatsProps {

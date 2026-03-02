@@ -1,5 +1,10 @@
-import { useEffect, useState } from 'react';
-import { getNearbyPlaces, NearbyPlace, getMockNearbyPlaces, geocodeAddress } from '../lib/places-service';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  getNearbyPlaces,
+  NearbyPlace,
+  getMockNearbyPlaces,
+  geocodeAddress,
+} from '../lib/places-service';
 import { MapPin, Star, Loader2, Navigation } from 'lucide-react';
 
 interface NearbyPlacesProps {
@@ -19,24 +24,15 @@ export default function NearbyPlaces({ destination }: NearbyPlacesProps) {
     { value: 'shopping_mall', label: 'Shopping' },
   ];
 
-  useEffect(() => {
-    loadNearbyPlaces();
-  }, [destination, selectedType]);
-
-  const loadNearbyPlaces = async () => {
+  const loadNearbyPlaces = useCallback(async () => {
     setLoading(true);
     try {
       // First, geocode the destination
       const location = await geocodeAddress(destination);
-      
+
       if (location) {
-        const nearbyPlaces = await getNearbyPlaces(
-          location.lat,
-          location.lng,
-          selectedType,
-          5000
-        );
-        
+        const nearbyPlaces = await getNearbyPlaces(location.lat, location.lng, selectedType, 5000);
+
         if (nearbyPlaces.length > 0) {
           setPlaces(nearbyPlaces);
         } else {
@@ -53,7 +49,11 @@ export default function NearbyPlaces({ destination }: NearbyPlacesProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [destination, selectedType]);
+
+  useEffect(() => {
+    loadNearbyPlaces();
+  }, [loadNearbyPlaces]);
 
   return (
     <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
@@ -90,9 +90,7 @@ export default function NearbyPlaces({ destination }: NearbyPlacesProps) {
             <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
           </div>
         ) : places.length === 0 ? (
-          <p className="text-gray-500 text-center py-4">
-            No places found in this category
-          </p>
+          <p className="text-gray-500 text-center py-4">No places found in this category</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {places.map((place) => (

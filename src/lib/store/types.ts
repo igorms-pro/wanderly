@@ -1,4 +1,4 @@
-import type { User, Trip, Activity, Message, Vote } from '../mock-supabase';
+import type { User, Trip, Activity, Message, Vote } from '../types/database.types';
 
 /** Full app state and actions – composed from slices in store/*.ts */
 export interface AppState {

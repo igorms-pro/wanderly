@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import { ToastProvider } from '../../contexts/ToastContext';
 import TripDetailPage from '../TripDetailPage';
 import { useStore } from '../../lib/store';
-import type { Vote, Activity } from '../../lib/mock-supabase';
+import type { Vote, Activity } from '../../lib/types/database.types';
 
 // Mock dependencies
 vi.mock('../../lib/store');
@@ -150,7 +151,9 @@ describe('TripDetailPage - Helper Functions', () => {
       // Since it's defined inside the component, we'll test it through rendering
       render(
         <BrowserRouter>
-          <TripDetailPage />
+          <ToastProvider>
+            <TripDetailPage />
+          </ToastProvider>
         </BrowserRouter>,
       );
 
@@ -188,7 +191,9 @@ describe('TripDetailPage - Helper Functions', () => {
 
       render(
         <BrowserRouter>
-          <TripDetailPage />
+          <ToastProvider>
+            <TripDetailPage />
+          </ToastProvider>
         </BrowserRouter>,
       );
     });
@@ -199,7 +204,9 @@ describe('TripDetailPage - Helper Functions', () => {
       // Test through component rendering
       render(
         <BrowserRouter>
-          <TripDetailPage />
+          <ToastProvider>
+            <TripDetailPage />
+          </ToastProvider>
         </BrowserRouter>,
       );
     });
@@ -244,7 +251,9 @@ describe('TripDetailPage - Helper Functions', () => {
 
       render(
         <BrowserRouter>
-          <TripDetailPage />
+          <ToastProvider>
+            <TripDetailPage />
+          </ToastProvider>
         </BrowserRouter>,
       );
     });
@@ -317,7 +326,9 @@ describe('TripDetailPage - Helper Functions', () => {
 
       render(
         <BrowserRouter>
-          <TripDetailPage />
+          <ToastProvider>
+            <TripDetailPage />
+          </ToastProvider>
         </BrowserRouter>,
       );
     });

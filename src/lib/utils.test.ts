@@ -8,5 +8,3 @@ describe('cn', () => {
     expect(cn('flex', { hidden: false })).toContain('flex');
   });
 });
-
-

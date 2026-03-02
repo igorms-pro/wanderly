@@ -1,6 +1,37 @@
-import { Activity, Vote } from '../mock-supabase';
+import type { Activity, Vote } from '../types/database.types';
 import { supabase } from '../supabase';
 import type { AppState, CreateActivityData, SetState, GetState } from './types';
+
+function mapRowToActivity(row: Record<string, unknown>): Activity {
+  const r = row as any;
+  return {
+    id: r.id,
+    trip_id: r.trip_id,
+    itinerary_day_id: r.itinerary_day_id ?? undefined,
+    place_id: r.place_id ?? undefined,
+    place_name: r.place_name ?? undefined,
+    title: r.title,
+    description: r.description ?? '',
+    category: r.category ?? '',
+    start_time: r.start_time ?? undefined,
+    end_time: r.end_time ?? undefined,
+    cost_cents: r.cost_cents ?? undefined,
+    cost_min_cents: r.cost_min_cents ?? undefined,
+    cost_max_cents: r.cost_max_cents ?? undefined,
+    currency: r.currency ?? undefined,
+    transport_type: r.transport_type ?? undefined,
+    transport_notes: r.transport_notes ?? undefined,
+    transport_duration_minutes: r.transport_duration_minutes ?? undefined,
+    transport_cost_cents: r.transport_cost_cents ?? undefined,
+    organizer_notes: r.organizer_notes ?? undefined,
+    packing_checklist: r.packing_checklist ?? null,
+    lat: r.lat ?? undefined,
+    lon: r.lon ?? undefined,
+    status: r.status,
+    source: r.source,
+    created_at: r.created_at,
+  };
+}
 
 export function createTripDetailSlice(set: SetState, get: GetState): Partial<AppState> {
   return {
@@ -35,22 +66,7 @@ export function createTripDetailSlice(set: SetState, get: GetState): Partial<App
           throw error;
         }
 
-        const mappedActivities: Activity[] = ((activities || []) as any[]).map((activity: any) => ({
-          id: activity.id,
-          trip_id: activity.trip_id,
-          itinerary_day_id: activity.itinerary_day_id || undefined,
-          title: activity.title,
-          description: activity.description || '',
-          category: activity.category || '',
-          start_time: activity.start_time || undefined,
-          end_time: activity.end_time || undefined,
-          cost_cents: activity.cost_cents ?? undefined,
-          lat: activity.lat ?? undefined,
-          lon: activity.lon ?? undefined,
-          status: activity.status,
-          source: activity.source,
-          created_at: activity.created_at,
-        }));
+        const mappedActivities: Activity[] = ((activities || []) as any[]).map(mapRowToActivity);
 
         set({ activities: mappedActivities });
       } catch (error) {
@@ -92,24 +108,7 @@ export function createTripDetailSlice(set: SetState, get: GetState): Partial<App
         }
         if (!activity) throw new Error('Failed to create activity');
 
-        const adb = activity as any;
-        const mappedActivity: Activity = {
-          id: adb.id,
-          trip_id: adb.trip_id,
-          itinerary_day_id: adb.itinerary_day_id || undefined,
-          title: adb.title,
-          description: adb.description || '',
-          category: adb.category || '',
-          start_time: adb.start_time || undefined,
-          end_time: adb.end_time || undefined,
-          cost_cents: adb.cost_cents ?? undefined,
-          lat: adb.lat ?? undefined,
-          lon: adb.lon ?? undefined,
-          status: adb.status,
-          source: adb.source,
-          created_at: adb.created_at,
-        };
-
+        const mappedActivity = mapRowToActivity(activity as Record<string, unknown>);
         set((state) => ({ activities: [...state.activities, mappedActivity] }));
         return mappedActivity;
       } catch (error) {
@@ -129,6 +128,24 @@ export function createTripDetailSlice(set: SetState, get: GetState): Partial<App
         if (updates.start_time !== undefined) updateData.start_time = updates.start_time || null;
         if (updates.end_time !== undefined) updateData.end_time = updates.end_time || null;
         if (updates.cost_cents !== undefined) updateData.cost_cents = updates.cost_cents ?? null;
+        if (updates.cost_min_cents !== undefined)
+          updateData.cost_min_cents = updates.cost_min_cents ?? null;
+        if (updates.cost_max_cents !== undefined)
+          updateData.cost_max_cents = updates.cost_max_cents ?? null;
+        if (updates.currency !== undefined) updateData.currency = updates.currency ?? null;
+        if (updates.transport_type !== undefined)
+          updateData.transport_type = updates.transport_type ?? null;
+        if (updates.transport_notes !== undefined)
+          updateData.transport_notes = updates.transport_notes ?? null;
+        if (updates.transport_duration_minutes !== undefined)
+          updateData.transport_duration_minutes = updates.transport_duration_minutes ?? null;
+        if (updates.transport_cost_cents !== undefined)
+          updateData.transport_cost_cents = updates.transport_cost_cents ?? null;
+        if (updates.place_name !== undefined) updateData.place_name = updates.place_name ?? null;
+        if (updates.organizer_notes !== undefined)
+          updateData.organizer_notes = updates.organizer_notes ?? null;
+        if (updates.packing_checklist !== undefined)
+          updateData.packing_checklist = updates.packing_checklist ?? null;
         if (updates.status !== undefined) updateData.status = updates.status;
         if (updates.lat !== undefined) updateData.lat = updates.lat ?? null;
         if (updates.lon !== undefined) updateData.lon = updates.lon ?? null;
@@ -145,25 +162,10 @@ export function createTripDetailSlice(set: SetState, get: GetState): Partial<App
         }
         if (!activity) throw new Error('Activity not found');
 
-        const adb = activity as any;
-        const mappedActivity: Activity = {
-          id: adb.id,
-          trip_id: adb.trip_id,
-          itinerary_day_id: adb.itinerary_day_id || undefined,
-          title: adb.title,
-          description: adb.description || '',
-          category: adb.category || '',
-          start_time: adb.start_time || undefined,
-          end_time: adb.end_time || undefined,
-          cost_cents: adb.cost_cents ?? undefined,
-          lat: adb.lat ?? undefined,
-          lon: adb.lon ?? undefined,
-          status: adb.status,
-          source: adb.source,
-          created_at: adb.created_at,
-        };
-
-        get().updateActivityInState(activityId, mappedActivity);
+        get().updateActivityInState(
+          activityId,
+          mapRowToActivity(activity as Record<string, unknown>),
+        );
       } catch (error) {
         console.error('Error updating activity:', error);
         throw error;

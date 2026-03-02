@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Trip } from '@/lib/mock-supabase';
+import type { Trip, TripConstraints } from '@/lib/types/database.types';
 import {
   Calendar,
   MapPin,
@@ -39,7 +39,7 @@ export default function TripCard({
   const { t } = useTranslation();
   const gradient = getGradient(trip.destination_text);
   const timeLabel = getTripTimeLabel(trip.start_date, trip.end_date, t);
-  const constraints = trip.constraints;
+  const constraints = trip.constraints as TripConstraints | null;
 
   return (
     <div

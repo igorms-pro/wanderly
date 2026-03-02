@@ -1,4 +1,4 @@
-import { Trip } from '../mock-supabase';
+import type { Trip } from '../types/database.types';
 import { supabase } from '../supabase';
 import type { AppState, CreateTripData, SetState, GetState } from './types';
 
