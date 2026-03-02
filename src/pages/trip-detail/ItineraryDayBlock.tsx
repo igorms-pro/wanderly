@@ -158,14 +158,6 @@ export function ItineraryDayBlock({
                           : formatTime(activity.start_time)}
                       </span>
                     )}
-                    {activity.place_name?.trim() && (
-                      <span className="flex items-center gap-1 max-w-full">
-                        <MapPin className="w-3.5 h-3.5 shrink-0" />
-                        <span className="truncate max-w-[10rem] sm:max-w-[14rem]">
-                          {activity.place_name.trim()}
-                        </span>
-                      </span>
-                    )}
                     {activity.status === 'proposed' && (upvotes > 0 || downvotes > 0) && (
                       <span className="text-xs text-gray-400 dark:text-gray-500">
                         {upvotes} {t('tripDetail.votesFor')} · {downvotes}{' '}
@@ -195,7 +187,7 @@ export function ItineraryDayBlock({
 
               {/* Expanded: description, lieu, participants, coût, transport (toujours affichés), votes */}
               {isExpanded && (
-                <div className="px-4 pb-5 sm:px-5 sm:pb-6 pt-0 border-t border-gray-100 dark:border-gray-700">
+                <div className="px-4 pb-5 sm:px-5 sm:pb-6 pt-3 sm:pt-4 border-t border-gray-100 dark:border-gray-700">
                   <div className="space-y-3 mb-4">
                     <div className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
                       <FileText className="w-4 h-4 shrink-0 mt-0.5" />
