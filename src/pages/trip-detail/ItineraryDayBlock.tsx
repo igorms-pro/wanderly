@@ -123,18 +123,15 @@ export function ItineraryDayBlock({
           const userVote = getUserVote(activity.id);
           const isExpanded = expandedIds.has(activity.id);
 
-          const accentBorderClasses = [
-            // Indigo accent
-            'border-l-2 border-indigo-400 bg-indigo-50/80 hover:bg-indigo-100 dark:border-indigo-400 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/60',
-            // Emerald accent
-            'border-l-2 border-emerald-400 bg-emerald-50/80 hover:bg-emerald-100 dark:border-emerald-400 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60',
-            // Amber accent
-            'border-l-2 border-amber-400 bg-amber-50/80 hover:bg-amber-100 dark:border-amber-400 dark:bg-amber-950/40 dark:hover:bg-amber-900/60',
-          ] as const;
-          const accentClass = accentBorderClasses[index % accentBorderClasses.length];
+          const accentClass =
+            index % 2 === 1
+              ? // Even rows: subtle colored background
+                'border-l-2 border-emerald-300 bg-emerald-50/80 hover:bg-emerald-100 dark:border-emerald-400 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 transition'
+              : // Odd rows: neutral white background
+                'border-l-2 border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900/40 dark:hover:bg-gray-800/70 transition';
 
           return (
-            <div key={activity.id} className={`transition ${accentClass}`}>
+            <div key={activity.id} className={accentClass}>
               {/* Collapsed row: title + time (+ vote summary). Click to expand. Like/dislike only when expanded. */}
               <div
                 role="button"
