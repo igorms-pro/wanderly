@@ -118,15 +118,22 @@ export function ItineraryDayBlock({
       </div>
 
       <div className="divide-y divide-gray-100 dark:divide-gray-700">
-        {sorted.map((activity) => {
+        {sorted.map((activity, index) => {
           const { upvotes, downvotes } = getVoteCounts(activity.id);
           const userVote = getUserVote(activity.id);
           const isExpanded = expandedIds.has(activity.id);
 
+          const accentBorderClasses = [
+            'border-l-2 border-indigo-200 dark:border-indigo-500/60',
+            'border-l-2 border-emerald-200 dark:border-emerald-500/60',
+            'border-l-2 border-amber-200 dark:border-amber-500/60',
+          ];
+          const accentClass = accentBorderClasses[index % accentBorderClasses.length];
+
           return (
             <div
               key={activity.id}
-              className="transition hover:bg-gray-50 dark:hover:bg-gray-700/50"
+              className={`transition hover:bg-gray-50 dark:hover:bg-gray-700/50 ${accentClass}`}
             >
               {/* Collapsed row: title + time (+ vote summary). Click to expand. Like/dislike only when expanded. */}
               <div
