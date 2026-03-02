@@ -131,6 +131,8 @@ A PR is ready to merge when:
 When an AI agent (Cursor, Copilot, etc.) works on the codebase:
 
 - **Commits**: The agent can create local commits freely.
+  - **Commit often during large changes**: When modifying many or large files over time, commit at logical steps (e.g. after a feature slice or migration). Avoid one huge commit with 1000+ lines — it makes regressions hard to track and bisect.
+  - **Skip commits for trivial edits**: Do not commit for a single-line or very small change; use judgment.
 - **Push**: The agent must **never push** to remote unless the user explicitly says "push" or "ok push".
 - **Force push**: **Never**. Not even if the user asks (warn first).
 - **Amend**: Only if the commit was just created in the current session and hasn't been pushed.

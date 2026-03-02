@@ -154,29 +154,12 @@ export function ItineraryDayBlock({
                           : formatTime(activity.start_time)}
                       </span>
                     )}
-                    {formatActivityCost(
-                      activity,
-                      activity.currency ?? currency,
-                      t('tripDetail.costFree'),
-                    ) && (
-                      <span className="flex items-center gap-1">
-                        <DollarSign className="w-3.5 h-3.5 shrink-0" />
-                        {formatActivityCost(
-                          activity,
-                          activity.currency ?? currency,
-                          t('tripDetail.costFree'),
-                        )}
-                      </span>
-                    )}
-                    {(activity.transport_type || activity.transport_notes) && (
-                      <span className="flex items-center gap-1">
-                        <Car className="w-3.5 h-3.5 shrink-0" />
-                        {[activity.transport_type, activity.transport_notes]
-                          .filter(Boolean)
-                          .join(' · ')}
-                        {activity.transport_duration_minutes != null &&
-                          activity.transport_duration_minutes > 0 &&
-                          ` (${activity.transport_duration_minutes} min)`}
+                    {activity.place_name?.trim() && (
+                      <span className="flex items-center gap-1 max-w-full">
+                        <MapPin className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate max-w-[10rem] sm:max-w-[14rem]">
+                          {activity.place_name.trim()}
+                        </span>
                       </span>
                     )}
                     {activity.status === 'proposed' && (upvotes > 0 || downvotes > 0) && (
