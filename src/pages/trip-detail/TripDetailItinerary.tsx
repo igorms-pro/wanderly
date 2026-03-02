@@ -33,6 +33,7 @@ interface TripDetailItineraryProps {
   currency?: string;
   constraintsSummary?: ConstraintsSummary | null;
   membersCount?: number;
+  activityParticipantsMap?: Record<string, string[]>;
 }
 
 export function TripDetailItinerary({
@@ -53,6 +54,7 @@ export function TripDetailItinerary({
   currency = 'EUR',
   constraintsSummary,
   membersCount = 0,
+  activityParticipantsMap = {},
 }: TripDetailItineraryProps) {
   const [viewMode, setViewMode] = useState<ItineraryViewMode>(() => {
     try {
@@ -219,6 +221,7 @@ export function TripDetailItinerary({
               t={t}
               currency={currency}
               tripMembersCount={membersCount}
+              activityParticipantsMap={activityParticipantsMap}
             />
           ))}
         </div>
@@ -244,6 +247,7 @@ export function TripDetailItinerary({
               t={t}
               currency={currency}
               tripMembersCount={membersCount}
+              activityParticipantsMap={activityParticipantsMap}
               showClose
               onClose={() => setSelectedDate(null)}
             />

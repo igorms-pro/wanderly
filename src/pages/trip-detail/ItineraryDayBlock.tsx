@@ -26,6 +26,7 @@ interface ItineraryDayBlockProps {
   t: (key: string) => string;
   currency?: string;
   tripMembersCount?: number;
+  activityParticipantsMap?: Record<string, string[]>;
   showClose?: boolean;
   onClose?: () => void;
 }
@@ -72,6 +73,7 @@ export function ItineraryDayBlock({
   t,
   currency = 'EUR',
   tripMembersCount,
+  activityParticipantsMap = {},
   showClose,
   onClose,
 }: ItineraryDayBlockProps) {
@@ -219,9 +221,25 @@ export function ItineraryDayBlock({
                     <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                       <Users className="w-4 h-4 shrink-0" />
                       <span>
-                        {tripMembersCount != null && tripMembersCount > 0
-                          ? `${t('tripDetail.participantsAll')} (${tripMembersCount})`
-                          : t('tripDetail.participantsNotSet')}
+                        {(() => {
+                          const participantIds = activityParticipantsMap[activity.id];
+                          if (
+                            participantIds != null &&
+                            Array.isArray(participantIds) &&
+                            participantIds.length > 0
+                          ) {
+                            return participantIds.length === 1
+                              ? t('tripDetail.participantCount_one')
+                              : t('tripDetail.participantsCount').replace(
+                                  '{{count}}',
+                                  String(participantIds.length),
+                                );
+                          }
+                          if (tripMembersCount != null && tripMembersCount > 0) {
+                            return `${t('tripDetail.participantsAll')} (${tripMembersCount})`;
+                          }
+                          return t('tripDetail.participantsNotSet');
+                        })()}
                       </span>
                     </div>
                   </div>

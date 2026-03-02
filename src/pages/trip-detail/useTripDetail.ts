@@ -33,6 +33,9 @@ export function useTripDetail() {
     [tripId],
   );
   const [tripMembers, setTripMembers] = useState<TripMember[]>([]);
+  const [activityParticipantsMap, setActivityParticipantsMap] = useState<Record<string, string[]>>(
+    {},
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     title: '',
@@ -157,6 +160,7 @@ export function useTripDetail() {
       setCurrentTrip,
       setEditForm,
       setTripMembers,
+      setActivityParticipantsMap,
       setActiveTabState,
       navigate,
       t,
@@ -250,6 +254,7 @@ export function useTripDetail() {
     getUserVote,
     activitiesByDate,
     sortedDates,
+    activityParticipantsMap,
     showAddActivityModal,
     setShowAddActivityModal,
   };

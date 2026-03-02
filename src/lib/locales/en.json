@@ -276,6 +276,8 @@
     "placeSet": "Set",
     "participantsAll": "All trip members",
     "participantsNotSet": "Not set",
+    "participantsCount": "{{count}} participants",
+    "participantCount_one": "1 participant",
     "organizerNote": "Organizer note",
     "packingChecklist": "What to bring",
     "viewOnGoogleMaps": "View on Google Maps",

@@ -11,6 +11,7 @@ export interface LoadTripDataParams {
   setCurrentTrip: (t: Trip | null) => void;
   setEditForm: (f: (prev: any) => any) => void;
   setTripMembers: (m: any[]) => void;
+  setActivityParticipantsMap: (m: Record<string, string[]>) => void;
   setActiveTabState: (t: Tab) => void;
   navigate: (path: string) => void;
   t: (key: string) => string;
@@ -25,6 +26,7 @@ export async function loadTripDataForDetail(params: LoadTripDataParams): Promise
     setCurrentTrip,
     setEditForm,
     setTripMembers,
+    setActivityParticipantsMap,
     setActiveTabState,
     navigate,
     t,
@@ -98,6 +100,20 @@ export async function loadTripDataForDetail(params: LoadTripDataParams): Promise
     const { activities } = getState();
     if (activities.length > 0) {
       await loadVotes(activities.map((a) => a.id));
+      const activityIds = activities.map((a) => a.id);
+      const { data: participantsRows } = await supabase
+        .from('activity_participants')
+        .select('activity_id, user_id')
+        .in('activity_id', activityIds);
+      const map: Record<string, string[]> = {};
+      for (const row of participantsRows || []) {
+        const aid = (row as { activity_id: string; user_id: string }).activity_id;
+        if (!map[aid]) map[aid] = [];
+        map[aid].push((row as { activity_id: string; user_id: string }).user_id);
+      }
+      setActivityParticipantsMap(map);
+    } else {
+      setActivityParticipantsMap({});
     }
   } catch (err: any) {
     console.error('Error loading trip:', err);
