@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, List, Calendar, Map } from 'lucide-react';
-import type { Activity } from '@/lib/types/database.types';
+import type { Activity, TripMember } from '@/lib/types/database.types';
 import { ItineraryDayBlock } from './ItineraryDayBlock';
 import { TripWeekGrid } from './TripWeekGrid';
 import { TripTimeline } from './TripTimeline';
@@ -34,6 +34,8 @@ interface TripDetailItineraryProps {
   constraintsSummary?: ConstraintsSummary | null;
   membersCount?: number;
   activityParticipantsMap?: Record<string, string[]>;
+  tripMembers?: TripMember[];
+  memberProfiles?: Record<string, { display_name: string | null; avatar_url: string | null }>;
 }
 
 export function TripDetailItinerary({
@@ -55,6 +57,8 @@ export function TripDetailItinerary({
   constraintsSummary,
   membersCount = 0,
   activityParticipantsMap = {},
+  tripMembers = [],
+  memberProfiles = {},
 }: TripDetailItineraryProps) {
   const [viewMode, setViewMode] = useState<ItineraryViewMode>(() => {
     try {
@@ -222,6 +226,8 @@ export function TripDetailItinerary({
               currency={currency}
               tripMembersCount={membersCount}
               activityParticipantsMap={activityParticipantsMap}
+              tripMembers={tripMembers}
+              memberProfiles={memberProfiles}
             />
           ))}
         </div>
@@ -248,6 +254,8 @@ export function TripDetailItinerary({
               currency={currency}
               tripMembersCount={membersCount}
               activityParticipantsMap={activityParticipantsMap}
+              tripMembers={tripMembers}
+              memberProfiles={memberProfiles}
               showClose
               onClose={() => setSelectedDate(null)}
             />

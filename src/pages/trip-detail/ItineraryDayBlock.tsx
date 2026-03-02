@@ -13,7 +13,9 @@ import {
   Users,
   FileText,
 } from 'lucide-react';
-import type { Activity } from '@/lib/types/database.types';
+import type { Activity, TripMember } from '@/lib/types/database.types';
+
+export type MemberProfile = { display_name: string | null; avatar_url: string | null };
 
 interface ItineraryDayBlockProps {
   date: string;
@@ -27,6 +29,8 @@ interface ItineraryDayBlockProps {
   currency?: string;
   tripMembersCount?: number;
   activityParticipantsMap?: Record<string, string[]>;
+  tripMembers?: TripMember[];
+  memberProfiles?: Record<string, MemberProfile>;
   showClose?: boolean;
   onClose?: () => void;
 }
@@ -74,10 +78,13 @@ export function ItineraryDayBlock({
   currency = 'EUR',
   tripMembersCount,
   activityParticipantsMap = {},
+  tripMembers = [],
+  memberProfiles = {},
   showClose,
   onClose,
 }: ItineraryDayBlockProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [openParticipantsActivityId, setOpenParticipantsActivityId] = useState<string | null>(null);
 
   const toggleExpanded = useCallback((id: string) => {
     setExpandedIds((prev) => {
@@ -218,29 +225,115 @@ export function ItineraryDayBlock({
                         )}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                      <Users className="w-4 h-4 shrink-0" />
-                      <span>
+                    <div className="flex flex-col gap-1">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setOpenParticipantsActivityId((prev) =>
+                            prev === activity.id ? null : activity.id,
+                          )
+                        }
+                        className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-left w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      >
+                        <Users className="w-4 h-4 shrink-0" />
                         {(() => {
-                          const participantIds = activityParticipantsMap[activity.id];
-                          if (
-                            participantIds != null &&
-                            Array.isArray(participantIds) &&
-                            participantIds.length > 0
-                          ) {
-                            return participantIds.length === 1
-                              ? t('tripDetail.participantCount_one')
-                              : t('tripDetail.participantsCount').replace(
-                                  '{{count}}',
-                                  String(participantIds.length),
-                                );
-                          }
-                          if (tripMembersCount != null && tripMembersCount > 0) {
-                            return `${t('tripDetail.participantsAll')} (${tripMembersCount})`;
-                          }
-                          return t('tripDetail.participantsNotSet');
+                          const participantIds =
+                            activityParticipantsMap[activity.id] != null &&
+                            activityParticipantsMap[activity.id].length > 0
+                              ? activityParticipantsMap[activity.id]
+                              : tripMembers.map((m) => m.user_id);
+                          const count = participantIds.length;
+                          const label =
+                            activityParticipantsMap[activity.id] != null &&
+                            activityParticipantsMap[activity.id].length > 0
+                              ? count === 1
+                                ? t('tripDetail.participantCount_one')
+                                : t('tripDetail.participantsCount').replace(
+                                    '{{count}}',
+                                    String(count),
+                                  )
+                              : tripMembersCount != null && tripMembersCount > 0
+                                ? `${t('tripDetail.participantsAll')} (${tripMembersCount})`
+                                : t('tripDetail.participantsNotSet');
+                          return (
+                            <>
+                              <span className="flex items-center gap-1.5 shrink-0">
+                                {participantIds.slice(0, 6).map((uid) => {
+                                  const profile = memberProfiles[uid];
+                                  const name =
+                                    profile?.display_name?.trim() || uid.slice(0, 8) + '…';
+                                  return (
+                                    <span
+                                      key={uid}
+                                      className="inline-flex h-6 w-6 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-600 ring-2 ring-white dark:ring-gray-800 shrink-0"
+                                      title={name}
+                                    >
+                                      {profile?.avatar_url ? (
+                                        <img
+                                          src={profile.avatar_url}
+                                          alt=""
+                                          className="h-full w-full object-cover"
+                                        />
+                                      ) : (
+                                        <span className="flex h-full w-full items-center justify-center text-[10px] font-medium text-gray-600 dark:text-gray-300">
+                                          {(profile?.display_name || '?').charAt(0).toUpperCase()}
+                                        </span>
+                                      )}
+                                    </span>
+                                  );
+                                })}
+                                {participantIds.length > 6 && (
+                                  <span className="text-xs text-gray-400">
+                                    +{participantIds.length - 6}
+                                  </span>
+                                )}
+                              </span>
+                              <span>{label}</span>
+                            </>
+                          );
                         })()}
-                      </span>
+                      </button>
+                      {openParticipantsActivityId === activity.id && (
+                        <div className="ml-6 mt-1 py-2 px-3 rounded-lg bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700">
+                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                            {t('tripDetail.participantsList')}
+                          </p>
+                          <ul className="space-y-1.5">
+                            {(() => {
+                              const participantIds =
+                                activityParticipantsMap[activity.id] != null &&
+                                activityParticipantsMap[activity.id].length > 0
+                                  ? activityParticipantsMap[activity.id]
+                                  : tripMembers.map((m) => m.user_id);
+                              return participantIds.map((uid) => {
+                                const profile = memberProfiles[uid];
+                                const name = profile?.display_name?.trim() || uid.slice(0, 8) + '…';
+                                return (
+                                  <li
+                                    key={uid}
+                                    className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"
+                                  >
+                                    <span className="inline-flex h-7 w-7 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-600 shrink-0">
+                                      {profile?.avatar_url ? (
+                                        <img
+                                          src={profile.avatar_url}
+                                          alt=""
+                                          className="h-full w-full object-cover"
+                                        />
+                                      ) : (
+                                        <span className="flex h-full w-full items-center justify-center text-xs font-medium text-gray-600 dark:text-gray-300">
+                                          {(profile?.display_name || '?').charAt(0).toUpperCase()}
+                                        </span>
+                                      )}
+                                    </span>
+                                    <span>{name}</span>
+                                  </li>
+                                );
+                              });
+                            })()}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </div>
                   {activity.organizer_notes?.trim() && (

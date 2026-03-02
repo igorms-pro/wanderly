@@ -12,6 +12,9 @@ export interface LoadTripDataParams {
   setEditForm: (f: (prev: any) => any) => void;
   setTripMembers: (m: any[]) => void;
   setActivityParticipantsMap: (m: Record<string, string[]>) => void;
+  setMemberProfiles: (
+    m: Record<string, { display_name: string | null; avatar_url: string | null }>,
+  ) => void;
   setActiveTabState: (t: Tab) => void;
   navigate: (path: string) => void;
   t: (key: string) => string;
@@ -27,6 +30,7 @@ export async function loadTripDataForDetail(params: LoadTripDataParams): Promise
     setEditForm,
     setTripMembers,
     setActivityParticipantsMap,
+    setMemberProfiles,
     setActiveTabState,
     navigate,
     t,
@@ -94,6 +98,26 @@ export async function loadTripDataForDetail(params: LoadTripDataParams): Promise
       .is('removed_at', null);
     if (membersError) console.error('Error loading trip members:', membersError);
     else setTripMembers(members || []);
+
+    const memberIds = (members || []).map((m: { user_id: string }) => m.user_id);
+    if (memberIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, display_name, avatar_url')
+        .in('id', memberIds);
+      const profileMap: Record<string, { display_name: string | null; avatar_url: string | null }> =
+        {};
+      for (const p of profiles || []) {
+        const row = p as { id: string; display_name: string | null; avatar_url: string | null };
+        profileMap[row.id] = {
+          display_name: row.display_name ?? null,
+          avatar_url: row.avatar_url ?? null,
+        };
+      }
+      setMemberProfiles(profileMap);
+    } else {
+      setMemberProfiles({});
+    }
 
     const { loadActivities, loadVotes } = getState();
     await loadActivities(tripId);

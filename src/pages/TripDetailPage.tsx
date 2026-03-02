@@ -59,6 +59,7 @@ export default function TripDetailPage() {
     activitiesByDate,
     sortedDates,
     activityParticipantsMap,
+    memberProfiles,
     showAddActivityModal,
     setShowAddActivityModal,
   } = useTripDetail();
@@ -233,6 +234,8 @@ export default function TripDetailPage() {
             })()}
             membersCount={tripMembers.length}
             activityParticipantsMap={activityParticipantsMap}
+            tripMembers={tripMembers}
+            memberProfiles={memberProfiles}
           />
         )}
         {activeTab === 'chat' && tripId && <TripChat tripId={tripId} userRole={getUserRole()} />}
