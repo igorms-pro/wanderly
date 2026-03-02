@@ -37,7 +37,7 @@ export function useTripDetail() {
     {},
   );
   const [memberProfiles, setMemberProfiles] = useState<
-    Record<string, { display_name: string | null; avatar_url: string | null }>
+    Record<string, { display_name: string | null; avatar_url: string | null; email: string | null }>
   >({});
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({

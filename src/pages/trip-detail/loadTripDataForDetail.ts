@@ -13,7 +13,10 @@ export interface LoadTripDataParams {
   setTripMembers: (m: any[]) => void;
   setActivityParticipantsMap: (m: Record<string, string[]>) => void;
   setMemberProfiles: (
-    m: Record<string, { display_name: string | null; avatar_url: string | null }>,
+    m: Record<
+      string,
+      { display_name: string | null; avatar_url: string | null; email: string | null }
+    >,
   ) => void;
   setActiveTabState: (t: Tab) => void;
   navigate: (path: string) => void;
@@ -103,15 +106,23 @@ export async function loadTripDataForDetail(params: LoadTripDataParams): Promise
     if (memberIds.length > 0) {
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, display_name, avatar_url')
+        .select('id, display_name, avatar_url, email')
         .in('id', memberIds);
-      const profileMap: Record<string, { display_name: string | null; avatar_url: string | null }> =
-        {};
+      const profileMap: Record<
+        string,
+        { display_name: string | null; avatar_url: string | null; email: string | null }
+      > = {};
       for (const p of profiles || []) {
-        const row = p as { id: string; display_name: string | null; avatar_url: string | null };
+        const row = p as {
+          id: string;
+          display_name: string | null;
+          avatar_url: string | null;
+          email: string | null;
+        };
         profileMap[row.id] = {
           display_name: row.display_name ?? null,
           avatar_url: row.avatar_url ?? null,
+          email: row.email ?? null,
         };
       }
       setMemberProfiles(profileMap);

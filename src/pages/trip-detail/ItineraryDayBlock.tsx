@@ -15,7 +15,22 @@ import {
 } from 'lucide-react';
 import type { Activity, TripMember } from '@/lib/types/database.types';
 
-export type MemberProfile = { display_name: string | null; avatar_url: string | null };
+export type MemberProfile = {
+  display_name: string | null;
+  avatar_url: string | null;
+  email?: string | null;
+};
+
+function getDisplayName(profile: MemberProfile | undefined, tMember: string): string {
+  if (profile?.display_name?.trim()) return profile.display_name.trim();
+  if (profile?.email) return profile.email.split('@')[0].trim() || tMember;
+  return tMember;
+}
+
+function getInitial(profile: MemberProfile | undefined, tMember: string): string {
+  const name = getDisplayName(profile, tMember);
+  return name.charAt(0).toUpperCase();
+}
 
 interface ItineraryDayBlockProps {
   date: string;
@@ -260,14 +275,8 @@ export function ItineraryDayBlock({
                               <span className="flex items-center gap-1.5 shrink-0">
                                 {participantIds.slice(0, 6).map((uid) => {
                                   const profile = memberProfiles[uid];
-                                  const name =
-                                    profile?.display_name && profile.display_name.trim().length > 0
-                                      ? profile.display_name.trim()
-                                      : t('tripDetail.member');
-                                  const initial =
-                                    profile?.display_name && profile.display_name.trim().length > 0
-                                      ? profile.display_name.trim().charAt(0).toUpperCase()
-                                      : 'M';
+                                  const name = getDisplayName(profile, t('tripDetail.member'));
+                                  const initial = getInitial(profile, t('tripDetail.member'));
                                   return (
                                     <span
                                       key={uid}
@@ -294,10 +303,17 @@ export function ItineraryDayBlock({
                                   </span>
                                 )}
                               </span>
-                              <span>{label}</span>
+                              <span className="truncate">{label}</span>
                             </>
                           );
                         })()}
+                        <span className="ml-1 text-gray-400 dark:text-gray-500 shrink-0">
+                          {openParticipantsActivityId === activity.id ? (
+                            <ChevronUp className="w-3 h-3" />
+                          ) : (
+                            <ChevronDown className="w-3 h-3" />
+                          )}
+                        </span>
                       </button>
                       {openParticipantsActivityId === activity.id && (
                         <div className="ml-6 mt-1 py-2 px-3 rounded-lg bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700">
@@ -313,14 +329,8 @@ export function ItineraryDayBlock({
                                   : tripMembers.map((m) => m.user_id);
                               return participantIds.map((uid) => {
                                 const profile = memberProfiles[uid];
-                                const name =
-                                  profile?.display_name && profile.display_name.trim().length > 0
-                                    ? profile.display_name.trim()
-                                    : t('tripDetail.member');
-                                const initial =
-                                  profile?.display_name && profile.display_name.trim().length > 0
-                                    ? profile.display_name.trim().charAt(0).toUpperCase()
-                                    : 'M';
+                                const name = getDisplayName(profile, t('tripDetail.member'));
+                                const initial = getInitial(profile, t('tripDetail.member'));
                                 return (
                                   <li
                                     key={uid}
