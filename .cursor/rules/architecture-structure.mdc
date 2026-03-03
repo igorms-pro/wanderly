@@ -1,5 +1,11 @@
 ---
 description: Project architecture, folder structure, and dependency rules for Voyagely
+globs: src/**/*
+alwaysApply: true
+---
+
+---
+description: Project architecture, folder structure, and dependency rules for Voyagely
 alwaysApply: true
 ---
 
@@ -133,3 +139,4 @@ The current codebase may not match this structure yet. When touching a file:
 
 - If it belongs to a feature, move it to the correct feature folder.
 - Don't refactor the entire codebase at once — migrate progressively, feature by feature.
+

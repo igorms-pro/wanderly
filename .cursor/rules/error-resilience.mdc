@@ -1,5 +1,11 @@
 ---
 description: Error handling, error boundaries, and resilience patterns for Voyagely
+globs: src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+---
+description: Error handling, error boundaries, and resilience patterns for Voyagely
 alwaysApply: true
 ---
 
@@ -181,3 +187,4 @@ React Query's `onMutate` / `onError` / `onSettled` pattern handles this cleanly.
   - User behavior analytics.
 - **Never log** user passwords, tokens, or PII to Sentry or console.
 - Add **context** to Sentry errors: trip ID, user role, action being performed.
+

@@ -1,5 +1,11 @@
 ---
 description: UI and design-system guidelines for Voyagely (screens, components, themes, accessibility)
+globs: src/**/*.tsx
+alwaysApply: false
+---
+
+---
+description: UI and design-system guidelines for Voyagely (screens, components, themes, accessibility)
 alwaysApply: true
 ---
 
@@ -92,3 +98,4 @@ Build and reuse these primitives (in `src/components/`):
 - `docs/design/design-system.md` and `docs/design/screen-system.md` are **conceptual and descriptive only**.
 - **No JSX / HTML / CSS code blocks** inside these design docs.
 - Implementation details belong in the codebase (`src/`), not in markdown design files.
+

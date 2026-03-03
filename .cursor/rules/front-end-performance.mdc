@@ -1,5 +1,11 @@
 ---
 description: Front-end performance guidelines for Voyagely – rendering, loading, bundle
+globs: src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+---
+description: Front-end performance guidelines for Voyagely – rendering, loading, bundle
 alwaysApply: true
 ---
 
@@ -124,3 +130,4 @@ const tripName = store.currentTrip?.name;
 - Use **CSS transitions / animations** instead of JS-driven animations when possible.
 - For complex animations: use `framer-motion` or CSS keyframes, not `setInterval`.
 - Always respect `prefers-reduced-motion` media query for accessibility.
+

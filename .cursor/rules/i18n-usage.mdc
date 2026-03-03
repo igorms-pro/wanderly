@@ -1,5 +1,11 @@
 ---
 description: Internationalization (i18n) usage and enforcement rules for Voyagely
+globs: src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+---
+description: Internationalization (i18n) usage and enforcement rules for Voyagely
 alwaysApply: true
 ---
 
@@ -104,3 +110,4 @@ Periodically (before major releases or at the end of a sprint):
 
 - Use i18next's built-in **pluralization**: `t('trip.members.count', { count: n })` with `_one` / `_other` keys.
 - Use `Intl.NumberFormat` or i18next formatting for numbers, currencies, dates — not manual string formatting.
+

@@ -1,5 +1,11 @@
 ---
 description: Product-specific rules, invariants, and strategic constraints for Voyagely
+globs: **/*
+alwaysApply: false
+---
+
+---
+description: Product-specific rules, invariants, and strategic constraints for Voyagely
 alwaysApply: true
 ---
 
@@ -110,3 +116,4 @@ When deciding what to work on next, always follow:
 2. Foundation issues (DB, i18n, architecture) before screen-specific features.
 3. Planning features before expenses.
 4. Core user journeys before edge cases.
+

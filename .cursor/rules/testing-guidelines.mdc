@@ -1,5 +1,11 @@
 ---
 description: Unit, integration, and E2E testing guidelines for Voyagely
+globs: **/*.{test,spec}.{ts,tsx}
+alwaysApply: false
+---
+
+---
+description: Unit, integration, and E2E testing guidelines for Voyagely
 alwaysApply: true
 ---
 
@@ -139,3 +145,4 @@ e2e/
 - Don't chase a number. Aim for **meaningful coverage** of critical paths.
 - CI enforces a baseline (currently 70% thresholds). Don't drop below it.
 - If coverage drops on a PR, check if important logic is untested — not just if the number went down.
+

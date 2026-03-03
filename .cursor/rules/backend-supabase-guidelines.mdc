@@ -1,5 +1,11 @@
 ---
 description: Backend, Supabase, database, and security guidelines for Voyagely
+globs: supabase/**/*.sql
+alwaysApply: false
+---
+
+---
+description: Backend, Supabase, database, and security guidelines for Voyagely
 alwaysApply: true
 ---
 
@@ -172,3 +178,4 @@ if (error) {
 const { data } = await supabase.from('activities').select('*');
 // silently ignores errors
 ```
+

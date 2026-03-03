@@ -1,5 +1,11 @@
 ---
 description: General coding guidelines for Voyagely – TypeScript, code style, file limits, naming
+globs: src/**/*.{ts,tsx}
+alwaysApply: true
+---
+
+---
+description: General coding guidelines for Voyagely – TypeScript, code style, file limits, naming
 alwaysApply: true
 ---
 
@@ -148,3 +154,4 @@ Separate each group with a blank line.
 | CSS classes (Tailwind) | kebab-case when custom  | `trip-card`          |
 | Test files             | `*.test.ts(x)`          | `useTrip.test.ts`    |
 | E2E specs              | `*.spec.ts`             | `voting.spec.ts`     |
+

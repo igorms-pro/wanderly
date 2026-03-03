@@ -1,5 +1,11 @@
 ---
 description: Git workflow, branching, commit conventions, and PR guidelines for Voyagely
+globs: **/*
+alwaysApply: false
+---
+
+---
+description: Git workflow, branching, commit conventions, and PR guidelines for Voyagely
 alwaysApply: true
 ---
 
@@ -137,3 +143,4 @@ When an AI agent (Cursor, Copilot, etc.) works on the codebase:
 - **Force push**: **Never**. Not even if the user asks (warn first).
 - **Amend**: Only if the commit was just created in the current session and hasn't been pushed.
 - **Branch switching**: Ask before switching branches if there are uncommitted changes.
+
