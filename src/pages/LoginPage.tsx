@@ -10,6 +10,9 @@ import { Card } from '@/components/ui/Card';
 import { useToast } from '@/contexts/ToastContext';
 import { GoogleIcon } from '@/features/auth/components/GoogleIcon';
 // import { FacebookIcon } from '@/features/auth/components/FacebookIcon'; // TODO: réactiver quand app FB vérifiée
+import { LoginForm } from '@/pages/login/LoginForm';
+import { SocialLoginButtons } from '@/pages/login/SocialLoginButtons';
+import { LoginHeader } from '@/pages/login/LoginHeader';
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -121,20 +124,7 @@ export default function LoginPage() {
     <Layout showLanguageTheme={true}>
       <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex items-center justify-center p-4">
         <div className="max-w-md w-full">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-500 dark:bg-orange-400 rounded-2xl mb-4">
-              <Plane className="w-8 h-8 text-white" />
-            </div>
-            <h1
-              className="text-3xl font-bold text-stone-900 dark:text-stone-100 mb-2"
-              data-testid="login-welcome-title"
-            >
-              {t('auth.welcomeTitle')}
-            </h1>
-            <p className="text-stone-600 dark:text-stone-400" data-testid="login-welcome-subtitle">
-              {t('auth.welcomeSubtitle')}
-            </p>
-          </div>
+          <LoginHeader successMessage={successMessage} />
 
           <Card className="p-8" data-testid="login-form">
             <h2
@@ -144,51 +134,13 @@ export default function LoginPage() {
               {t('auth.signIn')}
             </h2>
 
-            {successMessage && (
-              <div
-                className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-400 text-sm flex items-start gap-2"
-                data-testid="login-success-message"
-              >
-                <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                <span>{successMessage}</span>
-              </div>
-            )}
-
-            {error && (
-              <div
-                className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm"
-                data-testid="login-error-message"
-              >
-                {error}
-              </div>
-            )}
-
-            <form
+            <LoginForm
+              email={email}
+              error={error}
+              loading={emailLoading}
+              onEmailChange={setEmail}
               onSubmit={handleMagicLink}
-              className="space-y-4 mb-6"
-              data-testid="login-email-form"
-            >
-              <Input
-                id="login-email"
-                type="email"
-                label={t('auth.email')}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={emailLoading}
-                placeholder={t('auth.emailPlaceholder')}
-                data-testid="login-email-input"
-              />
-              <Button
-                type="submit"
-                disabled={emailLoading}
-                className="w-full"
-                loading={emailLoading}
-                data-testid="login-send-magic-link"
-              >
-                {emailLoading ? t('auth.magicLinkSending') : t('auth.sendMagicLink')}
-              </Button>
-            </form>
+            />
 
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
@@ -201,33 +153,11 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="space-y-3">
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 border-stone-300 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-700"
-                disabled={emailLoading || oauthLoading !== null}
-                onClick={() => handleOAuth('google')}
-                loading={oauthLoading === 'google'}
-                leftIcon={<GoogleIcon className="w-5 h-5" />}
-              >
-                {oauthLoading === 'google' ? t('auth.oauthLoading') : t('auth.continueWithGoogle')}
-              </Button>
-              {/* TODO: réactiver quand app Facebook vérifiée
-              <Button
-                type="button"
-                className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white border-0 focus:ring-[#1877F2]"
-                disabled={emailLoading || oauthLoading !== null}
-                onClick={() => handleOAuth('facebook')}
-                loading={oauthLoading === 'facebook'}
-                leftIcon={<FacebookIcon className="w-5 h-5 text-white" />}
-              >
-                {oauthLoading === 'facebook'
-                  ? t('auth.oauthLoading')
-                  : t('auth.continueWithFacebook')}
-              </Button>
-              */}
-            </div>
+            <SocialLoginButtons
+              disabled={emailLoading || oauthLoading !== null}
+              loadingProvider={oauthLoading}
+              onLogin={handleOAuth}
+            />
 
             <p className="mt-6 text-center text-stone-600 dark:text-stone-400 text-sm">
               {t('auth.dontHaveAccount')}{' '}
