@@ -26,6 +26,27 @@ function filterActivitiesByQuery(
     sortedDates: sortedDates.filter((d) => filtered[d]?.length),
   };
 }
+
+function useItinerarySearch(
+  activitiesByDate: Record<string, Activity[]>,
+  sortedDates: string[],
+  query: string,
+): { activitiesByDate: Record<string, Activity[]>; sortedDates: string[] } {
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 180);
+
+    return () => clearTimeout(handle);
+  }, [query]);
+
+  return useMemo(
+    () => filterActivitiesByQuery(activitiesByDate, sortedDates, debouncedQuery),
+    [activitiesByDate, sortedDates, debouncedQuery],
+  );
+}
 import { TripItineraryContextSummary } from './TripItineraryContextSummary';
 import { ItineraryViewTabs } from './ItineraryViewTabs';
 import { TripItineraryEmptyState } from './TripItineraryEmptyState';
@@ -101,10 +122,8 @@ export function TripDetailItinerary({
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { activitiesByDate: filteredActivitiesByDate, sortedDates: filteredSortedDates } = useMemo(
-    () => filterActivitiesByQuery(activitiesByDate, sortedDates, searchQuery),
-    [activitiesByDate, sortedDates, searchQuery],
-  );
+  const { activitiesByDate: filteredActivitiesByDate, sortedDates: filteredSortedDates } =
+    useItinerarySearch(activitiesByDate, sortedDates, searchQuery);
 
   useEffect(() => {
     try {
