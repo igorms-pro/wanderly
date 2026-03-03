@@ -6,12 +6,14 @@ import type { Trip } from '@/lib/types/database.types';
 import { supabase } from '@/lib/supabase';
 import { subscribeToTrips, RealtimePayload, unsubscribeFromChannel } from '@/lib/realtime-service';
 import { RealtimeChannel } from '@supabase/supabase-js';
-import { CreateTripModal, TripCard, TripStats, DashboardHero } from '@/features/trips';
+import { CreateTripModal, DashboardHero } from '@/features/trips';
 import { DashboardHeader } from './DashboardHeader';
 import { DashboardSearchFilters } from './DashboardSearchFilters';
 import { DashboardLoadingState } from './DashboardLoadingState';
 import { DashboardErrorState } from './DashboardErrorState';
 import { DashboardEmptyState } from './DashboardEmptyState';
+import { DashboardTripSections } from './DashboardTripSections';
+import { DashboardStatsSummary } from './DashboardStatsSummary';
 import type { StatusFilter, SortOption } from './types';
 
 export default function DashboardPage() {
@@ -188,7 +190,7 @@ export default function DashboardPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {user && <DashboardHero user={user} onCreateTrip={() => setShowCreateTripModal(true)} />}
-        {trips.length > 0 && <TripStats trips={trips} />}
+        <DashboardStatsSummary trips={trips} />
 
         <DashboardSearchFilters
           searchQuery={searchQuery}
@@ -205,20 +207,16 @@ export default function DashboardPage() {
             onCreateTrip={() => setShowCreateTripModal(true)}
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredAndSortedTrips.map((trip) => (
-              <TripCard
-                key={trip.id}
-                trip={trip}
-                memberCount={tripMemberCounts[trip.id] ?? 0}
-                isMenuOpen={openMenuId === trip.id}
-                onToggleMenu={() => setOpenMenuId(openMenuId === trip.id ? null : trip.id)}
-                onClick={() => navigate(`/trip/${trip.id}`)}
-                onArchive={() => handleArchiveTrip(trip.id)}
-                onDelete={() => handleDeleteTrip(trip.id)}
-              />
-            ))}
-          </div>
+          <DashboardTripSections
+            trips={trips}
+            filteredTrips={filteredAndSortedTrips}
+            memberCounts={tripMemberCounts}
+            openMenuId={openMenuId}
+            onToggleMenu={(tripId) => setOpenMenuId(openMenuId === tripId ? null : tripId)}
+            onOpenTrip={(tripId) => navigate(`/trip/${tripId}`)}
+            onArchiveTrip={handleArchiveTrip}
+            onDeleteTrip={handleDeleteTrip}
+          />
         )}
       </main>
 

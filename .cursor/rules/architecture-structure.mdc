@@ -1,0 +1,142 @@
+---
+description: Project architecture, folder structure, and dependency rules for Voyagely
+globs: src/**/*
+alwaysApply: true
+---
+
+---
+description: Project architecture, folder structure, and dependency rules for Voyagely
+alwaysApply: true
+---
+
+# Voyagely – Architecture & Folder Structure
+
+## Folder Structure – Feature-Based
+
+Organize code by **feature domain**, not by file type. Each feature is self-contained with its own components, hooks, services, and types.
+
+```
+src/
+├── features/                    # Feature modules (core product domains)
+│   ├── trips/
+│   │   ├── components/          # Trip-specific components
+│   │   │   ├── TripCard.tsx
+│   │   │   ├── TripSettings.tsx
+│   │   │   └── ConstraintForm.tsx
+│   │   ├── hooks/               # Trip-specific hooks
+│   │   │   ├── useTrip.ts
+│   │   │   └── useTripMembers.ts
+│   │   ├── services/            # Trip API / business logic
+│   │   │   └── tripService.ts
+│   │   ├── types.ts             # Trip-specific types
+│   │   └── index.ts             # Public API of this feature
+│   ├── activities/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── services/
+│   │   ├── types.ts
+│   │   └── index.ts
+│   ├── voting/
+│   ├── scenarios/
+│   ├── chat/
+│   └── auth/
+│
+├── components/                  # SHARED / reusable UI primitives
+│   ├── Button.tsx
+│   ├── Modal.tsx
+│   ├── Toast.tsx
+│   ├── Card.tsx
+│   ├── Skeleton.tsx
+│   ├── ErrorMessage.tsx
+│   └── Layout.tsx
+│
+├── hooks/                       # SHARED hooks (cross-feature)
+│   ├── useAuth.ts
+│   ├── useLanguage.ts
+│   └── useTheme.ts
+│
+├── lib/                         # Core infrastructure
+│   ├── supabase.ts              # Supabase client instance
+│   ├── realtime-service.ts      # Realtime subscription manager
+│   ├── store.ts                 # Zustand global store (keep thin)
+│   ├── errorHandling.ts         # Central error utilities
+│   ├── i18n.ts                  # i18next config
+│   ├── sentry.ts                # Sentry config
+│   ├── analytics.ts             # PostHog config
+│   ├── utils.ts                 # Pure utility functions
+│   ├── types/                   # Shared / database types
+│   │   └── database.types.ts
+│   └── locales/                 # Translation JSON files
+│       ├── en.json
+│       ├── fr.json
+│       └── ...
+│
+├── pages/                       # Route-level page components
+│   ├── LandingPage.tsx          # Assembles features for landing
+│   ├── LoginPage.tsx
+│   ├── SignupPage.tsx
+│   ├── DashboardPage.tsx
+│   └── TripDetailPage.tsx
+│
+├── App.tsx                      # Router + providers
+└── main.tsx                     # Entry point
+```
+
+## Dependency Direction (Critical Rule)
+
+Dependencies must flow **downward** only. Never import upward or sideways between features.
+
+```
+pages → features → components / hooks / lib
+                 ↘ lib (services, types, utils)
+
+components (shared) → lib only (never import from features)
+hooks (shared) → lib only (never import from features)
+lib → nothing above it
+```
+
+**Concrete rules:**
+
+- A **page** can import from any feature, shared component, hook, or lib.
+- A **feature** can import from shared components, shared hooks, and lib. Never from other features directly.
+- A **shared component** can import from lib only. Never from a feature.
+- **lib** modules must not import from features, pages, or shared components.
+
+If two features need to share data, use:
+
+- A **shared hook** in `src/hooks/`.
+- The **Zustand store** in `src/lib/store.ts`.
+- A **React Context** at a higher level (App or page).
+
+## Feature Module API (index.ts)
+
+Each feature folder has an `index.ts` that exports its public API. Other code imports from the feature via this file, not from internal paths.
+
+```typescript
+// features/voting/index.ts
+export { VotingPanel } from './components/VotingPanel';
+export { useVotes } from './hooks/useVotes';
+export type { Vote, VoteResult } from './types';
+
+// In a page:
+import { VotingPanel, useVotes } from '@/features/voting';
+// NOT: import { VotingPanel } from '@/features/voting/components/VotingPanel';
+```
+
+## When to Create a New Feature Module
+
+Create a new `features/xxx/` folder when:
+
+- The domain has its own **data model** (table in Supabase).
+- It has **3+ components** specific to that domain.
+- It has its own **hooks or services**.
+
+Don't create feature folders for trivial utilities or single-component concerns — those go in `components/` or `lib/`.
+
+## Migration Path
+
+The current codebase may not match this structure yet. When touching a file:
+
+- If it belongs to a feature, move it to the correct feature folder.
+- Don't refactor the entire codebase at once — migrate progressively, feature by feature.
+

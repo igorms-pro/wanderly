@@ -1,0 +1,148 @@
+---
+description: Unit, integration, and E2E testing guidelines for Voyagely
+globs: **/*.{test,spec}.{ts,tsx}
+alwaysApply: false
+---
+
+---
+description: Unit, integration, and E2E testing guidelines for Voyagely
+alwaysApply: true
+---
+
+# Voyagely – Testing Guidelines
+
+## Philosophy
+
+- Tests verify **behavior**, not implementation details.
+- Good coverage on **core flows** matters more than 100% coverage everywhere.
+- Tests must be **reliable** — a flaky test is worse than no test.
+- Write the **minimum test** that gives confidence. Don't test React internals or library code.
+
+## Test Types & Tools
+
+| Type          | Tool                     | Where           | What to test                              |
+| ------------- | ------------------------ | --------------- | ----------------------------------------- |
+| **Unit**      | Vitest                   | `*.test.ts`     | Pure functions, utils, hooks, store logic |
+| **Component** | Vitest + Testing Library | `*.test.tsx`    | Component rendering, user interactions    |
+| **E2E**       | Playwright               | `e2e/*.spec.ts` | Full user journeys across pages           |
+
+## Unit & Component Tests (Vitest + Testing Library)
+
+### What to Test
+
+**Always test:**
+
+- Custom hooks that contain business logic (`useTrip`, `useVotes`, `useActivities`).
+- Store functions (Zustand actions): create, update, delete, error cases.
+- Utility functions (`src/lib/utils.ts`, formatters, validators).
+- Constraint engine logic (budget calculations, preference matching).
+
+**Test when non-trivial:**
+
+- Components with conditional rendering logic.
+- Components with complex user interactions (voting, form submission).
+- Error handling paths (API failures, auth errors).
+
+**Skip tests for:**
+
+- Pure presentational components with no logic (a `Card` that just wraps children).
+- Third-party library behavior.
+- CSS / visual styling (use visual regression or manual QA for that).
+
+### Testing Library Best Practices
+
+- Query by what the **user sees**: `getByRole`, `getByText`, `getByLabelText`.
+- Avoid: `getByTestId` (last resort), querying by CSS class or internal state.
+- Simulate **real user behavior**: `userEvent.click()`, `userEvent.type()`, not `fireEvent`.
+- Assert on **visible outcomes**, not internal state.
+
+```tsx
+// GOOD: Tests what user sees
+const user = userEvent.setup();
+render(<VoteButton activity={mockActivity} />);
+
+await user.click(screen.getByRole('button', { name: /vote/i }));
+expect(screen.getByText(/voted/i)).toBeInTheDocument();
+
+// BAD: Tests implementation details
+render(<VoteButton activity={mockActivity} />);
+expect(component.state.hasVoted).toBe(false);
+fireEvent.click(screen.getByTestId('vote-btn'));
+expect(component.state.hasVoted).toBe(true);
+```
+
+### Test Structure
+
+```typescript
+describe('useVotes', () => {
+  describe('when user votes on an activity', () => {
+    it('should add the vote to the list', async () => {
+      // Arrange
+      // Act
+      // Assert
+    });
+
+    it('should handle duplicate vote gracefully', async () => { ... });
+    it('should handle network error', async () => { ... });
+  });
+});
+```
+
+- Use **descriptive `describe` / `it` blocks** that read like sentences.
+- Follow **Arrange / Act / Assert** pattern.
+- One assertion focus per test (multiple `expect` is fine if they test the same behavior).
+
+### Mocking
+
+- Mock **external boundaries** (Supabase client, APIs, timers), not internal modules.
+- Use the mock Supabase client from `src/lib/mock-supabase.ts` for store tests.
+- Prefer **dependency injection** (pass services as params) over module mocking when possible.
+- Reset mocks between tests (`beforeEach(() => vi.clearAllMocks())`).
+
+## E2E Tests (Playwright)
+
+### Critical Journeys to Cover
+
+These flows must always have E2E coverage:
+
+1. **Auth flow**: Sign up → verify → log in → see dashboard.
+2. **Trip creation**: Log in → create trip → see trip in dashboard → open trip detail.
+3. **Activities & voting**: Open trip → add activity → vote on activity → see results.
+4. **Chat**: Open trip → send message → see message appear.
+5. **Constraints**: Create trip → set constraints → verify they persist.
+
+### E2E Best Practices
+
+- **One flow per spec file.** Don't put 10 scenarios in one file.
+- Use **page object pattern** or helper functions for repeated actions (login, create trip).
+- Set **reasonable timeouts** — don't `waitForTimeout(5000)`, use `waitForSelector` or `expect(locator).toBeVisible()`.
+- Run E2E in **CI** on every PR (headless). Run locally in headed mode for debugging.
+- Use **test isolation**: each test should create its own data, not depend on leftover state.
+
+### E2E File Naming
+
+```
+e2e/
+  auth.spec.ts
+  trip-creation.spec.ts
+  activities-votes.spec.ts
+  chat.spec.ts
+  smoke.spec.ts           # Quick sanity check (landing page loads, etc.)
+```
+
+## When Adding or Changing Features
+
+| Change type                   | Required tests                                            |
+| ----------------------------- | --------------------------------------------------------- |
+| New hook with business logic  | Unit tests for the hook                                   |
+| New page / screen             | E2E for the happy path + component tests for key sections |
+| Bug fix                       | Regression test that reproduces the bug                   |
+| Refactor (no behavior change) | Existing tests must still pass. No new tests needed.      |
+| New Supabase interaction      | Store-level tests with mocked client                      |
+
+## Coverage
+
+- Don't chase a number. Aim for **meaningful coverage** of critical paths.
+- CI enforces a baseline (currently 70% thresholds). Don't drop below it.
+- If coverage drops on a PR, check if important logic is untested — not just if the number went down.
+

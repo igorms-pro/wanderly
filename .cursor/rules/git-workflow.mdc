@@ -1,0 +1,146 @@
+---
+description: Git workflow, branching, commit conventions, and PR guidelines for Voyagely
+globs: **/*
+alwaysApply: false
+---
+
+---
+description: Git workflow, branching, commit conventions, and PR guidelines for Voyagely
+alwaysApply: true
+---
+
+# Voyagely – Git Workflow & Conventions
+
+## Branch Strategy
+
+### Protected Branch
+
+- `main` is the **stable branch**. It must always build, pass tests, and be deployable.
+- **Never commit directly to `main`.** Always work on a feature/fix branch and merge via PR (or controlled merge).
+
+### Branch Naming
+
+```
+feature/issue-XX-short-description
+fix/issue-XX-short-description
+docs/short-description
+refactor/short-description
+chore/short-description
+```
+
+Examples:
+
+- `feature/issue-1-database-schema`
+- `fix/issue-5-voting-duplicate`
+- `docs/update-roadmap-phase2`
+- `refactor/trip-detail-split-components`
+
+### Branch Lifecycle
+
+1. Create branch from `main` (or current development branch).
+2. Work on the branch. Commit often with clear messages.
+3. Push to remote. Open PR when ready.
+4. Merge into `main` after review / tests pass.
+5. Delete the branch after merge.
+
+## Commit Messages – Conventional Commits
+
+Use the [Conventional Commits](https://www.conventionalcommits.org/) format:
+
+```
+<type>: <short description>
+
+[optional body with more details]
+```
+
+### Types
+
+| Type       | When to use                                      |
+| ---------- | ------------------------------------------------ |
+| `feat`     | New feature or significant new functionality     |
+| `fix`      | Bug fix                                          |
+| `docs`     | Documentation only (markdown, comments)          |
+| `refactor` | Code restructuring without behavior change       |
+| `test`     | Adding or updating tests                         |
+| `chore`    | Maintenance (deps, config, CI, tooling)          |
+| `style`    | Code style changes (formatting, no logic change) |
+| `perf`     | Performance improvement                          |
+
+### Examples
+
+```
+feat: add constraint engine for trip budget and pace
+
+fix: prevent duplicate votes on same activity
+
+docs: update roadmap to move expenses to Phase 2
+
+refactor: split TripDetailPage into feature sub-components
+
+test: add E2E spec for activity creation flow
+
+chore: update Supabase types after migration 007
+```
+
+### Rules
+
+- Subject line: **imperative mood** ("add", "fix", "update"), not past tense ("added", "fixed").
+- Subject line: **< 72 characters**.
+- Body (optional): explain **why**, not just what. The diff shows the what.
+- Reference issue numbers when relevant: `feat: add voting system (Issue #10)`.
+
+## Pull Request Guidelines
+
+### PR Size
+
+- Aim for **< 400 lines of diff** per PR.
+- If a feature requires more, break it into sequential PRs:
+  - PR 1: Data model + migrations.
+  - PR 2: Hooks + services.
+  - PR 3: UI components.
+  - PR 4: Tests.
+
+### PR Description
+
+Every PR should include:
+
+```markdown
+## Summary
+
+- What this PR does (1-3 bullets).
+
+## Related Issue
+
+- Issue #XX
+
+## Test Plan
+
+- [ ] Unit tests added/updated
+- [ ] E2E tests added/updated (if user-facing)
+- [ ] Manual testing done (describe steps)
+
+## Screenshots (if UI change)
+```
+
+### Before Merging
+
+A PR is ready to merge when:
+
+- [ ] TypeScript compiles with no errors (`pnpm typecheck`).
+- [ ] All tests pass (`pnpm test:run`).
+- [ ] No new linter warnings.
+- [ ] The feature works as described (manual verification).
+- [ ] No secrets or `.env` values committed.
+
+## AI Agent – Git Rules
+
+When an AI agent (Cursor, Copilot, etc.) works on the codebase:
+
+- **Commits**: The agent can create local commits freely.
+  - **Commit often during large changes**: When modifying many or large files over time, commit at logical steps (e.g. after a feature slice or migration). Avoid one huge commit with 1000+ lines — it makes regressions hard to track and bisect.
+  - **Skip commits for trivial edits**: Do not commit for a single-line or very small change; use judgment.
+- **Push**: The agent must **never push** to remote unless the user explicitly says "push" or "ok push".
+- **Force push**: **Never**. Not even if the user asks (warn first).
+- **Amend**: Only if the commit was just created in the current session and hasn't been pushed.
+- **Branch switching**: Ask before switching branches if there are uncommitted changes.
+

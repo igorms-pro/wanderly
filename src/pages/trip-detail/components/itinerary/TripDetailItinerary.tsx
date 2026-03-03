@@ -1,0 +1,160 @@
+import { useState, useEffect } from 'react';
+import type { Activity, TripMember } from '@/lib/types/database.types';
+import { TripItineraryContextSummary } from './TripItineraryContextSummary';
+import { ItineraryViewTabs } from './ItineraryViewTabs';
+import { TripItineraryEmptyState } from './TripItineraryEmptyState';
+import { TripItineraryListView } from './TripItineraryListView';
+import { TripItineraryCalendarView } from './TripItineraryCalendarView';
+import { TripItineraryTimelineView } from './TripItineraryTimelineView';
+
+const ITINERARY_VIEW_KEY = 'tripDetail:itineraryView';
+
+export type ItineraryViewMode = 'list' | 'calendar' | 'timeline';
+
+export interface ConstraintsSummary {
+  pace?: 'relaxed' | 'balanced' | 'packed';
+  has_children?: boolean;
+  preferences?: string;
+}
+
+interface TripDetailItineraryProps {
+  startDate: string;
+  endDate: string;
+  canEdit: boolean;
+  canVote: boolean;
+  activitiesByDate: Record<string, Activity[]>;
+  sortedDates: string[];
+  votingActivityId: string | null;
+  getVoteCounts: (activityId: string) => { upvotes: number; downvotes: number };
+  getUserVote: (activityId: string) => 'up' | 'down' | null;
+  onVote: (activityId: string, choice: 'up' | 'down') => void;
+  onAddActivity: () => void;
+  t: (key: string) => string;
+  totalSpentCents?: number;
+  budgetCents?: number | null;
+  currency?: string;
+  constraintsSummary?: ConstraintsSummary | null;
+  membersCount?: number;
+  activityParticipantsMap?: Record<string, string[]>;
+  tripMembers?: TripMember[];
+  memberProfiles?: Record<string, { display_name: string | null; avatar_url: string | null }>;
+}
+
+export function TripDetailItinerary({
+  startDate,
+  endDate,
+  canEdit,
+  canVote,
+  activitiesByDate,
+  sortedDates,
+  votingActivityId,
+  getVoteCounts,
+  getUserVote,
+  onVote,
+  onAddActivity,
+  t,
+  totalSpentCents = 0,
+  budgetCents = null,
+  currency = 'EUR',
+  constraintsSummary,
+  membersCount = 0,
+  activityParticipantsMap = {},
+  tripMembers = [],
+  memberProfiles = {},
+}: TripDetailItineraryProps) {
+  const [viewMode, setViewMode] = useState<ItineraryViewMode>(() => {
+    try {
+      const s = sessionStorage.getItem(ITINERARY_VIEW_KEY);
+      if (s === 'list' || s === 'calendar' || s === 'timeline') return s;
+    } catch {
+      /* ignore */
+    }
+    return 'list';
+  });
+
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(ITINERARY_VIEW_KEY, viewMode);
+    } catch {
+      /* ignore */
+    }
+  }, [viewMode]);
+
+  return (
+    <div className="space-y-6">
+      <TripItineraryContextSummary
+        t={t}
+        totalSpentCents={totalSpentCents}
+        budgetCents={budgetCents}
+        currency={currency}
+        constraintsSummary={constraintsSummary}
+        membersCount={membersCount}
+      />
+
+      <ItineraryViewTabs
+        t={t}
+        canEdit={canEdit}
+        viewMode={viewMode}
+        onChangeViewMode={(mode) => {
+          setViewMode(mode);
+          setSelectedDate(null);
+        }}
+        onAddActivity={onAddActivity}
+      />
+
+      {sortedDates.length === 0 ? (
+        <TripItineraryEmptyState t={t} canEdit={canEdit} onAddActivity={onAddActivity} />
+      ) : viewMode === 'list' ? (
+        <TripItineraryListView
+          sortedDates={sortedDates}
+          activitiesByDate={activitiesByDate}
+          canVote={canVote}
+          votingActivityId={votingActivityId}
+          getVoteCounts={getVoteCounts}
+          getUserVote={getUserVote}
+          onVote={onVote}
+          t={t}
+          currency={currency}
+          membersCount={membersCount}
+          activityParticipantsMap={activityParticipantsMap}
+          tripMembers={tripMembers}
+          memberProfiles={memberProfiles}
+          constraintsSummary={constraintsSummary}
+        />
+      ) : viewMode === 'calendar' ? (
+        <TripItineraryCalendarView
+          startDate={startDate}
+          endDate={endDate}
+          activitiesByDate={activitiesByDate}
+          selectedDate={selectedDate}
+          onSelectDate={setSelectedDate}
+          canVote={canVote}
+          votingActivityId={votingActivityId}
+          getVoteCounts={getVoteCounts}
+          getUserVote={getUserVote}
+          onVote={onVote}
+          t={t}
+          currency={currency}
+          membersCount={membersCount}
+          activityParticipantsMap={activityParticipantsMap}
+          tripMembers={tripMembers}
+          memberProfiles={memberProfiles}
+        />
+      ) : (
+        <TripItineraryTimelineView
+          sortedDates={sortedDates}
+          activitiesByDate={activitiesByDate}
+          canVote={canVote}
+          votingActivityId={votingActivityId}
+          getVoteCounts={getVoteCounts}
+          getUserVote={getUserVote}
+          onVote={onVote}
+          t={t}
+          currency={currency}
+        />
+      )}
+    </div>
+  );
+}

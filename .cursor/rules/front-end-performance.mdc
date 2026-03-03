@@ -1,0 +1,133 @@
+---
+description: Front-end performance guidelines for Voyagely – rendering, loading, bundle
+globs: src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+---
+description: Front-end performance guidelines for Voyagely – rendering, loading, bundle
+alwaysApply: true
+---
+
+# Voyagely – Front-End Performance Guidelines
+
+## Core Web Vitals Targets
+
+| Metric                             | Target  | What it measures                                |
+| ---------------------------------- | ------- | ----------------------------------------------- |
+| **LCP** (Largest Contentful Paint) | < 2.5s  | How fast the main content appears               |
+| **FID** (First Input Delay)        | < 100ms | How fast the page responds to first interaction |
+| **CLS** (Cumulative Layout Shift)  | < 0.1   | How stable the layout is during load            |
+
+Measure with Lighthouse, Chrome DevTools, or PostHog performance monitoring.
+
+## Route-Level Code Splitting
+
+Every page-level component must be **lazy-loaded** to keep the initial bundle small:
+
+```tsx
+// In App.tsx or router config
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const TripDetailPage = lazy(() => import('./pages/TripDetailPage'));
+
+<Suspense fallback={<PageSkeleton />}>
+  <Routes>
+    <Route path="/dashboard" element={<DashboardPage />} />
+    <Route path="/trip/:id" element={<TripDetailPage />} />
+  </Routes>
+</Suspense>;
+```
+
+- Use `React.lazy` + `Suspense` for all routes.
+- The fallback should be a meaningful skeleton, not a blank page.
+
+## List Virtualization
+
+If a list can grow beyond **~50 items**, virtualize it:
+
+- Activity lists (a trip could have many activities).
+- Chat messages (can grow to hundreds/thousands).
+- Member lists in large groups.
+
+Use `react-window`, `@tanstack/react-virtual`, or equivalent. Never render 500+ DOM nodes.
+
+## Debouncing & Throttling
+
+- **Search / filter inputs**: debounce at **300ms** minimum.
+- **Scroll handlers**: throttle to **~16ms** (requestAnimationFrame) or use IntersectionObserver.
+- **Vote actions**: debounce to prevent double-voting on rapid clicks.
+- **Window resize**: throttle to **200ms**.
+
+```tsx
+// GOOD
+const debouncedSearch = useMemo(
+  () => debounce((query: string) => setSearchTerm(query), 300),
+  []
+);
+
+// BAD: Fires on every keystroke
+onChange={(e) => setSearchTerm(e.target.value)}
+```
+
+## Images & Assets
+
+- Use **WebP** format when possible (smaller than PNG/JPEG).
+- Always set explicit **width and height** attributes (prevents CLS).
+- Use native `loading="lazy"` for images below the fold.
+- For user avatars: small thumbnails (< 50KB), with fallback initials component.
+
+## Memoization Strategy
+
+### When to Use
+
+| Tool          | Use when...                                                                            | Don't use when...                                               |
+| ------------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `useMemo`     | Expensive computation (sorting 100+ items, complex filtering, building context values) | Simple variable assignment, cheap operations                    |
+| `useCallback` | Callback is passed to a `React.memo`-wrapped child                                     | Callback is used only in the same component                     |
+| `React.memo`  | Component re-renders often with same props, and rendering is expensive                 | Component is cheap to render, or props change every time anyway |
+
+### Profile First, Optimize Second
+
+1. Use **React DevTools Profiler** to identify which components re-render unnecessarily.
+2. Use **Chrome DevTools Performance** tab to find bottlenecks.
+3. Only then apply memoization to the specific problem areas.
+
+Random memoization everywhere adds complexity without measurable benefit.
+
+## Bundle Size Awareness
+
+- After adding a new dependency, check the bundle impact:
+  - Run `npx vite-bundle-visualizer` or check build output.
+  - If a dependency adds **> 50KB** (gzipped), evaluate alternatives or lazy-load it.
+- Prefer lightweight libraries:
+  - `date-fns` over `moment` (tree-shakable).
+  - `clsx` over `classnames` (smaller).
+  - Native `Intl` APIs over heavy formatting libraries when possible.
+- Keep an eye on the Vite build output size. Set a budget:
+  - Initial JS bundle: target **< 200KB** gzipped.
+  - Individual lazy chunks: target **< 100KB** each.
+
+## Rendering Optimization
+
+- Avoid **unnecessary re-renders**:
+  - Don't create new objects/arrays/functions inline in JSX (see react-patterns rule).
+  - Lift state up only as far as needed — not everything needs to be global.
+  - Use Zustand **selectors** to subscribe to only the slice of state you need.
+
+```tsx
+// GOOD: Only re-renders when tripName changes
+const tripName = useStore((state) => state.currentTrip?.name);
+
+// BAD: Re-renders on ANY store change
+const store = useStore();
+const tripName = store.currentTrip?.name;
+```
+
+- For forms: consider **uncontrolled inputs** with refs for large forms, or use a form library (`react-hook-form`) to minimize re-renders.
+
+## Animation & Transitions
+
+- Use **CSS transitions / animations** instead of JS-driven animations when possible.
+- For complex animations: use `framer-motion` or CSS keyframes, not `setInterval`.
+- Always respect `prefers-reduced-motion` media query for accessibility.
+

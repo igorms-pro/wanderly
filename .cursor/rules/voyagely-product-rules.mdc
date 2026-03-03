@@ -1,0 +1,119 @@
+---
+description: Product-specific rules, invariants, and strategic constraints for Voyagely
+globs: **/*
+alwaysApply: false
+---
+
+---
+description: Product-specific rules, invariants, and strategic constraints for Voyagely
+alwaysApply: true
+---
+
+# Voyagely – Product Rules & Invariants
+
+## What Voyagely IS
+
+**Voyagely is a Group Decision & Planning Platform for Travel.**
+
+The core product loop:
+
+1. A group creates a trip and defines **constraints** (budget, children, pace, preferences, must-dos).
+2. **Humans** propose activities ("I want to see whales Thursday at 6pm") and complete day-by-day scenarios.
+3. **AI** can also generate 2-3 day-by-day scenarios based on the group's constraints (optional, complements human proposals).
+4. The **group votes** on individual activities and complete scenarios (everyone votes, regardless of role).
+5. The group arrives at a **decided itinerary** through democratic voting.
+6. After finalization, **admins** (owner/editor/moderator) can adjust the itinerary; members can vote on changes.
+
+## What Voyagely is NOT
+
+- **Not a booking engine.** Users plan here, book elsewhere. No flight/hotel purchasing.
+- **Not a solo trip planner.** Every feature is designed group-first (solo works, but isn't the primary use case).
+- **Not a social network.** The goal is to plan and execute trips, not to post content or build a following.
+- **Not a generic collaboration tool.** It's purpose-built for travel planning.
+
+## MVP Phase (Phase 1) – Planning Only
+
+The MVP focuses exclusively on the **planning & decision core**:
+
+- Trip creation + constraints.
+- Human-created activities and scenarios.
+- AI-generated scenarios (constraint-aware).
+- Structured voting on activities and scenarios.
+- Real-time chat and collaboration.
+
+**Explicitly NOT in MVP:**
+
+- Tricount-like expense tracking (→ Phase 2).
+- Booking integrations.
+- Offline / PWA (→ Phase 2).
+- Team / B2B features (→ Phase 3).
+
+## Phase 2+ – Expenses & Road-Ready
+
+- Tricount-like group expense tracking (who paid, who owes whom, settle-up).
+- Advanced expenses (categories, multi-currency, exports).
+- Offline PWA for on-the-road usage.
+- Templates and trip sharing.
+
+## Roles & Permissions
+
+| Role          | During planning                                     | After itinerary finalized         |
+| ------------- | --------------------------------------------------- | --------------------------------- |
+| **owner**     | Full access (CRUD all, manage members)              | Full access                       |
+| **editor**    | CRUD activities/scenarios + vote                    | Add/edit/delete activities + vote |
+| **moderator** | CRUD activities/scenarios + vote + manage conflicts | Add/edit/delete activities + vote |
+| **viewer**    | View + propose activities/scenarios + vote          | View + vote only                  |
+
+**Key invariant**: **Everyone can always vote.** No role restriction on voting.
+
+## Constraints System
+
+Constraints are the foundation of intelligent planning. They are **optional but strongly recommended** (the AI works better with constraints).
+
+| Constraint  | Type                | Example                                      |
+| ----------- | ------------------- | -------------------------------------------- |
+| Budget      | Per person or total | €500/person for 5 days                       |
+| Children    | Boolean flag        | Group has kids under 12                      |
+| Pace        | Enum                | Chill / Normal / Intense                     |
+| Preferences | Multi-select        | Nature, culture, nightlife, beach, adventure |
+| Must-dos    | Free text list      | "See whales", "Visit old town"               |
+| No-gos      | Free text list      | "No hiking", "No early mornings"             |
+
+## AI Integration Rules
+
+- AI scenarios are **options**, not decisions. The group always has the final say via voting.
+- AI-generated content must be clearly **labeled as AI-generated** in the UI.
+- AI must respect all constraints when generating scenarios.
+- If AI generation fails, the app works perfectly fine with human-only proposals.
+
+## Documentation Alignment
+
+These documents are **sources of truth** and must stay consistent with each other:
+
+| Document                          | What it defines                                 |
+| --------------------------------- | ----------------------------------------------- |
+| `docs/EXECUTIVE_SUMMARY.md`       | Product vision, market, business model          |
+| `docs/roadmap/product-roadmap.md` | Phased feature plan (what, when)                |
+| `docs/issues/ISSUES.md`           | Implementation tasks, priorities, critical path |
+| `docs/design/design-system.md`    | Visual & interaction guidelines                 |
+| `docs/design/screen-system.md`    | Screen architecture & navigation                |
+
+When changing product strategy (e.g., moving a feature between phases):
+
+- Update **all relevant docs together** — don't leave them contradicting each other.
+
+## Business Model Context
+
+- **Phase 1**: 100% free. Goal is to validate usage and engagement, not revenue.
+- **Future**: Freemium (core free, power features paid), inspired by Tricount's model.
+- No pricing decisions until post-MVP usage data is collected.
+
+## Development Priorities
+
+When deciding what to work on next, always follow:
+
+1. The **critical path** defined in `docs/issues/ISSUES.md`.
+2. Foundation issues (DB, i18n, architecture) before screen-specific features.
+3. Planning features before expenses.
+4. Core user journeys before edge cases.
+

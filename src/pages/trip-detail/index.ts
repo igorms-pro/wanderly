@@ -1,6 +1,6 @@
-export { useTripDetail } from './useTripDetail';
-export { TripDetailHeader } from './TripDetailHeader';
-export { TripDetailHero } from './TripDetailHero';
-export type { EditFormState } from './TripDetailHero';
-export { TripDetailTabs } from './TripDetailTabs';
-export { TripDetailItinerary } from './TripDetailItinerary';
+export { useTripDetail } from './hooks/useTripDetail';
+export { TripDetailHeader } from './components/layout/TripDetailHeader';
+export { TripDetailHero } from './components/layout/TripDetailHero';
+export type { EditFormState } from './components/layout/TripDetailHero';
+export { TripDetailTabs } from './components/layout/TripDetailTabs';
+export { TripDetailItinerary } from './components/itinerary/TripDetailItinerary';
