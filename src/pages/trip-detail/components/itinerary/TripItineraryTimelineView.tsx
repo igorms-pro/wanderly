@@ -34,7 +34,7 @@ export function TripItineraryTimelineView({
   memberProfiles,
 }: TripItineraryTimelineViewProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm dark:shadow-lg p-6 sm:p-8">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm dark:shadow-lg pl-3 pt-6 pr-6 pb-6 sm:p-8">
       <TripTimeline
         sortedDates={sortedDates}
         activitiesByDate={activitiesByDate}

@@ -40,7 +40,7 @@ export function TripTimeline({
     <div className="relative">
       {/* Fil vertical */}
       <div
-        className="absolute left-5 sm:left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-300 via-blue-400 to-blue-300 dark:from-blue-600 dark:via-blue-500 dark:to-blue-600 rounded-full"
+        className="absolute left-4 sm:left-7 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-300 via-blue-400 to-blue-300 dark:from-blue-600 dark:via-blue-500 dark:to-blue-600 rounded-full"
         aria-hidden
       />
 

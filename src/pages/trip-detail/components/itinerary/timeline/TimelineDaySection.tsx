@@ -43,11 +43,11 @@ export function TimelineDaySection({
   );
 
   return (
-    <section key={date} className="relative pl-12 sm:pl-20 pb-8 last:pb-0">
+    <section key={date} className="relative pl-10 sm:pl-18 pb-8 last:pb-0">
       {/* Nœud jour */}
       <div className="flex items-center gap-3 mb-4">
         <div
-          className="absolute left-3 sm:left-6 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-blue-500 dark:bg-blue-400 ring-4 ring-white dark:ring-gray-800 z-10"
+          className="absolute left-2.5 sm:left-5 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-blue-500 dark:bg-blue-400 ring-4 ring-white dark:ring-gray-800 z-10"
           aria-hidden
         />
         <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">
