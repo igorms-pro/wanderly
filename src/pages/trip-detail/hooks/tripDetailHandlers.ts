@@ -1,4 +1,4 @@
-import type { EditFormState } from './TripDetailHero';
+import type { EditFormState } from '@/pages/trip-detail/components/layout/TripDetailHero';
 
 export interface UpdateTripParams {
   tripId: string | undefined;

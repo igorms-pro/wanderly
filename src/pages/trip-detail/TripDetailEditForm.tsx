@@ -1,5 +1,5 @@
 import { Coffee, Zap, Gauge, DollarSign, Baby, Save, X } from 'lucide-react';
-import type { EditFormState } from './TripDetailHero';
+import type { EditFormState } from './components/layout/TripDetailHero';
 
 const PACE_ICONS = { relaxed: Coffee, balanced: Gauge, packed: Zap };
 const PACE_OPTIONS: ('relaxed' | 'balanced' | 'packed')[] = ['relaxed', 'balanced', 'packed'];

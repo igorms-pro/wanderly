@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import type { Activity, TripMember } from '@/lib/types/database.types';
-import type { MemberProfile } from './ItineraryActivityTypes';
+import type { MemberProfile } from '@/pages/trip-detail/ItineraryActivityTypes';
 import { ItineraryActivityItem } from './ItineraryActivityItem';
 
 interface ItineraryDayBlockProps {

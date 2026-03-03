@@ -1,5 +1,5 @@
 import { format, parseISO } from 'date-fns';
-import { getWeeksForTrip, WEEKDAY_LABELS } from './itinerary-utils';
+import { getWeeksForTrip, WEEKDAY_LABELS } from '@/pages/trip-detail/hooks/itinerary-utils';
 
 interface TripWeekGridProps {
   startDate: string;

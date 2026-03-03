@@ -2,7 +2,7 @@ import { Edit, Trash2 } from 'lucide-react';
 import type { Trip } from '@/lib/types/database.types';
 import type { TripMember } from '@/lib/types/database.types';
 import { TripDetailHeroView } from './TripDetailHeroView';
-import { TripDetailEditForm } from './TripDetailEditForm';
+import { TripDetailEditForm } from '@/pages/trip-detail/TripDetailEditForm';
 
 export type EditFormState = {
   title: string;
