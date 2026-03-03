@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useStore } from '@/lib/store';
-import type { Activity, Vote, Trip } from '@/lib/types/database.types';
+import { useStore } from '../../../lib/store';
+import type { Activity, Vote, Trip } from '../../../lib/types/database.types';
 import {
   subscribeToTrip,
   subscribeToMessages,
@@ -9,7 +9,7 @@ import {
   subscribeToVotes,
   RealtimePayload,
   unsubscribeFromChannel,
-} from '@/lib/realtime-service';
+} from '../../../lib/realtime-service';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
 function mapActivityRow(row: Record<string, unknown>): Activity {

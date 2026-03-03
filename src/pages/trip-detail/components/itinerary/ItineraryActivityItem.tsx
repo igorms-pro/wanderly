@@ -12,8 +12,8 @@ import {
   Users,
   FileText,
 } from 'lucide-react';
-import type { Activity, TripMember } from '@/lib/types/database.types';
-import type { MemberProfile } from '@/pages/trip-detail/ItineraryActivityTypes';
+import type { Activity, TripMember } from '../../../../lib/types/database.types';
+import type { MemberProfile } from '../../ItineraryActivityTypes';
 import {
   formatActivityCost,
   formatTime,
@@ -21,7 +21,7 @@ import {
   getGoogleMapsUrl,
   getInitial,
   getTransportLabel,
-} from '@/pages/trip-detail/ItineraryActivityTypes';
+} from '../../ItineraryActivityTypes';
 
 interface ItineraryActivityItemProps {
   activity: Activity;
