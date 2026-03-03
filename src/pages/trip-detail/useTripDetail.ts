@@ -10,17 +10,13 @@ import { useTripDetailRealtime } from './useTripDetailRealtime';
 import { loadTripDataForDetail } from './loadTripDataForDetail';
 import { updateTripHandler, deleteTripHandler } from './tripDetailHandlers';
 
-export function useTripDetail() {
-  const { t } = useTranslation();
-  const { tripId } = useParams<{ tripId: string }>();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTabState] = useState<'itinerary' | 'chat' | 'weather' | 'explore'>(
-    'itinerary',
-  );
+type TripDetailTab = 'itinerary' | 'chat' | 'weather' | 'explore';
+
+function useTripDetailUiState(tripId: string | undefined) {
+  const [activeTab, setActiveTabState] = useState<TripDetailTab>('itinerary');
+
   const setActiveTab = useCallback(
-    (tab: 'itinerary' | 'chat' | 'weather' | 'explore') => {
+    (tab: TripDetailTab) => {
       setActiveTabState(tab);
       if (tripId) {
         try {
@@ -32,6 +28,16 @@ export function useTripDetail() {
     },
     [tripId],
   );
+
+  return { activeTab, setActiveTab, setActiveTabState };
+}
+
+function useTripDetailData() {
+  const { t } = useTranslation();
+  const { tripId } = useParams<{ tripId: string }>();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [tripMembers, setTripMembers] = useState<TripMember[]>([]);
   const [activityParticipantsMap, setActivityParticipantsMap] = useState<Record<string, string[]>>(
     {},
@@ -52,7 +58,6 @@ export function useTripDetail() {
     has_children: false,
   });
   const [isDeleting, setIsDeleting] = useState(false);
-  const [votingActivityId, setVotingActivityId] = useState<string | null>(null);
 
   useTripDetailRealtime(tripId ?? undefined);
   const { addToast } = useToast();
@@ -61,17 +66,123 @@ export function useTripDetail() {
   const setCurrentTrip = useStore((state) => state.setCurrentTrip);
   const updateTrip = useStore((state) => state.updateTrip);
   const deleteTrip = useStore((state) => state.deleteTrip);
-  const activities = useStore((state) => state.activities);
-  const loadActivities = useStore((state) => state.loadActivities);
-  const addActivity = useStore((state) => state.addActivity);
-  const updateActivityInState = useStore((state) => state.updateActivityInState);
-  const setActivities = useStore((state) => state.setActivities);
-  const votes = useStore((state) => state.votes);
-  const setVotes = useStore((state) => state.setVotes);
-  const loadVotes = useStore((state) => state.loadVotes);
-  const createOrUpdateVote = useStore((state) => state.createOrUpdateVote);
   const showAddActivityModal = useStore((state) => state.showAddActivityModal);
   const setShowAddActivityModal = useStore((state) => state.setShowAddActivityModal);
+
+  const { activeTab, setActiveTab, setActiveTabState } = useTripDetailUiState(tripId);
+
+  const loadTripData = useCallback(async () => {
+    if (!tripId || !user) return;
+    await loadTripDataForDetail({
+      tripId,
+      setLoading,
+      setError,
+      setCurrentTrip,
+      setEditForm,
+      setTripMembers,
+      setActivityParticipantsMap,
+      setMemberProfiles,
+      setActiveTabState,
+      navigate,
+      t,
+      getState: useStore.getState,
+    });
+  }, [tripId, user, navigate, setCurrentTrip, t, setActiveTabState]);
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    if (!tripId) {
+      navigate('/dashboard');
+      return;
+    }
+    loadTripData();
+  }, [tripId, user, navigate, loadTripData]);
+
+  const handleUpdateTrip = useCallback(
+    () =>
+      updateTripHandler({
+        tripId,
+        currentTrip,
+        editForm,
+        addToast,
+        t,
+        updateTrip,
+        setIsEditing,
+        loadTripData,
+      }),
+    [tripId, currentTrip, editForm, addToast, t, updateTrip, setIsEditing, loadTripData],
+  );
+
+  const handleDeleteTrip = useCallback(
+    () =>
+      deleteTripHandler({
+        tripId,
+        currentTrip,
+        addToast,
+        t,
+        deleteTrip,
+        navigate,
+        setIsDeleting,
+      }),
+    [tripId, currentTrip, addToast, t, deleteTrip, navigate, setIsDeleting],
+  );
+
+  const getUserRole = (): 'owner' | 'editor' | 'viewer' | 'moderator' | null => {
+    if (!user) return null;
+    const member = tripMembers.find((m) => m.user_id === user.id);
+    return member?.role || null;
+  };
+
+  const canEdit = (): boolean => {
+    if (!user || !currentTrip) return false;
+    const role = getUserRole();
+    return role === 'owner' || role === 'editor' || user.id === currentTrip.owner_id;
+  };
+
+  const canDelete = (): boolean => {
+    if (!user || !currentTrip) return false;
+    return user.id === currentTrip.owner_id;
+  };
+
+  return {
+    t,
+    user,
+    tripId,
+    navigate,
+    loading,
+    error,
+    currentTrip,
+    tripMembers,
+    activityParticipantsMap,
+    memberProfiles,
+    isEditing,
+    setIsEditing,
+    editForm,
+    setEditForm,
+    isDeleting,
+    loadTripData,
+    handleUpdateTrip,
+    handleDeleteTrip,
+    getUserRole,
+    canEdit,
+    canDelete,
+    activeTab,
+    setActiveTab,
+    showAddActivityModal,
+    setShowAddActivityModal,
+  };
+}
+
+function useTripDetailActivities(t: (key: string) => string) {
+  const user = useStore((state) => state.user);
+  const activities = useStore((state) => state.activities);
+  const votes = useStore((state) => state.votes);
+  const setVotes = useStore((state) => state.setVotes);
+  const createOrUpdateVote = useStore((state) => state.createOrUpdateVote);
+  const [votingActivityId, setVotingActivityId] = useState<string | null>(null);
 
   const activitiesByDate = useMemo(
     () =>
@@ -154,113 +265,22 @@ export function useTripDetail() {
     [user, votes, setVotes, createOrUpdateVote, t, getUserVote],
   );
 
-  const loadTripData = useCallback(async () => {
-    if (!tripId || !user) return;
-    await loadTripDataForDetail({
-      tripId,
-      setLoading,
-      setError,
-      setCurrentTrip,
-      setEditForm,
-      setTripMembers,
-      setActivityParticipantsMap,
-      setMemberProfiles,
-      setActiveTabState,
-      navigate,
-      t,
-      getState: useStore.getState,
-    });
-  }, [tripId, user, navigate, setCurrentTrip, t]);
-
-  useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    if (!tripId) {
-      navigate('/dashboard');
-      return;
-    }
-    loadTripData();
-  }, [tripId, user, navigate, loadTripData]);
-
-  const handleUpdateTrip = useCallback(
-    () =>
-      updateTripHandler({
-        tripId,
-        currentTrip,
-        editForm,
-        addToast,
-        t,
-        updateTrip,
-        setIsEditing,
-        loadTripData,
-      }),
-    [tripId, currentTrip, editForm, addToast, t, updateTrip, setIsEditing, loadTripData],
-  );
-
-  const handleDeleteTrip = useCallback(
-    () =>
-      deleteTripHandler({
-        tripId,
-        currentTrip,
-        addToast,
-        t,
-        deleteTrip,
-        navigate,
-        setIsDeleting,
-      }),
-    [tripId, currentTrip, addToast, t, deleteTrip, navigate, setIsDeleting],
-  );
-
-  const getUserRole = (): 'owner' | 'editor' | 'viewer' | 'moderator' | null => {
-    if (!user) return null;
-    const member = tripMembers.find((m) => m.user_id === user.id);
-    return member?.role || null;
-  };
-
-  const canEdit = (): boolean => {
-    if (!user || !currentTrip) return false;
-    const role = getUserRole();
-    return role === 'owner' || role === 'editor' || user.id === currentTrip.owner_id;
-  };
-
-  const canDelete = (): boolean => {
-    if (!user || !currentTrip) return false;
-    return user.id === currentTrip.owner_id;
-  };
-
   return {
-    t,
-    user,
-    tripId,
-    navigate,
-    loading,
-    error,
-    currentTrip,
-    tripMembers,
-    activeTab,
-    setActiveTab,
-    isEditing,
-    setIsEditing,
-    editForm,
-    setEditForm,
-    isDeleting,
+    activitiesByDate,
+    sortedDates,
     votingActivityId,
-    loadTripData,
-    handleUpdateTrip,
-    handleDeleteTrip,
-    getUserRole,
-    canEdit,
-    canDelete,
     handleVote,
     getVoteCounts,
     getUserVote,
-    activitiesByDate,
-    sortedDates,
-    activityParticipantsMap,
-    memberProfiles,
-    showAddActivityModal,
-    setShowAddActivityModal,
+  };
+}
+
+export function useTripDetail() {
+  const data = useTripDetailData();
+  const activities = useTripDetailActivities(data.t);
+
+  return {
+    ...data,
+    ...activities,
   };
 }
