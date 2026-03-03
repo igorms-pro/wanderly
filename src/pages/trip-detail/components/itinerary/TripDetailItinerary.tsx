@@ -1,5 +1,31 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { Activity, TripMember } from '@/lib/types/database.types';
+
+function filterActivitiesByQuery(
+  activitiesByDate: Record<string, Activity[]>,
+  sortedDates: string[],
+  query: string,
+): { activitiesByDate: Record<string, Activity[]>; sortedDates: string[] } {
+  const q = query.trim().toLowerCase();
+  if (!q) {
+    return { activitiesByDate, sortedDates };
+  }
+  const filtered: Record<string, Activity[]> = {};
+  for (const date of sortedDates) {
+    const activities = activitiesByDate[date] ?? [];
+    const match = activities.filter(
+      (a) =>
+        (a.title && a.title.toLowerCase().includes(q)) ||
+        (a.place_name && a.place_name.toLowerCase().includes(q)) ||
+        (a.description && a.description.toLowerCase().includes(q)),
+    );
+    if (match.length > 0) filtered[date] = match;
+  }
+  return {
+    activitiesByDate: filtered,
+    sortedDates: sortedDates.filter((d) => filtered[d]?.length),
+  };
+}
 import { TripItineraryContextSummary } from './TripItineraryContextSummary';
 import { ItineraryViewTabs } from './ItineraryViewTabs';
 import { TripItineraryEmptyState } from './TripItineraryEmptyState';
@@ -73,6 +99,12 @@ export function TripDetailItinerary({
   });
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const { activitiesByDate: filteredActivitiesByDate, sortedDates: filteredSortedDates } = useMemo(
+    () => filterActivitiesByQuery(activitiesByDate, sortedDates, searchQuery),
+    [activitiesByDate, sortedDates, searchQuery],
+  );
 
   useEffect(() => {
     try {
@@ -102,14 +134,16 @@ export function TripDetailItinerary({
           setSelectedDate(null);
         }}
         onAddActivity={onAddActivity}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
       />
 
       {sortedDates.length === 0 ? (
         <TripItineraryEmptyState t={t} canEdit={canEdit} onAddActivity={onAddActivity} />
       ) : viewMode === 'list' ? (
         <TripItineraryListView
-          sortedDates={sortedDates}
-          activitiesByDate={activitiesByDate}
+          sortedDates={searchQuery.trim() ? filteredSortedDates : sortedDates}
+          activitiesByDate={searchQuery.trim() ? filteredActivitiesByDate : activitiesByDate}
           canVote={canVote}
           votingActivityId={votingActivityId}
           getVoteCounts={getVoteCounts}
@@ -122,12 +156,13 @@ export function TripDetailItinerary({
           tripMembers={tripMembers}
           memberProfiles={memberProfiles}
           constraintsSummary={constraintsSummary}
+          searchQuery={searchQuery}
         />
       ) : viewMode === 'calendar' ? (
         <TripItineraryCalendarView
           startDate={startDate}
           endDate={endDate}
-          activitiesByDate={activitiesByDate}
+          activitiesByDate={searchQuery.trim() ? filteredActivitiesByDate : activitiesByDate}
           selectedDate={selectedDate}
           onSelectDate={setSelectedDate}
           canVote={canVote}
@@ -144,8 +179,8 @@ export function TripDetailItinerary({
         />
       ) : (
         <TripItineraryTimelineView
-          sortedDates={sortedDates}
-          activitiesByDate={activitiesByDate}
+          sortedDates={searchQuery.trim() ? filteredSortedDates : sortedDates}
+          activitiesByDate={searchQuery.trim() ? filteredActivitiesByDate : activitiesByDate}
           canVote={canVote}
           votingActivityId={votingActivityId}
           getVoteCounts={getVoteCounts}
