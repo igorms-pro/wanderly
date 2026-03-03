@@ -1,27 +1,10 @@
 import { useState, useCallback, KeyboardEvent } from 'react';
-import {
-  ThumbsUp,
-  ThumbsDown,
-  Clock,
-  DollarSign,
-  Sparkles,
-  ChevronDown,
-  ChevronUp,
-  Car,
-  MapPin,
-  Users,
-  FileText,
-} from 'lucide-react';
+import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import type { Activity, TripMember } from '../../../../lib/types/database.types';
 import type { MemberProfile } from '../../ItineraryActivityTypes';
-import {
-  formatActivityCost,
-  formatTime,
-  getDisplayName,
-  getGoogleMapsUrl,
-  getInitial,
-  getTransportLabel,
-} from '../../ItineraryActivityTypes';
+import { formatTime } from '../../ItineraryActivityTypes';
+import { ItineraryActivityHeaderRow } from './ItineraryActivityHeaderRow';
+import { ItineraryActivityDetailsSection } from './ItineraryActivityDetailsSection';
 
 interface ItineraryActivityItemProps {
   activity: Activity;
