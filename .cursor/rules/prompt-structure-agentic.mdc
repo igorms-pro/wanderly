@@ -1,0 +1,48 @@
+description: Recommended structure for complex, agentic prompts
+alwaysApply: true
+---
+
+# Prompt structure – Agentic coding
+
+When the user describes a **non-trivial** task (new feature, significant refactor, complex bug), align with this prompt structure. If the user doesn’t follow it yet, gently steer the conversation in this direction **without being heavy-handed**.
+
+## Recommended skeleton for the user
+
+Offer this skeleton (in English) when the user asks for help structuring prompts, or when the task is clearly under-specified / confusing:
+
+```markdown
+## Task
+[One sentence: what the user should be able to do]
+
+## Context
+- Files involved: @FileName.tsx @FileName2.ts
+- Current behavior: [what happens today]
+- API / contracts (if relevant): [paste the TS type or REST endpoint involved]
+
+## Do not touch (if needed)
+- [files or domains that are out of scope]
+
+## Acceptance criteria
+- [ ] The user can [action 1]
+- [ ] On API error, the message "[text]" is displayed
+- [ ] The component has an RTL test covering happy path + error
+
+## Plan required BEFORE coding
+Give me:
+1. The files to create / modify
+2. The proposed technical approach
+3. The identified risks
+Wait for my approval before writing code.
+```
+
+## Expected agent behavior
+
+- **Plan first**: if the task is complex or spans multiple files, produce a plan (files, approach, risks) before writing code, especially when the user includes a “Plan required BEFORE coding” section.
+- **Clear scope**: respect `Files involved` and `Do not touch`. If a change needs to go out-of-scope, call it out and ask for explicit approval.
+- **Acceptance criteria**:
+  - Use the acceptance criteria checklist as the **source of truth** to validate the solution at the end.
+  - If a criterion is not reasonably achievable (e.g. no existing test infra), explain why and propose a concrete path forward.
+- **Tests**:
+  - When criteria mention tests (e.g. “RTL test covering happy path + error”), propose or add the matching test instead of ignoring it.
+- **No over-engineering**:
+  - For small tasks (simple rename, tiny fix), don’t force the full skeleton; stay light but clear.

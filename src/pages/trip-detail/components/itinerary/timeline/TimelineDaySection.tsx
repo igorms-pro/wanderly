@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
-import type { Activity } from '@/lib/types/database.types';
+import type { Activity, TripMember } from '@/lib/types/database.types';
+import type { MemberProfile } from '../../../ItineraryActivityTypes';
 import { TimelineActivityCard } from './TimelineActivityCard';
 
 interface TimelineDaySectionProps {
@@ -14,6 +15,10 @@ interface TimelineDaySectionProps {
   onVote: (activityId: string, choice: 'up' | 'down') => void;
   t: (key: string) => string;
   currency: string;
+  membersCount: number;
+  activityParticipantsMap: Record<string, string[]>;
+  tripMembers: TripMember[];
+  memberProfiles: Record<string, MemberProfile>;
 }
 
 export function TimelineDaySection({
@@ -28,6 +33,10 @@ export function TimelineDaySection({
   onVote,
   t,
   currency,
+  membersCount,
+  activityParticipantsMap,
+  tripMembers,
+  memberProfiles,
 }: TimelineDaySectionProps) {
   const sortedActivities = [...activities].sort((a, b) =>
     (a.start_time || '').localeCompare(b.start_time || ''),
@@ -69,6 +78,10 @@ export function TimelineDaySection({
               onToggleExpanded={() =>
                 setExpandedId(expandedId === activity.id ? null : activity.id)
               }
+              tripMembersCount={membersCount}
+              activityParticipantsMap={activityParticipantsMap}
+              tripMembers={tripMembers}
+              memberProfiles={memberProfiles}
             />
           );
         })}

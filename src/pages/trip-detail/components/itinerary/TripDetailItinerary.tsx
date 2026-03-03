@@ -153,6 +153,10 @@ export function TripDetailItinerary({
           onVote={onVote}
           t={t}
           currency={currency}
+          membersCount={membersCount}
+          activityParticipantsMap={activityParticipantsMap}
+          tripMembers={tripMembers}
+          memberProfiles={memberProfiles}
         />
       )}
     </div>

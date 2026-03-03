@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import type { Activity } from '@/lib/types/database.types';
+import type { Activity, TripMember } from '@/lib/types/database.types';
+import type { MemberProfile } from '../../ItineraryActivityTypes';
 import { TimelineDaySection } from './timeline/TimelineDaySection';
 
 interface TripTimelineProps {
@@ -12,6 +13,10 @@ interface TripTimelineProps {
   onVote: (activityId: string, choice: 'up' | 'down') => void;
   t: (key: string) => string;
   currency?: string;
+  membersCount: number;
+  activityParticipantsMap: Record<string, string[]>;
+  tripMembers: TripMember[];
+  memberProfiles: Record<string, MemberProfile>;
 }
 
 export function TripTimeline({
@@ -24,6 +29,10 @@ export function TripTimeline({
   onVote,
   t,
   currency = 'EUR',
+  membersCount,
+  activityParticipantsMap,
+  tripMembers,
+  memberProfiles,
 }: TripTimelineProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -55,6 +64,10 @@ export function TripTimeline({
               onVote={onVote}
               t={t}
               currency={currency}
+              membersCount={membersCount}
+              activityParticipantsMap={activityParticipantsMap}
+              tripMembers={tripMembers}
+              memberProfiles={memberProfiles}
             />
           );
         })}
