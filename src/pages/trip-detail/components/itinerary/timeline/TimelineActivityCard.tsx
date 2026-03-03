@@ -69,7 +69,7 @@ export function TimelineActivityCard({
         isRight ? 'sm:ml-8' : 'sm:mr-8'
       }`}
     >
-      <div className="p-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+      <div className="px-4 py-4 sm:px-6 sm:py-5 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div className="min-w-0 flex-1">
           <TimelineActivityHeader
             activity={activity}
@@ -81,12 +81,12 @@ export function TimelineActivityCard({
               {activity.category}
             </span>
           )}
-          {isExpanded && activity.description && (
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{activity.description}</p>
-          )}
           {isExpanded && (
-            <>
-              <div className="mt-3 flex flex-col gap-1">
+            <div className="mt-3 space-y-3">
+              {activity.description && (
+                <p className="text-sm text-gray-600 dark:text-gray-300">{activity.description}</p>
+              )}
+              <div className="mt-3 flex flex-col gap-1.5">
                 <button
                   type="button"
                   onClick={() => setOpenParticipants((prev) => !prev)}
@@ -125,7 +125,8 @@ export function TimelineActivityCard({
                     )}
                   </span>
                   <span className="flex items-center gap-1 truncate">
-                    <span className="truncate">{participantsLabel}</span>
+                    <span className="truncate sm:hidden">{String(participantsCount)}</span>
+                    <span className="hidden sm:inline truncate">{participantsLabel}</span>
                     <span className="shrink-0 text-gray-400 dark:text-gray-500">
                       {openParticipants ? (
                         <ChevronUp className="w-3 h-3" />
@@ -171,8 +172,18 @@ export function TimelineActivityCard({
                   </div>
                 )}
               </div>
+              {activity.organizer_notes?.trim() && (
+                <div className="mt-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-3 py-2">
+                  <p className="text-[11px] font-medium text-amber-800 dark:text-amber-200 mb-0.5">
+                    {t('tripDetail.organizerNote')}
+                  </p>
+                  <p className="text-xs text-amber-900 dark:text-amber-100">
+                    {activity.organizer_notes.trim()}
+                  </p>
+                </div>
+              )}
               <TimelineActivityMeta activity={activity} currency={currency} t={t} />
-            </>
+            </div>
           )}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
