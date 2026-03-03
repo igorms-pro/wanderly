@@ -67,7 +67,7 @@ export function TimelineDaySection({
               t={t}
               isExpanded={isExpanded}
               onToggleExpanded={() =>
-                setExpandedId((prev) => (prev === activity.id ? null : activity.id))
+                setExpandedId(expandedId === activity.id ? null : activity.id)
               }
             />
           );
