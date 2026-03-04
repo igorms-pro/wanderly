@@ -1,21 +1,55 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle } from 'lucide-react';
 import WeatherWidget from '@/components/WeatherWidget';
 import NearbyPlaces from '@/components/NearbyPlaces';
 import { TripChat } from '@/features/chat';
 import { CreateActivityModal } from '@/features/activities';
 import { useStore } from '@/lib/store';
 import { DashboardHeader } from '@/pages/dashboard/DashboardHeader';
-import { Modal } from '@/components/ui/Modal';
-import { Button } from '@/components/ui/Button';
+import type { TripConstraints } from '@/lib/types/database.types';
 import {
   useTripDetail,
   TripDetailHeader,
   TripDetailHero,
   TripDetailTabs,
   TripDetailItinerary,
+  TripDetailLoadingState,
+  TripDetailErrorState,
+  TripDetailDeleteModal,
 } from './trip-detail';
+
+function getTripBudgetFromConstraints(
+  currentTrip: { constraints: unknown },
+  membersCount: number,
+): number | null {
+  const constraints = currentTrip.constraints as TripConstraints | null;
+
+  if (!constraints) {
+    return null;
+  }
+
+  if (typeof constraints.budget_total_cents === 'number') {
+    return constraints.budget_total_cents;
+  }
+
+  if (typeof constraints.budget_per_person_cents === 'number' && membersCount > 0) {
+    return constraints.budget_per_person_cents * membersCount;
+  }
+
+  return null;
+}
+
+function getConstraintsSummary(currentTrip: { constraints: unknown }) {
+  const constraints = currentTrip.constraints as TripConstraints | null;
+
+  return constraints
+    ? {
+        pace: constraints.pace,
+        has_children: constraints.has_children,
+        preferences: constraints.preferences,
+      }
+    : null;
+}
 
 export default function TripDetailPage() {
   const navigate = useNavigate();
@@ -66,48 +100,24 @@ export default function TripDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <DashboardHeader user={user} onLogout={handleLogout} />
-        <div className="flex items-center justify-center flex-1 min-h-[60vh]">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-500"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-300">{t('tripDetail.loadingTrip')}</p>
-          </div>
-        </div>
-      </div>
+      <TripDetailLoadingState
+        headerProps={{ user, onLogout: handleLogout }}
+        message={t('tripDetail.loadingTrip')}
+      />
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <DashboardHeader user={user} onLogout={handleLogout} />
-        <div className="flex items-center justify-center flex-1 min-h-[60vh]">
-          <div className="text-center max-w-md">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full mb-4">
-              <AlertCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              {t('tripDetail.errorLoadingTrip')}
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">{error}</p>
-            <div className="flex space-x-3 justify-center">
-              <button
-                onClick={() => navigate('/dashboard')}
-                className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-              >
-                {t('tripDetail.backToDashboard')}
-              </button>
-              <button
-                onClick={loadTripData}
-                className="px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition"
-              >
-                {t('trip.tryAgain')}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <TripDetailErrorState
+        headerProps={{ user, onLogout: handleLogout }}
+        title={t('tripDetail.errorLoadingTrip')}
+        errorMessage={error}
+        backLabel={t('tripDetail.backToDashboard')}
+        retryLabel={t('trip.tryAgain')}
+        onBack={() => navigate('/dashboard')}
+        onRetry={loadTripData}
+      />
     );
   }
 
@@ -156,32 +166,16 @@ export default function TripDetailPage() {
         t={t}
       />
 
-      <Modal
+      <TripDetailDeleteModal
         isOpen={showDeleteModal}
+        isDeleting={isDeleting}
         onClose={() => setShowDeleteModal(false)}
-        title={t('tripDetail.delete')}
-        closeOnBackdrop={true}
-        showCloseButton={true}
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
-              {t('tripDetail.cancel')}
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={async () => {
-                await handleDeleteTrip();
-                setShowDeleteModal(false);
-              }}
-              disabled={isDeleting}
-            >
-              {isDeleting ? t('tripDetail.deleting') : t('tripDetail.delete')}
-            </Button>
-          </>
-        }
-      >
-        <p className="text-stone-600 dark:text-stone-300">{t('tripDetail.confirmDelete')}</p>
-      </Modal>
+        onConfirm={async () => {
+          await handleDeleteTrip();
+          setShowDeleteModal(false);
+        }}
+        t={t}
+      />
 
       <TripDetailTabs activeTab={activeTab} onTabChange={setActiveTab} t={t} />
 
@@ -211,27 +205,9 @@ export default function TripDetailPage() {
             totalSpentCents={Object.values(activitiesByDate)
               .flat()
               .reduce((s, a) => s + (a.cost_max_cents ?? a.cost_min_cents ?? a.cost_cents ?? 0), 0)}
-            budgetCents={(() => {
-              const c = currentTrip.constraints as
-                | import('@/lib/types/database.types').TripConstraints
-                | null;
-              return (
-                c?.budget_total_cents ??
-                (typeof c?.budget_per_person_cents === 'number' && tripMembers.length > 0
-                  ? c.budget_per_person_cents * tripMembers.length
-                  : null) ??
-                null
-              );
-            })()}
+            budgetCents={getTripBudgetFromConstraints(currentTrip, tripMembers.length)}
             currency={currentTrip.currency ?? 'EUR'}
-            constraintsSummary={(() => {
-              const c = currentTrip.constraints as
-                | import('@/lib/types/database.types').TripConstraints
-                | null;
-              return c
-                ? { pace: c.pace, has_children: c.has_children, preferences: c.preferences }
-                : null;
-            })()}
+            constraintsSummary={getConstraintsSummary(currentTrip)}
             membersCount={tripMembers.length}
             activityParticipantsMap={activityParticipantsMap}
             tripMembers={tripMembers}

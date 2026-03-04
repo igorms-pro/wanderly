@@ -4,3 +4,6 @@ export { TripDetailHero } from './components/layout/TripDetailHero';
 export type { EditFormState } from './components/layout/TripDetailHero';
 export { TripDetailTabs } from './components/layout/TripDetailTabs';
 export { TripDetailItinerary } from './components/itinerary/TripDetailItinerary';
+export { TripDetailLoadingState } from './components/layout/TripDetailLoadingState';
+export { TripDetailErrorState } from './components/layout/TripDetailErrorState';
+export { TripDetailDeleteModal } from './components/layout/TripDetailDeleteModal';

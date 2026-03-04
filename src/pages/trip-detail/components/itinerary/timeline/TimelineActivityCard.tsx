@@ -1,11 +1,11 @@
-import { Users, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import type { Activity, TripMember } from '@/lib/types/database.types';
 import type { MemberProfile } from '../../../ItineraryActivityTypes';
-import { getDisplayName, getInitial } from '../../../ItineraryActivityTypes';
 import { TimelineActivityHeader } from './TimelineActivityHeader';
 import { TimelineActivityMeta } from './TimelineActivityMeta';
 import { TimelineActivityVotes } from './TimelineActivityVotes';
+import { TimelineActivityParticipants } from './TimelineActivityParticipants';
+import { TimelineActivityNotes } from './TimelineActivityNotes';
 
 export interface TimelineActivityCardProps {
   activity: Activity;
@@ -86,102 +86,16 @@ export function TimelineActivityCard({
               {activity.description && (
                 <p className="text-sm text-gray-600 dark:text-gray-300">{activity.description}</p>
               )}
-              <div className="mt-3 flex flex-col gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => setOpenParticipants((prev) => !prev)}
-                  className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-left w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                >
-                  <Users className="w-4 h-4 shrink-0" />
-                  <span className="flex items-center gap-1.5 shrink-0">
-                    {participantIds.slice(0, 4).map((uid) => {
-                      const profile = memberProfiles[uid];
-                      const name = getDisplayName(profile, t('tripDetail.member'));
-                      const initial = getInitial(profile, t('tripDetail.member'));
-                      return (
-                        <span
-                          key={uid}
-                          className="inline-flex h-6 w-6 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-600 ring-2 ring-white dark:ring-gray-800 shrink-0"
-                          title={name}
-                        >
-                          {profile?.avatar_url ? (
-                            <img
-                              src={profile.avatar_url}
-                              alt=""
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <span className="flex h-full w-full items-center justify-center text-[10px] font-medium text-gray-600 dark:text-gray-300">
-                              {initial}
-                            </span>
-                          )}
-                        </span>
-                      );
-                    })}
-                    {participantIds.length > 4 && (
-                      <span className="text-[11px] text-gray-400">
-                        +{participantIds.length - 4}
-                      </span>
-                    )}
-                  </span>
-                  <span className="flex items-center gap-1 truncate">
-                    <span className="truncate sm:hidden">{String(participantsCount)}</span>
-                    <span className="hidden sm:inline truncate">{participantsLabel}</span>
-                    <span className="shrink-0 text-gray-400 dark:text-gray-500">
-                      {openParticipants ? (
-                        <ChevronUp className="w-3 h-3" />
-                      ) : (
-                        <ChevronDown className="w-3 h-3" />
-                      )}
-                    </span>
-                  </span>
-                </button>
-                {openParticipants && (
-                  <div className="ml-6 mt-1 py-2 px-3 rounded-lg bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700">
-                    <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1.5">
-                      {t('tripDetail.participantsList')}
-                    </p>
-                    <ul className="space-y-1.5">
-                      {participantIds.map((uid) => {
-                        const profile = memberProfiles[uid];
-                        const name = getDisplayName(profile, t('tripDetail.member'));
-                        const initial = getInitial(profile, t('tripDetail.member'));
-                        return (
-                          <li
-                            key={uid}
-                            className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300"
-                          >
-                            <span className="inline-flex h-6 w-6 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-600 shrink-0">
-                              {profile?.avatar_url ? (
-                                <img
-                                  src={profile.avatar_url}
-                                  alt=""
-                                  className="h-full w-full object-cover"
-                                />
-                              ) : (
-                                <span className="flex h-full w-full items-center justify-center text-[10px] font-medium text-gray-600 dark:text-gray-300">
-                                  {initial}
-                                </span>
-                              )}
-                            </span>
-                            <span>{name}</span>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                )}
-              </div>
-              {activity.organizer_notes?.trim() && (
-                <div className="mt-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-3 py-2">
-                  <p className="text-[11px] font-medium text-amber-800 dark:text-amber-200 mb-0.5">
-                    {t('tripDetail.organizerNote')}
-                  </p>
-                  <p className="text-xs text-amber-900 dark:text-amber-100">
-                    {activity.organizer_notes.trim()}
-                  </p>
-                </div>
-              )}
+              <TimelineActivityParticipants
+                participantIds={participantIds}
+                participantsCount={participantsCount}
+                participantsLabel={participantsLabel}
+                memberProfiles={memberProfiles}
+                isOpen={openParticipants}
+                onToggle={() => setOpenParticipants((prev) => !prev)}
+                t={t}
+              />
+              <TimelineActivityNotes notes={activity.organizer_notes} t={t} />
               <TimelineActivityMeta activity={activity} currency={currency} t={t} />
             </div>
           )}
