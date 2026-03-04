@@ -1,4 +1,5 @@
-import type { Activity } from '@/lib/types/database.types';
+import type { Activity, TripMember } from '@/lib/types/database.types';
+import type { MemberProfile } from '../../ItineraryActivityTypes';
 import { TripTimeline } from './TripTimeline';
 
 interface TripItineraryTimelineViewProps {
@@ -11,6 +12,10 @@ interface TripItineraryTimelineViewProps {
   onVote: (activityId: string, choice: 'up' | 'down') => void;
   t: (key: string) => string;
   currency: string;
+  membersCount: number;
+  activityParticipantsMap: Record<string, string[]>;
+  tripMembers: TripMember[];
+  memberProfiles: Record<string, MemberProfile>;
 }
 
 export function TripItineraryTimelineView({
@@ -23,9 +28,13 @@ export function TripItineraryTimelineView({
   onVote,
   t,
   currency,
+  membersCount,
+  activityParticipantsMap,
+  tripMembers,
+  memberProfiles,
 }: TripItineraryTimelineViewProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm dark:shadow-lg p-6 sm:p-8">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm dark:shadow-lg pl-3 pt-6 pr-6 pb-6 sm:p-8">
       <TripTimeline
         sortedDates={sortedDates}
         activitiesByDate={activitiesByDate}
@@ -36,6 +45,10 @@ export function TripItineraryTimelineView({
         onVote={onVote}
         t={t}
         currency={currency}
+        membersCount={membersCount}
+        activityParticipantsMap={activityParticipantsMap}
+        tripMembers={tripMembers}
+        memberProfiles={memberProfiles}
       />
     </div>
   );

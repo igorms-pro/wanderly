@@ -17,6 +17,8 @@ interface TripItineraryListViewProps {
   tripMembers: TripMember[];
   memberProfiles: Record<string, { display_name: string | null; avatar_url: string | null }>;
   constraintsSummary?: ConstraintsSummary | null;
+  /** When set and no results, show search empty state */
+  searchQuery?: string;
 }
 
 export function TripItineraryListView({
@@ -33,7 +35,18 @@ export function TripItineraryListView({
   activityParticipantsMap,
   tripMembers,
   memberProfiles,
+  searchQuery = '',
 }: TripItineraryListViewProps) {
+  const hasSearchNoResults = searchQuery.trim() !== '' && sortedDates.length === 0;
+
+  if (hasSearchNoResults) {
+    return (
+      <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-6 py-8 text-center">
+        <p className="text-gray-600 dark:text-gray-400">{t('tripDetail.searchNoResults')}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {sortedDates.map((date) => (

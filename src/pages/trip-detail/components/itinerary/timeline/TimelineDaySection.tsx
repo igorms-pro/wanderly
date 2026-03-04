@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
-import type { Activity } from '@/lib/types/database.types';
+import type { Activity, TripMember } from '@/lib/types/database.types';
+import type { MemberProfile } from '../../../ItineraryActivityTypes';
 import { TimelineActivityCard } from './TimelineActivityCard';
 
 interface TimelineDaySectionProps {
@@ -14,6 +15,10 @@ interface TimelineDaySectionProps {
   onVote: (activityId: string, choice: 'up' | 'down') => void;
   t: (key: string) => string;
   currency: string;
+  membersCount: number;
+  activityParticipantsMap: Record<string, string[]>;
+  tripMembers: TripMember[];
+  memberProfiles: Record<string, MemberProfile>;
 }
 
 export function TimelineDaySection({
@@ -28,17 +33,21 @@ export function TimelineDaySection({
   onVote,
   t,
   currency,
+  membersCount,
+  activityParticipantsMap,
+  tripMembers,
+  memberProfiles,
 }: TimelineDaySectionProps) {
   const sortedActivities = [...activities].sort((a, b) =>
     (a.start_time || '').localeCompare(b.start_time || ''),
   );
 
   return (
-    <section key={date} className="relative pl-12 sm:pl-20 pb-8 last:pb-0">
+    <section key={date} className="relative pl-10 sm:pl-18 pb-8 last:pb-0">
       {/* Nœud jour */}
       <div className="flex items-center gap-3 mb-4">
         <div
-          className="absolute left-3 sm:left-6 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-blue-500 dark:bg-blue-400 ring-4 ring-white dark:ring-gray-800 z-10"
+          className="absolute left-2.5 sm:left-5 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-blue-500 dark:bg-blue-400 ring-4 ring-white dark:ring-gray-800 z-10"
           aria-hidden
         />
         <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">
@@ -69,6 +78,10 @@ export function TimelineDaySection({
               onToggleExpanded={() =>
                 setExpandedId(expandedId === activity.id ? null : activity.id)
               }
+              tripMembersCount={membersCount}
+              activityParticipantsMap={activityParticipantsMap}
+              tripMembers={tripMembers}
+              memberProfiles={memberProfiles}
             />
           );
         })}

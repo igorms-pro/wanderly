@@ -732,11 +732,12 @@ Complete trip detail screen core: header, tabs, trip info, edit/delete trip. Vue
 - [x] 🟢 Affichage coût par activité en vue expandable (exact ou fourchette cost_min/max, gratuit)
 - [x] 🟢 Affichage transport par activité en vue expandable (notes/type/durée)
 - [x] 🟢 Résumé contraintes dans la vue itinéraire (rythme, enfants, préférences + nombre de membres)
+- [ ] 🔴 **Recherche dans l’itinéraire** (issue dédiée plus tard) : champ de recherche à côté d’Add Activity (dock fixed desktop + mobile) pour retrouver un événement sans scroller — par nom, jour ou créneau. Essentiel pour rendre la vue + création vraiment utilisables.
 
 #### Trip Members
 
-- [ ] 🔴 **Add trip members management**:
-  - [ ] Invite members (email or link) — voir issue création trip / invite
+- [ ] 🔴 **Add trip members management** **(déplacé hors scope de l’issue #8)**:
+  - [ ] Invite members (email or link) — couvert par l’issue de création/partage de trip
   - [ ] Display member list
   - [ ] Change member roles (owner only)
   - [ ] Remove members (owner only)
@@ -744,19 +745,21 @@ Complete trip detail screen core: header, tabs, trip info, edit/delete trip. Vue
 
 #### i18n
 
-- [ ] 🔴 **Verify all trip detail text is internationalized**:
-  - [ ] Tab labels
-  - [ ] Buttons
-  - [ ] Modals
-  - [ ] Error messages
+- [x] 🟢 **Verify all trip detail text is internationalized**:
+  - [x] Tab labels
+  - [x] Buttons
+  - [x] Modals
+  - [x] Error messages
 
 ### Ce qu’il manque pour fermer l’issue #8
 
 1. ~~**Header**~~ : fait (contraintes, membres, rôles, statut dans hero).
 2. ~~**Vue itinéraire**~~ : fait (coût fourchette, transport, résumé contraintes + membres dans l’onglet itinéraire ; vue expandable par activité).
-3. **Trip members** : gestion des membres (invite par email/lien, liste détaillée, changement de rôles, retrait, avatars / présence) — voir issue création trip ou issue dédiée invite.
-4. **i18n** : vérifier que tous les textes de l’écran trip detail sont bien internationalisés (onglets, boutons, modales, erreurs).
-5. **Optionnel** : animations d’onglets ; real-time updates après edit.
+3. ~~**Trip members**~~ : la gestion fine des membres (invite, rôles, retrait, avatars / présence) est **déléguée à l’issue création/partage de trip**, pas bloquant pour fermer #8.
+4. ~~**i18n**~~ : tous les textes de l’écran trip detail sont internationalisés (onglets, boutons, modales, erreurs).
+5. **Obligatoire** : animations d’onglets + real-time updates après edit (cohérence visuelle et mise à jour immédiate du header/apercus).
+6. **Tests** : couverture minimale (unit + E2E) après validation de l’UX mobile.
+7. **Recherche itinéraire** : issue dédiée plus tard — recherche (nom / jour / créneau) à côté d’Add Activity, dock fixed, pour faciliter vue + création (essentiel, pas post-MVP).
 
 ### Acceptance Criteria
 
@@ -765,9 +768,9 @@ Complete trip detail screen core: header, tabs, trip info, edit/delete trip. Vue
 - [x] Delete trip works (owner only)
 - [x] Tab navigation works (with persistence and mobile dock)
 - [x] Vue itinéraire : dépenses, contraintes, coût/transport par activité en vue expandable
-- [ ] Member management (invite, roles, remove) — délégué à une autre issue
-- [ ] All text is internationalized (vérification)
-- [ ] Design system is applied
+- [ ] Member management (invite, roles, remove) — délégué à une autre issue (non bloquant pour #8)
+- [x] All text is internationalized (vérification)
+- [x] Design system is applied
 - [ ] Tests pass (unit + E2E)
 
 ---
@@ -1306,6 +1309,7 @@ _None yet_
 
 ## 💡 Feature Requests / Ideas (Backlog)
 
+- [ ] 🌟 **Recherche dans l’itinéraire** (issue dédiée, essentiel vue + création) : champ de recherche à côté d’Add Activity pour retrouver un événement sans scroller (nom, jour, créneau). Desktop + mobile, dock fixed.
 - [ ] 🌟 Multi-language trip planning
 - [ ] 🌟 AR/VR destination previews
 - [ ] 🌟 Voice assistant integration
@@ -1351,7 +1355,7 @@ _Will be tracked here as discovered_
 - **Issue #5 (Landing Page)**: 🟢 100% - Completed (MVP)
 - **Issue #6 (Auth Screens)**: 🟢 100% - Completed (MVP, passwordless + OAuth)
 - **Issue #7 (Dashboard)**: 🟢 100% - Completed (constraints, design overhaul, quick actions)
-- **Issue #8 (Trip Detail Core)**: 🟡 40% - Partially Done
+- **Issue #8 (Trip Detail Core)**: 🟡 70% - Partially Done (reste : animations + realtime post-edit + tests)
 - **Issue #9 (Activities & Scenarios)**: 🔴 0% - Not Started
 - **Issue #10 (Voting System)**: 🔴 0% - Not Started (BLOCKED by #9)
 - **Issue #11 (Chat)**: 🟡 50% - Partially Done

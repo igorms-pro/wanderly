@@ -1,6 +1,8 @@
 import { FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { useStore } from '@/lib/store';
+import type { ActivityFormData } from '../types';
 
 interface UseCreateActivityFormOptions {
   tripId: string;
@@ -13,7 +15,7 @@ export function useCreateActivityForm({ tripId, onSuccess }: UseCreateActivityFo
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ActivityFormData>({
     title: '',
     description: '',
     category: '',
@@ -27,7 +29,7 @@ export function useCreateActivityForm({ tripId, onSuccess }: UseCreateActivityFo
     status: 'proposed' as 'proposed' | 'confirmed' | 'rejected',
   });
 
-  const handleChange = (updates: Partial<typeof formData>) =>
+  const handleChange = (updates: Partial<ActivityFormData>) =>
     setFormData((prev) => ({ ...prev, ...updates }));
 
   const handleSubmit = async (e: FormEvent) => {

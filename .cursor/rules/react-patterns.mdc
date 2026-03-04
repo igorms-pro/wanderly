@@ -49,6 +49,18 @@ const TripPage = () => {
 - **Components** own the rendering (JSX, styles, layout).
 - A component should **never** contain raw Supabase calls, complex business logic, or multi-step data transformations.
 
+### Strong Rule – New Logic ⇒ Hook + Helpers
+
+When adding new non-trivial behavior (search, derived data, mapping, subscriptions, etc.):
+
+- **Default**: create a `useXxx` hook + pure helpers in a colocated file (`useTripDetailSearch.ts`, `mapActivities.ts`, etc.).
+- Page/feature components (`TripDetailItinerary`, `TripDetailPage`, etc.) should:
+  - Call hooks and pass results into JSX.
+  - Avoid inline algorithms (string normalization, filtering, grouping) inside the component body.
+- Helpers like `normalizeSearchText`, `groupActivitiesByDay`, `buildTimelineSections` must live in **helpers/hooks files**, not inline at the top of a JSX file.
+
+Only skip this rule for **truly trivial** cases (one-liner computed values). If it feels like “logic” and not “pure display”, it belongs in a hook or helper.
+
 ```tsx
 // GOOD: Hook owns logic, component owns rendering
 function useActivities(tripId: string) {

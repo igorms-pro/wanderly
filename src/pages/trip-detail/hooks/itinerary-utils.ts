@@ -1,4 +1,5 @@
 import { addDays, format, isWithinInterval, parseISO, startOfWeek } from 'date-fns';
+import type { Activity } from '@/lib/types/database.types';
 
 const WEEK_STARTS_MONDAY = 1; // 0 = Sunday, 1 = Monday
 
@@ -31,3 +32,18 @@ export function getWeeksForTrip(startDate: string, endDate: string): (string | n
 
 /** Weekday labels (short) for grid header, Mon–Sun */
 export const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+export function groupActivitiesByDate(activities: Activity[]): Record<string, Activity[]> {
+  return activities.reduce<Record<string, Activity[]>>((acc, activity) => {
+    const date = activity.start_time?.includes('T')
+      ? activity.start_time.split('T')[0]
+      : activity.created_at.split('T')[0];
+
+    if (!acc[date]) {
+      acc[date] = [];
+    }
+
+    acc[date].push(activity);
+    return acc;
+  }, {});
+}

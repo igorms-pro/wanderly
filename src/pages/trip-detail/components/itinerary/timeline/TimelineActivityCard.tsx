@@ -1,7 +1,11 @@
-import type { Activity } from '@/lib/types/database.types';
+import { useState } from 'react';
+import type { Activity, TripMember } from '@/lib/types/database.types';
+import type { MemberProfile } from '../../../ItineraryActivityTypes';
 import { TimelineActivityHeader } from './TimelineActivityHeader';
 import { TimelineActivityMeta } from './TimelineActivityMeta';
 import { TimelineActivityVotes } from './TimelineActivityVotes';
+import { TimelineActivityParticipants } from './TimelineActivityParticipants';
+import { TimelineActivityNotes } from './TimelineActivityNotes';
 
 export interface TimelineActivityCardProps {
   activity: Activity;
@@ -15,6 +19,10 @@ export interface TimelineActivityCardProps {
   t: (key: string) => string;
   isExpanded: boolean;
   onToggleExpanded: () => void;
+  tripMembersCount?: number;
+  activityParticipantsMap: Record<string, string[]>;
+  tripMembers: TripMember[];
+  memberProfiles: Record<string, MemberProfile>;
 }
 
 export function TimelineActivityCard({
@@ -29,10 +37,31 @@ export function TimelineActivityCard({
   t,
   isExpanded,
   onToggleExpanded,
+  tripMembersCount,
+  activityParticipantsMap,
+  tripMembers,
+  memberProfiles,
 }: TimelineActivityCardProps) {
   const { upvotes, downvotes } = getVoteCounts(activity.id);
   const userVote = getUserVote(activity.id);
   const isRight = index % 2 === 0;
+
+  const [openParticipants, setOpenParticipants] = useState(false);
+
+  const participantIds =
+    activityParticipantsMap[activity.id] != null && activityParticipantsMap[activity.id].length > 0
+      ? activityParticipantsMap[activity.id]
+      : tripMembers.map((m) => m.user_id);
+  const participantsCount = participantIds.length;
+
+  const participantsLabel =
+    activityParticipantsMap[activity.id] != null && activityParticipantsMap[activity.id].length > 0
+      ? participantsCount === 1
+        ? t('tripDetail.participantCount_one')
+        : t('tripDetail.participantsCount').replace('{{count}}', String(participantsCount))
+      : tripMembersCount != null && tripMembersCount > 0
+        ? `${t('tripDetail.participantsAll')} (${tripMembersCount})`
+        : t('tripDetail.participantsNotSet');
 
   return (
     <div
@@ -40,7 +69,7 @@ export function TimelineActivityCard({
         isRight ? 'sm:ml-8' : 'sm:mr-8'
       }`}
     >
-      <div className="p-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+      <div className="px-4 py-4 sm:px-6 sm:py-5 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div className="min-w-0 flex-1">
           <TimelineActivityHeader
             activity={activity}
@@ -52,10 +81,24 @@ export function TimelineActivityCard({
               {activity.category}
             </span>
           )}
-          {isExpanded && activity.description && (
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{activity.description}</p>
+          {isExpanded && (
+            <div className="mt-3 space-y-3">
+              {activity.description && (
+                <p className="text-sm text-gray-600 dark:text-gray-300">{activity.description}</p>
+              )}
+              <TimelineActivityParticipants
+                participantIds={participantIds}
+                participantsCount={participantsCount}
+                participantsLabel={participantsLabel}
+                memberProfiles={memberProfiles}
+                isOpen={openParticipants}
+                onToggle={() => setOpenParticipants((prev) => !prev)}
+                t={t}
+              />
+              <TimelineActivityNotes notes={activity.organizer_notes} t={t} />
+              <TimelineActivityMeta activity={activity} currency={currency} t={t} />
+            </div>
           )}
-          {isExpanded && <TimelineActivityMeta activity={activity} currency={currency} t={t} />}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <TimelineActivityVotes

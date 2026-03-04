@@ -1,11 +1,8 @@
 import { useTranslation } from 'react-i18next';
+
 import { useCreateActivityForm } from '../hooks/useCreateActivityForm';
-import {
-  ActivityBasicFields,
-  ActivityPlanningFields,
-  ActivityAdvancedFields,
-  ActivityModalShell,
-} from './ActivityFormSections';
+import { ActivityModalShell } from './ActivityModalShell';
+import { ActivityFormSections } from './ActivityFormSections';
 
 interface CreateActivityModalProps {
   tripId: string;
@@ -27,9 +24,7 @@ export default function CreateActivityModal({ tripId, onClose }: CreateActivityM
       onClose={onClose}
       onSubmit={handleSubmit}
     >
-      <ActivityBasicFields formData={formData} onChange={handleChange} />
-      <ActivityPlanningFields formData={formData} onChange={handleChange} />
-      <ActivityAdvancedFields formData={formData} onChange={handleChange} />
+      <ActivityFormSections formData={formData} onChange={handleChange} />
     </ActivityModalShell>
   );
 }

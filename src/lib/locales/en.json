@@ -292,7 +292,9 @@
     "upvote": "Upvote",
     "downvote": "Downvote",
     "removeUpvote": "Remove upvote",
-    "removeDownvote": "Remove downvote"
+    "removeDownvote": "Remove downvote",
+    "searchPlaceholder": "Search by name, place or description...",
+    "searchNoResults": "No activities match your search."
   },
   "activityModal": {
     "addActivity": "Add Activity",

@@ -7,8 +7,10 @@ import { supabase } from '@/lib/supabase';
 import type { Activity, Vote } from '@/lib/types/database.types';
 import { TripMember } from '@/lib/types/database.types';
 import { useTripDetailRealtime } from './useTripDetailRealtime';
+import { groupActivitiesByDate } from './itinerary-utils';
 import { loadTripDataForDetail } from './loadTripDataForDetail';
 import { updateTripHandler, deleteTripHandler } from './tripDetailHandlers';
+import type { EditFormState } from '../components/layout/TripDetailHero';
 
 type TripDetailTab = 'itinerary' | 'chat' | 'weather' | 'explore';
 
@@ -46,17 +48,17 @@ function useTripDetailData() {
     Record<string, { display_name: string | null; avatar_url: string | null; email: string | null }>
   >({});
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({
+  const [editForm, setEditForm] = useState<EditFormState>(() => ({
     title: '',
     destination_text: '',
     start_date: '',
     end_date: '',
-    status: 'planned' as 'planned' | 'locked' | 'archived',
-    pace: 'balanced' as 'relaxed' | 'balanced' | 'packed',
+    status: 'planned',
+    pace: 'balanced',
     budget: '',
     currency: 'EUR',
     has_children: false,
-  });
+  }));
   const [isDeleting, setIsDeleting] = useState(false);
 
   useTripDetailRealtime(tripId ?? undefined);
@@ -89,6 +91,31 @@ function useTripDetailData() {
     });
   }, [tripId, user, navigate, setCurrentTrip, t, setActiveTabState]);
 
+  const handleUpdateTrip = useCallback(async () => {
+    await updateTripHandler({
+      tripId,
+      currentTrip,
+      editForm,
+      addToast,
+      t,
+      updateTrip,
+      setIsEditing,
+      loadTripData,
+    });
+  }, [tripId, currentTrip, editForm, addToast, t, updateTrip, loadTripData]);
+
+  const handleDeleteTrip = useCallback(async () => {
+    await deleteTripHandler({
+      tripId,
+      currentTrip,
+      addToast,
+      t,
+      deleteTrip,
+      navigate,
+      setIsDeleting,
+    });
+  }, [tripId, currentTrip, addToast, t, deleteTrip, navigate]);
+
   useEffect(() => {
     if (!user) {
       navigate('/login');
@@ -101,52 +128,6 @@ function useTripDetailData() {
     loadTripData();
   }, [tripId, user, navigate, loadTripData]);
 
-  const handleUpdateTrip = useCallback(
-    () =>
-      updateTripHandler({
-        tripId,
-        currentTrip,
-        editForm,
-        addToast,
-        t,
-        updateTrip,
-        setIsEditing,
-        loadTripData,
-      }),
-    [tripId, currentTrip, editForm, addToast, t, updateTrip, setIsEditing, loadTripData],
-  );
-
-  const handleDeleteTrip = useCallback(
-    () =>
-      deleteTripHandler({
-        tripId,
-        currentTrip,
-        addToast,
-        t,
-        deleteTrip,
-        navigate,
-        setIsDeleting,
-      }),
-    [tripId, currentTrip, addToast, t, deleteTrip, navigate, setIsDeleting],
-  );
-
-  const getUserRole = (): 'owner' | 'editor' | 'viewer' | 'moderator' | null => {
-    if (!user) return null;
-    const member = tripMembers.find((m) => m.user_id === user.id);
-    return member?.role || null;
-  };
-
-  const canEdit = (): boolean => {
-    if (!user || !currentTrip) return false;
-    const role = getUserRole();
-    return role === 'owner' || role === 'editor' || user.id === currentTrip.owner_id;
-  };
-
-  const canDelete = (): boolean => {
-    if (!user || !currentTrip) return false;
-    return user.id === currentTrip.owner_id;
-  };
-
   return {
     t,
     user,
@@ -156,19 +137,16 @@ function useTripDetailData() {
     error,
     currentTrip,
     tripMembers,
-    activityParticipantsMap,
-    memberProfiles,
     isEditing,
     setIsEditing,
     editForm,
     setEditForm,
     isDeleting,
+    activityParticipantsMap,
+    memberProfiles,
     loadTripData,
     handleUpdateTrip,
     handleDeleteTrip,
-    getUserRole,
-    canEdit,
-    canDelete,
     activeTab,
     setActiveTab,
     showAddActivityModal,
@@ -176,30 +154,54 @@ function useTripDetailData() {
   };
 }
 
-function useTripDetailActivities(t: (key: string) => string) {
-  const user = useStore((state) => state.user);
-  const activities = useStore((state) => state.activities);
-  const votes = useStore((state) => state.votes);
-  const setVotes = useStore((state) => state.setVotes);
-  const createOrUpdateVote = useStore((state) => state.createOrUpdateVote);
-  const [votingActivityId, setVotingActivityId] = useState<string | null>(null);
+function useTripDetailPermissions(
+  user: { id: string } | null,
+  tripMembers: TripMember[],
+  currentTrip: { owner_id: string } | null,
+) {
+  const getUserRole = useCallback((): 'owner' | 'editor' | 'viewer' | 'moderator' | null => {
+    if (!user) return null;
+    const member = tripMembers.find((m) => m.user_id === user.id);
+    return member?.role || null;
+  }, [tripMembers, user]);
 
-  const activitiesByDate = useMemo(
-    () =>
-      activities.reduce(
-        (acc, activity) => {
-          const date = activity.start_time?.includes('T')
-            ? activity.start_time.split('T')[0]
-            : activity.created_at.split('T')[0];
-          if (!acc[date]) acc[date] = [];
-          acc[date].push(activity);
-          return acc;
-        },
-        {} as Record<string, Activity[]>,
-      ),
-    [activities],
-  );
+  const canEdit = useCallback((): boolean => {
+    if (!user || !currentTrip) return false;
+    const role = getUserRole();
+    return role === 'owner' || role === 'editor' || user.id === currentTrip.owner_id;
+  }, [currentTrip, getUserRole, user]);
+
+  const canDelete = useCallback((): boolean => {
+    if (!user || !currentTrip) return false;
+    return user.id === currentTrip.owner_id;
+  }, [currentTrip, user]);
+
+  return {
+    getUserRole,
+    canEdit,
+    canDelete,
+  };
+}
+
+function useTripDetailDerivedState(activities: Activity[]) {
+  const activitiesByDate = useMemo(() => groupActivitiesByDate(activities), [activities]);
+
   const sortedDates = useMemo(() => Object.keys(activitiesByDate).sort(), [activitiesByDate]);
+
+  return {
+    activitiesByDate,
+    sortedDates,
+  };
+}
+
+function useTripDetailActions(
+  t: (key: string) => string,
+  user: { id: string } | null,
+  votes: Record<string, Vote[]>,
+  setVotes: (nextVotes: Record<string, Vote[]>) => void,
+  createOrUpdateVote: (activityId: string, choice: 'up' | 'down') => Promise<void>,
+) {
+  const [votingActivityId, setVotingActivityId] = useState<string | null>(null);
 
   const getUserVote = useCallback(
     (activityId: string): 'up' | 'down' | null => {
@@ -262,12 +264,10 @@ function useTripDetailActivities(t: (key: string) => string) {
         setVotingActivityId(null);
       }
     },
-    [user, votes, setVotes, createOrUpdateVote, t, getUserVote],
+    [createOrUpdateVote, getUserVote, t, user, votes, setVotes],
   );
 
   return {
-    activitiesByDate,
-    sortedDates,
     votingActivityId,
     handleVote,
     getVoteCounts,
@@ -275,12 +275,30 @@ function useTripDetailActivities(t: (key: string) => string) {
   };
 }
 
+function useTripDetailActivities(t: (key: string) => string) {
+  const user = useStore((state) => state.user);
+  const activities = useStore((state) => state.activities);
+  const votes = useStore((state) => state.votes);
+  const setVotes = useStore((state) => state.setVotes);
+  const createOrUpdateVote = useStore((state) => state.createOrUpdateVote);
+
+  const derivedState = useTripDetailDerivedState(activities);
+  const actions = useTripDetailActions(t, user, votes, setVotes, createOrUpdateVote);
+
+  return {
+    ...derivedState,
+    ...actions,
+  };
+}
+
 export function useTripDetail() {
   const data = useTripDetailData();
   const activities = useTripDetailActivities(data.t);
+  const permissions = useTripDetailPermissions(data.user, data.tripMembers, data.currentTrip);
 
   return {
     ...data,
     ...activities,
+    ...permissions,
   };
 }

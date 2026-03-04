@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Activity, TripMember } from '@/lib/types/database.types';
+import { useItinerarySearch } from './useItinerarySearch';
 import { TripItineraryContextSummary } from './TripItineraryContextSummary';
 import { ItineraryViewTabs } from './ItineraryViewTabs';
 import { TripItineraryEmptyState } from './TripItineraryEmptyState';
@@ -40,6 +41,80 @@ interface TripDetailItineraryProps {
   memberProfiles?: Record<string, { display_name: string | null; avatar_url: string | null }>;
 }
 
+interface UseItineraryViewStateArgs {
+  activitiesByDate: Record<string, Activity[]>;
+  sortedDates: string[];
+}
+
+interface UseItineraryViewStateResult {
+  viewMode: ItineraryViewMode;
+  selectedDate: string | null;
+  searchQuery: string;
+  activitiesByDateForView: Record<string, Activity[]>;
+  sortedDatesForView: string[];
+  handleChangeViewMode: (mode: ItineraryViewMode) => void;
+  handleSelectDate: (date: string | null) => void;
+  handleSearchChange: (value: string) => void;
+}
+
+function useItineraryViewState({
+  activitiesByDate,
+  sortedDates,
+}: UseItineraryViewStateArgs): UseItineraryViewStateResult {
+  const [viewMode, setViewMode] = useState<ItineraryViewMode>(() => {
+    try {
+      const s = sessionStorage.getItem(ITINERARY_VIEW_KEY);
+      if (s === 'list' || s === 'calendar' || s === 'timeline') return s;
+    } catch {
+      /* ignore */
+    }
+    return 'list';
+  });
+
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const { activitiesByDate: filteredActivitiesByDate, sortedDates: filteredSortedDates } =
+    useItinerarySearch(activitiesByDate, sortedDates, searchQuery);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(ITINERARY_VIEW_KEY, viewMode);
+    } catch {
+      /* ignore */
+    }
+  }, [viewMode]);
+
+  const isSearching = searchQuery.trim().length > 0;
+
+  const activitiesByDateForView = isSearching ? filteredActivitiesByDate : activitiesByDate;
+  const sortedDatesForView = isSearching ? filteredSortedDates : sortedDates;
+
+  const handleChangeViewMode = (mode: ItineraryViewMode) => {
+    setViewMode(mode);
+    setSelectedDate(null);
+  };
+
+  const handleSelectDate = (date: string | null) => {
+    setSelectedDate(date);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+  };
+
+  return {
+    viewMode,
+    selectedDate,
+    searchQuery,
+    activitiesByDateForView,
+    sortedDatesForView,
+    handleChangeViewMode,
+    handleSelectDate,
+    handleSearchChange,
+  };
+}
+
 export function TripDetailItinerary({
   startDate,
   endDate,
@@ -62,25 +137,16 @@ export function TripDetailItinerary({
   tripMembers = [],
   memberProfiles = {},
 }: TripDetailItineraryProps) {
-  const [viewMode, setViewMode] = useState<ItineraryViewMode>(() => {
-    try {
-      const s = sessionStorage.getItem(ITINERARY_VIEW_KEY);
-      if (s === 'list' || s === 'calendar' || s === 'timeline') return s;
-    } catch {
-      /* ignore */
-    }
-    return 'list';
-  });
-
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-
-  useEffect(() => {
-    try {
-      sessionStorage.setItem(ITINERARY_VIEW_KEY, viewMode);
-    } catch {
-      /* ignore */
-    }
-  }, [viewMode]);
+  const {
+    viewMode,
+    selectedDate,
+    searchQuery,
+    activitiesByDateForView,
+    sortedDatesForView,
+    handleChangeViewMode,
+    handleSelectDate,
+    handleSearchChange,
+  } = useItineraryViewState({ activitiesByDate, sortedDates });
 
   return (
     <div className="space-y-6">
@@ -97,19 +163,18 @@ export function TripDetailItinerary({
         t={t}
         canEdit={canEdit}
         viewMode={viewMode}
-        onChangeViewMode={(mode) => {
-          setViewMode(mode);
-          setSelectedDate(null);
-        }}
+        onChangeViewMode={handleChangeViewMode}
         onAddActivity={onAddActivity}
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
       />
 
       {sortedDates.length === 0 ? (
         <TripItineraryEmptyState t={t} canEdit={canEdit} onAddActivity={onAddActivity} />
       ) : viewMode === 'list' ? (
         <TripItineraryListView
-          sortedDates={sortedDates}
-          activitiesByDate={activitiesByDate}
+          sortedDates={sortedDatesForView}
+          activitiesByDate={activitiesByDateForView}
           canVote={canVote}
           votingActivityId={votingActivityId}
           getVoteCounts={getVoteCounts}
@@ -122,14 +187,15 @@ export function TripDetailItinerary({
           tripMembers={tripMembers}
           memberProfiles={memberProfiles}
           constraintsSummary={constraintsSummary}
+          searchQuery={searchQuery}
         />
       ) : viewMode === 'calendar' ? (
         <TripItineraryCalendarView
           startDate={startDate}
           endDate={endDate}
-          activitiesByDate={activitiesByDate}
+          activitiesByDate={activitiesByDateForView}
           selectedDate={selectedDate}
-          onSelectDate={setSelectedDate}
+          onSelectDate={handleSelectDate}
           canVote={canVote}
           votingActivityId={votingActivityId}
           getVoteCounts={getVoteCounts}
@@ -144,8 +210,8 @@ export function TripDetailItinerary({
         />
       ) : (
         <TripItineraryTimelineView
-          sortedDates={sortedDates}
-          activitiesByDate={activitiesByDate}
+          sortedDates={sortedDatesForView}
+          activitiesByDate={activitiesByDateForView}
           canVote={canVote}
           votingActivityId={votingActivityId}
           getVoteCounts={getVoteCounts}
@@ -153,6 +219,10 @@ export function TripDetailItinerary({
           onVote={onVote}
           t={t}
           currency={currency}
+          membersCount={membersCount}
+          activityParticipantsMap={activityParticipantsMap}
+          tripMembers={tripMembers}
+          memberProfiles={memberProfiles}
         />
       )}
     </div>

@@ -292,7 +292,9 @@
     "upvote": "Voter pour",
     "downvote": "Voter contre",
     "removeUpvote": "Retirer le vote pour",
-    "removeDownvote": "Retirer le vote contre"
+    "removeDownvote": "Retirer le vote contre",
+    "searchPlaceholder": "Rechercher par nom, lieu ou description...",
+    "searchNoResults": "Aucune activité ne correspond à votre recherche."
   },
   "activityModal": {
     "addActivity": "Ajouter une activité",
