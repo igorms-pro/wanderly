@@ -10,6 +10,7 @@ import { useTripDetailRealtime } from './useTripDetailRealtime';
 import { groupActivitiesByDate } from './itinerary-utils';
 import { loadTripDataForDetail } from './loadTripDataForDetail';
 import { updateTripHandler, deleteTripHandler } from './tripDetailHandlers';
+import type { EditFormState } from '../components/layout/TripDetailHero';
 
 type TripDetailTab = 'itinerary' | 'chat' | 'weather' | 'explore';
 
@@ -46,6 +47,19 @@ function useTripDetailData() {
   const [memberProfiles, setMemberProfiles] = useState<
     Record<string, { display_name: string | null; avatar_url: string | null; email: string | null }>
   >({});
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState<EditFormState>(() => ({
+    title: '',
+    destination_text: '',
+    start_date: '',
+    end_date: '',
+    status: 'planned',
+    pace: 'balanced',
+    budget: '',
+    currency: 'EUR',
+    has_children: false,
+  }));
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useTripDetailRealtime(tripId ?? undefined);
   const { addToast } = useToast();
@@ -66,6 +80,7 @@ function useTripDetailData() {
       setLoading,
       setError,
       setCurrentTrip,
+      setEditForm,
       setTripMembers,
       setActivityParticipantsMap,
       setMemberProfiles,
@@ -75,6 +90,31 @@ function useTripDetailData() {
       getState: useStore.getState,
     });
   }, [tripId, user, navigate, setCurrentTrip, t, setActiveTabState]);
+
+  const handleUpdateTrip = useCallback(async () => {
+    await updateTripHandler({
+      tripId,
+      currentTrip,
+      editForm,
+      addToast,
+      t,
+      updateTrip,
+      setIsEditing,
+      loadTripData,
+    });
+  }, [tripId, currentTrip, editForm, addToast, t, updateTrip, loadTripData]);
+
+  const handleDeleteTrip = useCallback(async () => {
+    await deleteTripHandler({
+      tripId,
+      currentTrip,
+      addToast,
+      t,
+      deleteTrip,
+      navigate,
+      setIsDeleting,
+    });
+  }, [tripId, currentTrip, addToast, t, deleteTrip, navigate]);
 
   useEffect(() => {
     if (!user) {
@@ -97,9 +137,16 @@ function useTripDetailData() {
     error,
     currentTrip,
     tripMembers,
+    isEditing,
+    setIsEditing,
+    editForm,
+    setEditForm,
+    isDeleting,
     activityParticipantsMap,
     memberProfiles,
     loadTripData,
+    handleUpdateTrip,
+    handleDeleteTrip,
     activeTab,
     setActiveTab,
     showAddActivityModal,

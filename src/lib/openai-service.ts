@@ -1,3 +1,5 @@
+import { generateItineraryFromConstraints } from './ai/openai-itinerary-service';
+
 export type {
   ItineraryRequest,
   DayActivity,
