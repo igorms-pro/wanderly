@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useStore } from '@/lib/store';
+import type { Activity } from '@/lib/types/database.types';
 import type { ActivityFormData } from '../types';
 
 interface UseCreateActivityFormOptions {
@@ -9,15 +10,47 @@ interface UseCreateActivityFormOptions {
   onSuccess: () => void;
 }
 
-export function useCreateActivityForm({ tripId, onSuccess }: UseCreateActivityFormOptions) {
-  const { t } = useTranslation();
-  const createActivity = useStore((state) => state.createActivity);
-  const currentTrip = useStore((state) => state.currentTrip);
-  const getActiveItineraryDayIdByDate = useStore((state) => state.getActiveItineraryDayIdByDate);
+type ActivityFormMode = 'create' | 'edit';
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState<ActivityFormData>({
+interface UseActivityFormBaseOptions {
+  tripId: string;
+  onSuccess: () => void;
+}
+
+interface UseActivityFormCreateOptions extends UseActivityFormBaseOptions {
+  mode: 'create';
+}
+
+interface UseActivityFormEditOptions extends UseActivityFormBaseOptions {
+  mode: 'edit';
+  activity: Activity;
+  date?: string;
+}
+
+type UseActivityFormOptions = UseActivityFormCreateOptions | UseActivityFormEditOptions;
+
+function buildInitialFormData(options: UseActivityFormOptions): ActivityFormData {
+  if (options.mode === 'edit') {
+    const { activity, date } = options;
+    return {
+      title: activity.title,
+      description: activity.description ?? '',
+      category: activity.category ?? '',
+      date: date ?? activity.created_at.split('T')[0],
+      startTime: activity.start_time ? activity.start_time.slice(0, 5) : '',
+      endTime: activity.end_time ? activity.end_time.slice(0, 5) : '',
+      cost:
+        typeof activity.cost_cents === 'number'
+          ? (activity.cost_cents / 100).toFixed(2).replace(/\.00$/, '')
+          : '',
+      currency: activity.currency ?? 'USD',
+      lat: activity.lat != null ? String(activity.lat) : '',
+      lon: activity.lon != null ? String(activity.lon) : '',
+      status: activity.status,
+    };
+  }
+
+  return {
     title: '',
     description: '',
     category: '',
@@ -28,8 +61,21 @@ export function useCreateActivityForm({ tripId, onSuccess }: UseCreateActivityFo
     currency: 'USD',
     lat: '',
     lon: '',
-    status: 'proposed' as 'proposed' | 'confirmed' | 'rejected',
-  });
+    status: 'proposed',
+  };
+}
+
+export function useActivityForm(options: UseActivityFormOptions) {
+  const { tripId, onSuccess } = options;
+  const { t } = useTranslation();
+  const createActivity = useStore((state) => state.createActivity);
+  const updateActivity = useStore((state) => state.updateActivity);
+  const currentTrip = useStore((state) => state.currentTrip);
+  const getActiveItineraryDayIdByDate = useStore((state) => state.getActiveItineraryDayIdByDate);
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [formData, setFormData] = useState<ActivityFormData>(() => buildInitialFormData(options));
 
   const handleChange = (updates: Partial<ActivityFormData>) =>
     setFormData((prev) => ({ ...prev, ...updates }));
@@ -91,43 +137,58 @@ export function useCreateActivityForm({ tripId, onSuccess }: UseCreateActivityFo
         end_time = timeParts.length === 2 ? `${formData.endTime}:00` : formData.endTime;
       }
 
-      await createActivity({
-        trip_id: tripId,
-        itinerary_day_id:
-          currentTrip?.id === tripId && formData.date
-            ? (getActiveItineraryDayIdByDate(formData.date) ?? undefined)
-            : undefined,
-        title: formData.title.trim(),
-        description: formData.description.trim() || undefined,
-        category: formData.category || undefined,
-        start_time,
-        end_time,
-        cost_cents: formData.cost ? Math.round(parseFloat(formData.cost) * 100) : undefined,
-        currency: formData.currency,
-        lat: formData.lat ? parseFloat(formData.lat) : undefined,
-        lon: formData.lon ? parseFloat(formData.lon) : undefined,
-        status: formData.status,
-        source: 'manual',
-      });
+      const itinerary_day_id =
+        currentTrip?.id === tripId && formData.date
+          ? (getActiveItineraryDayIdByDate(formData.date) ?? undefined)
+          : undefined;
 
-      setFormData({
-        title: '',
-        description: '',
-        category: '',
-        date: '',
-        startTime: '',
-        endTime: '',
-        cost: '',
-        currency: 'USD',
-        lat: '',
-        lon: '',
-        status: 'proposed',
-      });
+      if (options.mode === 'create') {
+        await createActivity({
+          trip_id: tripId,
+          itinerary_day_id,
+          title: formData.title.trim(),
+          description: formData.description.trim() || undefined,
+          category: formData.category || undefined,
+          start_time,
+          end_time,
+          cost_cents: formData.cost ? Math.round(parseFloat(formData.cost) * 100) : undefined,
+          currency: formData.currency,
+          lat: formData.lat ? parseFloat(formData.lat) : undefined,
+          lon: formData.lon ? parseFloat(formData.lon) : undefined,
+          status: formData.status,
+          source: 'manual',
+        });
+
+        setFormData(
+          buildInitialFormData({
+            mode: 'create',
+            tripId,
+            onSuccess,
+          }),
+        );
+      } else {
+        await updateActivity(options.activity.id, {
+          title: formData.title.trim(),
+          description: formData.description.trim() || undefined,
+          category: formData.category || undefined,
+          itinerary_day_id,
+          start_time,
+          end_time,
+          cost_cents: formData.cost ? Math.round(parseFloat(formData.cost) * 100) : undefined,
+          currency: formData.currency,
+          lat: formData.lat ? parseFloat(formData.lat) : undefined,
+          lon: formData.lon ? parseFloat(formData.lon) : undefined,
+          status: formData.status,
+        });
+      }
 
       onSuccess();
     } catch (err: any) {
-      console.error('Error creating activity:', err);
-      let errorMessage = t('errors.failedToCreateActivity') || 'Failed to create activity';
+      console.error('Error saving activity:', err);
+      let errorMessage =
+        options.mode === 'create'
+          ? t('errors.failedToCreateActivity') || 'Failed to create activity'
+          : t('errors.failedToUpdateActivity') || 'Failed to update activity';
       if (err.message) {
         errorMessage = err.message;
       } else if (err.code === '23505') {
@@ -149,4 +210,24 @@ export function useCreateActivityForm({ tripId, onSuccess }: UseCreateActivityFo
     handleChange,
     handleSubmit,
   };
+}
+
+export function useCreateActivityForm({ tripId, onSuccess }: UseCreateActivityFormOptions) {
+  return useActivityForm({ mode: 'create', tripId, onSuccess });
+}
+
+export interface UseEditActivityFormOptions {
+  tripId: string;
+  activity: Activity;
+  date?: string;
+  onSuccess: () => void;
+}
+
+export function useEditActivityForm({
+  tripId,
+  activity,
+  date,
+  onSuccess,
+}: UseEditActivityFormOptions) {
+  return useActivityForm({ mode: 'edit', tripId, activity, date, onSuccess });
 }

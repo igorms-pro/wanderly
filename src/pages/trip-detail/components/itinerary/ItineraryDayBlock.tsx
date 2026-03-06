@@ -24,6 +24,9 @@ interface ItineraryDayBlockProps {
   onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
   onDropOnActivity?: (activityId: string, date: string, index: number) => void;
   onDropOnEmpty?: (date: string) => void;
+  canEditActivities?: boolean;
+  onEditActivity?: (activity: Activity, date: string) => void;
+  onDeleteActivity?: (activity: Activity) => void;
 }
 
 export function ItineraryDayBlock({
@@ -46,6 +49,9 @@ export function ItineraryDayBlock({
   onDragOver,
   onDropOnActivity,
   onDropOnEmpty,
+  canEditActivities = false,
+  onEditActivity,
+  onDeleteActivity,
 }: ItineraryDayBlockProps) {
   const sorted = [...activities].sort((a, b) =>
     (a.start_time || '').localeCompare(b.start_time || ''),
@@ -107,6 +113,9 @@ export function ItineraryDayBlock({
             onDragOver={onDragOver}
             onDrop={onDropOnActivity}
             date={date}
+            canEditActivity={canEditActivities}
+            onEditActivity={onEditActivity}
+            onDeleteActivity={onDeleteActivity}
           />
         ))}
       </div>

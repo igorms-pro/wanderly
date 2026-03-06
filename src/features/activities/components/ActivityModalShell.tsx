@@ -1,6 +1,6 @@
 import type React from 'react';
 
-import { AlertCircle, Loader2, Plus, X } from 'lucide-react';
+import { AlertCircle, Loader2, Plus, Pencil, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface ActivityModalShellProps {
@@ -10,6 +10,7 @@ interface ActivityModalShellProps {
   onClose: () => void;
   onSubmit: (e: React.FormEvent) => void;
   children: React.ReactNode;
+  mode?: 'create' | 'edit';
 }
 
 export function ActivityModalShell({
@@ -19,6 +20,7 @@ export function ActivityModalShell({
   onClose,
   onSubmit,
   children,
+  mode = 'create',
 }: ActivityModalShellProps) {
   const { t } = useTranslation();
 
@@ -27,7 +29,11 @@ export function ActivityModalShell({
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl dark:shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center">
-            <Plus className="w-6 h-6 text-blue-600 dark:text-blue-400 mr-2" />
+            {mode === 'edit' ? (
+              <Pencil className="w-6 h-6 text-blue-600 dark:text-blue-400 mr-2" />
+            ) : (
+              <Plus className="w-6 h-6 text-blue-600 dark:text-blue-400 mr-2" />
+            )}
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{title}</h2>
           </div>
           <button
@@ -66,12 +72,18 @@ export function ActivityModalShell({
               {loading ? (
                 <>
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  {t('activityModal.creating')}
+                  {mode === 'edit' ? t('activityModal.saving') : t('activityModal.creating')}
                 </>
               ) : (
                 <>
-                  <Plus className="w-5 h-5 mr-2" />
-                  {t('activityModal.createActivity')}
+                  {mode === 'edit' ? (
+                    <Pencil className="w-5 h-5 mr-2" />
+                  ) : (
+                    <Plus className="w-5 h-5 mr-2" />
+                  )}
+                  {mode === 'edit'
+                    ? t('activityModal.saveChanges')
+                    : t('activityModal.createActivity')}
                 </>
               )}
             </button>

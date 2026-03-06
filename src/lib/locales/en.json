@@ -212,6 +212,7 @@
     "failedToUpdateTrip": "Failed to update trip. Please try again.",
     "failedToDeleteTrip": "Failed to delete trip. Please try again.",
     "failedToCreateActivity": "Failed to create activity. Please try again.",
+    "failedToUpdateActivity": "Failed to update activity. Please try again.",
     "failedToVote": "Failed to vote. Please try again.",
     "failedToUpdateMessage": "Failed to update message. Please try again.",
     "failedToDeleteMessage": "Failed to delete message. Please try again.",
@@ -341,7 +342,23 @@
     "confirmed": "Confirmed",
     "rejected": "Rejected",
     "creating": "Creating...",
-    "createActivity": "Create Activity"
+    "createActivity": "Create Activity",
+    "editActivity": "Edit Activity",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes"
+  },
+  "activities": {
+    "actions": {
+      "edit": "Edit activity",
+      "delete": "Delete activity"
+    }
+  },
+  "activityDelete": {
+    "title": "Delete activity",
+    "message": "Are you sure you want to delete \"{{title}}\" from this itinerary?",
+    "confirm": "Delete activity",
+    "deleting": "Deleting...",
+    "error": "Failed to delete activity. Please try again."
   },
   "tripModal": {
     "createTripWithAI": "Create Trip with AI",

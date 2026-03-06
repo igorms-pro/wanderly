@@ -44,11 +44,42 @@ export function useTripDetailPermissions({
     return role === 'owner' || role === 'editor' || role === 'moderator';
   }, [currentTrip, getUserRole, user]);
 
+  const canEditActivities = useCallback((): boolean => {
+    if (!user || !currentTrip) return false;
+    const role = getUserRole();
+    if (!role) return false;
+
+    if (currentTrip.status === 'archived') return false;
+    if (currentTrip.status === 'planned') {
+      // Everyone in the trip can manage activities during planning
+      return true;
+    }
+
+    // After finalized: only admins (owner, editor, moderator)
+    return role === 'owner' || role === 'editor' || role === 'moderator';
+  }, [currentTrip, getUserRole, user]);
+
+  const canDeleteActivities = useCallback((): boolean => {
+    // For now, share the same rules as edit for activities
+    if (!user || !currentTrip) return false;
+    const role = getUserRole();
+    if (!role) return false;
+
+    if (currentTrip.status === 'archived') return false;
+    if (currentTrip.status === 'planned') {
+      return true;
+    }
+
+    return role === 'owner' || role === 'editor' || role === 'moderator';
+  }, [currentTrip, getUserRole, user]);
+
   return {
     getUserRole,
     canEdit,
     canDelete,
     canCreateActivitiesAndScenarios,
     canManageScenarios,
+    canEditActivities,
+    canDeleteActivities,
   };
 }

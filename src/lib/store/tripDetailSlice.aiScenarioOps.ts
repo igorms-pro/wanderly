@@ -7,11 +7,11 @@ import type { TripScenario } from './tripDetailSlice.scenarios';
 type ItineraryRow = Database['public']['Tables']['itineraries']['Row'];
 type ItineraryDayRow = Database['public']['Tables']['itinerary_days']['Row'];
 
-function normalizeTime(value: string): string {
+export function normalizeTime(value: string): string {
   return value.length === 5 ? `${value}:00` : value;
 }
 
-function parseTripConstraints(constraints: unknown): TripConstraints | null {
+export function parseTripConstraints(constraints: unknown): TripConstraints | null {
   if (!constraints || typeof constraints !== 'object') return null;
   return constraints as TripConstraints;
 }

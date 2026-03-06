@@ -49,6 +49,8 @@ interface TripDetailItineraryProps {
     date: string,
     activity: import('@/lib/types/database.types').Activity,
   ) => Promise<void>;
+  onEditActivity?: (activity: Activity, date: string) => void;
+  onDeleteActivity?: (activity: Activity) => void;
 }
 
 export function TripDetailItinerary({
@@ -81,6 +83,8 @@ export function TripDetailItinerary({
   onDeleteScenario,
   onUseScenarioAsBase,
   onAddScenarioActivityToItinerary,
+  onEditActivity,
+  onDeleteActivity,
 }: TripDetailItineraryProps) {
   const {
     viewMode,
@@ -135,6 +139,8 @@ export function TripDetailItinerary({
           memberProfiles={memberProfiles}
           constraintsSummary={constraintsSummary}
           searchQuery={searchQuery}
+          onEditActivity={onEditActivity}
+          onDeleteActivity={onDeleteActivity}
         />
       ) : viewMode === 'calendar' ? (
         <TripItineraryCalendarView

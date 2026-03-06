@@ -3,10 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import WeatherWidget from '@/components/WeatherWidget';
 import NearbyPlaces from '@/components/NearbyPlaces';
 import { TripChat } from '@/features/chat';
-import { CreateActivityModal } from '@/features/activities';
+import {
+  ActivityDeleteConfirmModal,
+  CreateActivityModal,
+  EditActivityModal,
+} from '@/features/activities';
 import { useStore } from '@/lib/store';
 import { DashboardHeader } from '@/pages/dashboard/DashboardHeader';
 import type { TripConstraints } from '@/lib/types/database.types';
+import type { Activity } from '@/lib/types/database.types';
 import {
   useTripDetail,
   TripDetailHeader,
@@ -55,7 +60,13 @@ export default function TripDetailPage() {
   const navigate = useNavigate();
   const user = useStore((s) => s.user);
   const signOut = useStore((s) => s.signOut);
+  const deleteActivity = useStore((s) => s.deleteActivity);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [activityToEdit, setActivityToEdit] = useState<{
+    activity: Activity;
+    date: string;
+  } | null>(null);
+  const [activityToDelete, setActivityToDelete] = useState<Activity | null>(null);
 
   const handleLogout = async () => {
     try {
@@ -102,6 +113,8 @@ export default function TripDetailPage() {
     scenariosError,
     canCreateActivitiesAndScenarios,
     canManageScenarios,
+    canEditActivities,
+    canDeleteActivities,
     createScenario,
     deleteScenario,
     generateAiScenario,
@@ -203,7 +216,7 @@ export default function TripDetailPage() {
           <TripDetailItinerary
             startDate={currentTrip.start_date}
             endDate={currentTrip.end_date}
-            canEdit={canEdit()}
+            canEdit={canEditActivities()}
             canVote={!!user}
             activitiesByDate={activitiesByDate}
             sortedDates={sortedDates}
@@ -241,6 +254,13 @@ export default function TripDetailPage() {
               if (!tripId) return;
               await importScenarioActivityToItinerary(tripId, date, activity);
             }}
+            onEditActivity={(activity, date) => {
+              if (!date) return;
+              setActivityToEdit({ activity, date });
+            }}
+            onDeleteActivity={(activity) => {
+              setActivityToDelete(activity);
+            }}
           />
         )}
         {activeTab === 'chat' && tripId && <TripChat tripId={tripId} userRole={getUserRole()} />}
@@ -249,6 +269,25 @@ export default function TripDetailPage() {
       {showAddActivityModal && tripId && (
         <CreateActivityModal tripId={tripId} onClose={() => setShowAddActivityModal(false)} />
       )}
+
+      {activityToEdit && tripId && (
+        <EditActivityModal
+          tripId={tripId}
+          activity={activityToEdit.activity}
+          date={activityToEdit.date}
+          onClose={() => setActivityToEdit(null)}
+        />
+      )}
+
+      <ActivityDeleteConfirmModal
+        activity={activityToDelete}
+        isOpen={!!activityToDelete}
+        onClose={() => setActivityToDelete(null)}
+        onConfirm={async (activityId) => {
+          await deleteActivity(activityId);
+          setActivityToDelete(null);
+        }}
+      />
     </div>
   );
 }

@@ -141,5 +141,26 @@ export function createTripDetailActivitiesSlice(set: SetState, get: GetState): P
         throw error;
       }
     },
+
+    deleteActivity: async (activityId) => {
+      try {
+        const { error } = await supabase
+          .from('activities')
+          .update({ deleted_at: new Date().toISOString() } as any)
+          .eq('id', activityId);
+
+        if (error) {
+          console.error('Error deleting activity:', error);
+          throw error;
+        }
+
+        set((state) => ({
+          activities: state.activities.filter((a) => a.id !== activityId),
+        }));
+      } catch (error) {
+        console.error('Error deleting activity:', error);
+        throw error;
+      }
+    },
   };
 }

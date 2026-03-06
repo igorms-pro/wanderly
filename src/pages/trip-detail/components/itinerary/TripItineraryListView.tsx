@@ -22,6 +22,8 @@ interface TripItineraryListViewProps {
   constraintsSummary?: ConstraintsSummary | null;
   /** When set and no results, show search empty state */
   searchQuery?: string;
+  onEditActivity?: (activity: Activity, date: string) => void;
+  onDeleteActivity?: (activity: Activity) => void;
 }
 
 export function TripItineraryListView({
@@ -41,6 +43,8 @@ export function TripItineraryListView({
   tripMembers,
   memberProfiles,
   searchQuery = '',
+  onEditActivity,
+  onDeleteActivity,
 }: TripItineraryListViewProps) {
   const hasSearchNoResults = searchQuery.trim() !== '' && sortedDates.length === 0;
 
@@ -81,6 +85,9 @@ export function TripItineraryListView({
           onDragOver={dragAndDrop.handleDragOver}
           onDropOnActivity={dragAndDrop.handleDropOnActivity}
           onDropOnEmpty={dragAndDrop.handleDropOnEmptyDay}
+          canEditActivities={canEdit}
+          onEditActivity={onEditActivity}
+          onDeleteActivity={onDeleteActivity}
         />
       ))}
     </div>

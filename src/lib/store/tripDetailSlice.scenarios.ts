@@ -23,7 +23,7 @@ export interface TripScenario {
   days: TripScenarioDay[];
 }
 
-function mapItineraryToScenario(
+export function mapItineraryToScenario(
   itinerary: ItineraryRow,
   days: ItineraryDayRow[],
   activitiesByDayId: Record<string, Activity[]>,

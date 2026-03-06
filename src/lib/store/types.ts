@@ -43,6 +43,7 @@ export interface AppState {
   loadActivities: (tripId: string) => Promise<void>;
   createActivity: (activityData: CreateActivityData) => Promise<Activity>;
   updateActivity: (activityId: string, updates: Partial<Activity>) => Promise<void>;
+  deleteActivity: (activityId: string) => Promise<void>;
 
   // Scenarios
   scenarios: TripScenario[];

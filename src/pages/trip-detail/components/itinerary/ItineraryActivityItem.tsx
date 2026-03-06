@@ -23,6 +23,9 @@ interface ItineraryActivityItemProps {
   onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
   onDrop?: (activityId: string, date: string, index: number) => void;
   date?: string;
+  canEditActivity?: boolean;
+  onEditActivity?: (activity: Activity, date?: string) => void;
+  onDeleteActivity?: (activity: Activity) => void;
 }
 
 export function ItineraryActivityItem({
@@ -43,6 +46,9 @@ export function ItineraryActivityItem({
   onDragOver,
   onDrop,
   date,
+  canEditActivity = false,
+  onEditActivity,
+  onDeleteActivity,
 }: ItineraryActivityItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -82,6 +88,13 @@ export function ItineraryActivityItem({
         t={t}
         upvotes={upvotes}
         downvotes={downvotes}
+        canEdit={canEditActivity}
+        onEdit={
+          canEditActivity && onEditActivity ? () => onEditActivity(activity, date) : undefined
+        }
+        onDelete={
+          canEditActivity && onDeleteActivity ? () => onDeleteActivity(activity) : undefined
+        }
       />
 
       {isExpanded && (

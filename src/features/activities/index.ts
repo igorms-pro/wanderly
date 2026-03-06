@@ -4,3 +4,5 @@
  */
 
 export { default as CreateActivityModal } from './components/CreateActivityModal';
+export { EditActivityModal } from './components/EditActivityModal';
+export { ActivityDeleteConfirmModal } from './components/ActivityDeleteConfirmModal';

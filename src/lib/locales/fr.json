@@ -212,6 +212,7 @@
     "failedToUpdateTrip": "Échec de la mise à jour du voyage. Veuillez réessayer.",
     "failedToDeleteTrip": "Échec de la suppression du voyage. Veuillez réessayer.",
     "failedToCreateActivity": "Échec de la création de l'activité. Veuillez réessayer.",
+    "failedToUpdateActivity": "Échec de la mise à jour de l'activité. Veuillez réessayer.",
     "failedToVote": "Échec du vote. Veuillez réessayer.",
     "failedToUpdateMessage": "Échec de la mise à jour du message. Veuillez réessayer.",
     "invalidDates": "La date de fin doit être égale ou postérieure à la date de début.",
@@ -341,7 +342,23 @@
     "confirmed": "Confirmé",
     "rejected": "Rejeté",
     "creating": "Création...",
-    "createActivity": "Créer l'activité"
+    "createActivity": "Créer l'activité",
+    "editActivity": "Modifier l'activité",
+    "saving": "Enregistrement...",
+    "saveChanges": "Enregistrer les modifications"
+  },
+  "activities": {
+    "actions": {
+      "edit": "Modifier l'activité",
+      "delete": "Supprimer l'activité"
+    }
+  },
+  "activityDelete": {
+    "title": "Supprimer l'activité",
+    "message": "Êtes-vous sûr de vouloir supprimer « {{title}} » de cet itinéraire ?",
+    "confirm": "Supprimer l'activité",
+    "deleting": "Suppression...",
+    "error": "Échec de la suppression de l'activité. Veuillez réessayer."
   },
   "tripModal": {
     "createTripWithAI": "Créer un voyage avec l'IA",
