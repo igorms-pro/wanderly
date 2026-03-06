@@ -1,11 +1,5 @@
 ---
 description: Error handling, error boundaries, and resilience patterns for Voyagely
-globs: src/**/*.{ts,tsx}
-alwaysApply: false
----
-
----
-description: Error handling, error boundaries, and resilience patterns for Voyagely
 alwaysApply: true
 ---
 
