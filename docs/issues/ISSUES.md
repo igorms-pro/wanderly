@@ -775,6 +775,20 @@ Complete trip detail screen core: header, tabs, trip info, edit/delete trip. Vue
 
 ---
 
+## 📌 Terminologie importante (itinéraire vs scénarios)
+
+Pour éviter la confusion “plusieurs plannings en parallèle” :
+
+- **Itinéraire actif (source of truth)** : la timeline réelle du trip. C’est **la seule** vue “planning” que les membres utilisent au quotidien. Elle contient les **activités** du trip, réparties par jour / créneau, avec statuts (`proposed` / `confirmed` / `rejected`) et votes.
+- **Scénarios (propositions IA)** : des **versions alternatives** du voyage (souvent 2–3 générées par l’IA). Un scénario n’est **pas** vécu en parallèle : il sert à comparer des options.
+- **Choisir un scénario de base** : initialise l’itinéraire actif en **copiant** les activités du scénario sélectionné (les scénarios restent stables).
+- **Importer une activité depuis un scénario** : “piocher” une activité de n’importe quel scénario → **copie** dans l’itinéraire actif, puis on vote/valide comme une activité normale.
+
+Ce modèle permet :
+
+- de garder **un seul mardi à Tokyo** dans la réalité (itinéraire actif),
+- tout en gardant des scénarios IA comme **catalogue d’options** (base + cherry-pick).
+
 ## 🎯 Issue #9: Trip Detail Screen - Activities & Scenarios
 
 **Status:** 🟡 **PARTIALLY DONE**  
@@ -784,13 +798,15 @@ Complete trip detail screen core: header, tabs, trip info, edit/delete trip. Vue
 
 ### Description
 
-Implement activities and scenarios CRUD in trip detail screen.
+Implement activities CRUD (truth = itinerary actif) + AI scenario proposals (base selection + import/copy into itinerary).
+
+**Important**: On ne “vit” pas plusieurs scénarios en parallèle. L’utilisateur travaille sur **un itinéraire actif**. Les scénarios sont des options (souvent IA) qu’on peut sélectionner comme base et/ou depuis lesquels on peut importer des activités.
 
 ### Tasks
 
 #### Activities List
 
-- [ ] 🔴 **Display activities**:
+- [ ] 🔴 **Display activities (itinéraire actif)**:
   - [ ] Day-by-day timeline view
   - [ ] Activity cards with all info
   - [ ] Activity status (proposed, confirmed, rejected)
@@ -841,18 +857,19 @@ Implement activities and scenarios CRUD in trip detail screen.
   - [ ] Success feedback
   - [ ] Real-time updates
 
-#### Scenarios
+#### AI Scenarios (propositions) + Import into itinerary
 
-- [ ] 🔴 **Scenario creation (human)**:
-  - [ ] "Create Scenario" button
-  - [ ] Scenario builder:
-    - [ ] Scenario name
-    - [ ] Day-by-day activity selection
-    - [ ] Drag & drop activities to days
-    - [ ] Save as scenario
-  - [ ] Display scenarios
-  - [ ] Edit scenarios
-  - [ ] Delete scenarios
+- [ ] 🔴 **Display scenarios (AI proposals)**:
+  - [ ] List scenarios for the trip (title, AI badge, createdAt)
+  - [ ] Preview scenario day-by-day (activities grouped by day)
+  - [ ] Compare scenarios (lightweight UI; no need for perfect diff yet)
+- [ ] 🔴 **Choose base scenario**:
+  - [ ] Action: “Use as base” → copy all scenario activities into itinerary actif
+  - [ ] Scenarios remain stable (no mutation when selecting base)
+- [ ] 🔴 **Import an activity from a scenario**:
+  - [ ] Action: “Add to itinerary” (copy)
+  - [ ] Imported activity becomes a normal activity in itinerary actif (then vote/confirm/reorder)
+- [ ] 🟣 **Optional / later**: Human scenario creation & editing (builder). Not required for MVP if scenarios are primarily AI-generated.
 
 #### Drag & Drop
 
@@ -873,7 +890,7 @@ Implement activities and scenarios CRUD in trip detail screen.
 
 #### i18n
 
-- [ ] 🔴 **Verify all activities text is internationalized**:
+- [ ] 🔴 **Verify all activities + scenarios text is internationalized**:
   - [ ] Form labels
   - [ ] Buttons
   - [ ] Activity statuses
@@ -886,7 +903,7 @@ Implement activities and scenarios CRUD in trip detail screen.
   - Cartes d’activités avec statut (proposed/confirmed/rejected), source (humain / IA), coût, lieu, participants et badge IA.
   - Création d’activités humaines via modal dédiée (validation, persistance Supabase, i18n, realtime).
 - Pas encore fait / à garder dans le scope de **#9** (ou à splitter plus tard) :
-  - Scénarios (builder, liste, édition, suppression).
+  - Scénarios IA : sélection “base” + import/copie d’activités dans l’itinéraire actif (et UI de preview/compare).
   - Drag & drop pour réordonner les activités et les déplacer entre jours.
   - Permissions fines par rôle + phase (planning vs trip verrouillé) sur CRUD activité.
   - Couverture de tests (unit + E2E) ciblée sur activités & scénarios.
@@ -897,7 +914,7 @@ Implement activities and scenarios CRUD in trip detail screen.
 - [ ] Human activity creation works
 - [ ] Activity editing works with role permissions
 - [ ] Activity deletion works with role permissions
-- [ ] Scenarios work
+- [ ] AI scenarios can be previewed, a base scenario can be selected (copy to itinerary), and individual activities can be imported (copy)
 - [ ] Drag & drop works
 - [ ] Real-time updates work
 - [ ] All text is internationalized
