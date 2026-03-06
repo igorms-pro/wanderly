@@ -16,7 +16,7 @@ interface TripScenariosSectionProps {
   onDeleteScenario: (scenarioId: string) => void;
   onUseScenarioAsBase: (scenarioItineraryId: string) => Promise<void>;
   onAddScenarioActivityToItinerary: (date: string, activity: Activity) => Promise<void>;
-  t: (key: string) => string;
+  t: (key: string, options?: Record<string, unknown>) => string;
 }
 
 export function TripScenariosSection({

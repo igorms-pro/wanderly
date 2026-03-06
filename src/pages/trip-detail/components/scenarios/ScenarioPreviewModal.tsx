@@ -8,7 +8,7 @@ interface ScenarioPreviewModalProps {
   onClose: () => void;
   onUseAsBase: (scenarioItineraryId: string) => Promise<void>;
   onAddToItinerary: (date: string, activity: Activity) => Promise<void>;
-  t: (key: string) => string;
+  t: (key: string, options?: Record<string, unknown>) => string;
 }
 
 function formatTime(value: string | null | undefined): string | null {

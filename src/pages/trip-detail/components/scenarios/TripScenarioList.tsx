@@ -5,7 +5,7 @@ interface TripScenarioListProps {
   canManage: boolean;
   onDelete: (scenarioId: string) => void;
   onPreview: (scenarioId: string) => void;
-  t: (key: string) => string;
+  t: (key: string, options?: Record<string, unknown>) => string;
 }
 
 export function TripScenarioList({
@@ -33,8 +33,10 @@ export function TripScenarioList({
               {scenario.title || t('tripDetail.untitledScenario')}
             </p>
             <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-              {t('tripDetail.scenarioDays')}
-              {scenario.isAiGenerated ? ` · ${t('tripDetail.scenarioAiBadge')}` : ''}
+              {t('tripDetail.scenarioDays', { count: scenario.days.length } as any)}
+              {scenario.isAiGenerated
+                ? ` · ${t('tripDetail.scenarioAiBadge')}`
+                : ` · ${t('tripDetail.scenarioHumanBadge')}`}
             </p>
           </div>
           <div className="ml-3 flex items-center gap-3">

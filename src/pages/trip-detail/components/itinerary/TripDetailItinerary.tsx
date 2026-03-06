@@ -121,6 +121,7 @@ export function TripDetailItinerary({
           sortedDates={sortedDatesForView}
           activitiesByDate={activitiesByDateForView}
           itineraryDayIdByDate={itineraryDayIdByDate}
+          canEdit={canEdit}
           canVote={canVote}
           votingActivityId={votingActivityId}
           getVoteCounts={getVoteCounts}

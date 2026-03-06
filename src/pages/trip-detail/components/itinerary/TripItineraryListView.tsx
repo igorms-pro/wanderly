@@ -7,6 +7,7 @@ interface TripItineraryListViewProps {
   sortedDates: string[];
   activitiesByDate: Record<string, Activity[]>;
   itineraryDayIdByDate: Record<string, string>;
+  canEdit: boolean;
   canVote: boolean;
   votingActivityId: string | null;
   getVoteCounts: (activityId: string) => { upvotes: number; downvotes: number };
@@ -27,6 +28,7 @@ export function TripItineraryListView({
   sortedDates,
   activitiesByDate,
   itineraryDayIdByDate,
+  canEdit,
   canVote,
   votingActivityId,
   getVoteCounts,
@@ -46,7 +48,7 @@ export function TripItineraryListView({
     activitiesByDate,
     sortedDates,
     itineraryDayIdByDate,
-    canEdit: true,
+    canEdit,
   });
 
   if (hasSearchNoResults) {
