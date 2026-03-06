@@ -1,9 +1,10 @@
-import type { Activity } from '../types/database.types';
+import type { Activity, Database } from '../types/database.types';
 import { supabase } from '../supabase';
 import type { AppState, CreateActivityData, SetState, GetState } from './types';
 import { mapRowToActivity } from './activityMapping';
 
 export function createTripDetailActivitiesSlice(set: SetState, get: GetState): Partial<AppState> {
+  type ActivitiesUpdate = Database['public']['Tables']['activities']['Update'];
   return {
     activities: [],
     setActivities: (activities) => set({ activities }),
@@ -144,9 +145,8 @@ export function createTripDetailActivitiesSlice(set: SetState, get: GetState): P
 
     deleteActivity: async (activityId) => {
       try {
-        const { error } = await supabase
-          .from('activities')
-          .update({ deleted_at: new Date().toISOString() } as any)
+        const { error } = await (supabase.from('activities') as any)
+          .update({ deleted_at: new Date().toISOString() } as ActivitiesUpdate)
           .eq('id', activityId);
 
         if (error) {
