@@ -163,19 +163,29 @@ export function useTripDetail() {
     currentTrip: data.currentTrip,
   });
   const scenariosState = useTripScenarios(data.tripId);
+  const generateAiScenario = useStore((s) => s.generateAiScenario);
+  const applyScenarioAsBase = useStore((s) => s.applyScenarioAsBase);
+  const importScenarioActivityToItinerary = useStore((s) => s.importScenarioActivityToItinerary);
 
   useEffect(() => {
     scenariosState.load();
   }, [scenariosState, scenariosState.load]);
 
+  const scenarios = data.currentTrip?.active_itinerary_id
+    ? scenariosState.scenarios.filter((s) => s.id !== data.currentTrip?.active_itinerary_id)
+    : scenariosState.scenarios;
+
   return {
     ...data,
     ...activities,
     ...permissions,
-    scenarios: scenariosState.scenarios,
+    scenarios,
     scenariosLoading: scenariosState.loading,
     scenariosError: scenariosState.error,
     createScenario: scenariosState.create,
     deleteScenario: scenariosState.remove,
+    generateAiScenario,
+    applyScenarioAsBase,
+    importScenarioActivityToItinerary,
   };
 }

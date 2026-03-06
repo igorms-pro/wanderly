@@ -92,6 +92,7 @@ export default function TripDetailPage() {
     getUserVote,
     activitiesByDate,
     sortedDates,
+    itineraryDayIdByDate,
     activityParticipantsMap,
     memberProfiles,
     showAddActivityModal,
@@ -103,6 +104,9 @@ export default function TripDetailPage() {
     canManageScenarios,
     createScenario,
     deleteScenario,
+    generateAiScenario,
+    applyScenarioAsBase,
+    importScenarioActivityToItinerary,
   } = useTripDetail();
 
   if (loading) {
@@ -203,6 +207,7 @@ export default function TripDetailPage() {
             canVote={!!user}
             activitiesByDate={activitiesByDate}
             sortedDates={sortedDates}
+            itineraryDayIdByDate={itineraryDayIdByDate}
             votingActivityId={votingActivityId}
             getVoteCounts={getVoteCounts}
             getUserVote={getUserVote}
@@ -222,8 +227,20 @@ export default function TripDetailPage() {
             scenarios={scenarios}
             canCreateScenarios={canCreateActivitiesAndScenarios()}
             canManageScenarios={canManageScenarios()}
+            onGenerateAiScenario={async () => {
+              if (!currentTrip) return;
+              await generateAiScenario(currentTrip, tripMembers.length);
+            }}
             onCreateScenario={createScenario}
             onDeleteScenario={deleteScenario}
+            onUseScenarioAsBase={async (scenarioId) => {
+              if (!tripId) return;
+              await applyScenarioAsBase(tripId, scenarioId);
+            }}
+            onAddScenarioActivityToItinerary={async (date, activity) => {
+              if (!tripId) return;
+              await importScenarioActivityToItinerary(tripId, date, activity);
+            }}
           />
         )}
         {activeTab === 'chat' && tripId && <TripChat tripId={tripId} userRole={getUserRole()} />}

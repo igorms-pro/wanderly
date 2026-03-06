@@ -12,6 +12,8 @@ interface UseCreateActivityFormOptions {
 export function useCreateActivityForm({ tripId, onSuccess }: UseCreateActivityFormOptions) {
   const { t } = useTranslation();
   const createActivity = useStore((state) => state.createActivity);
+  const currentTrip = useStore((state) => state.currentTrip);
+  const getActiveItineraryDayIdByDate = useStore((state) => state.getActiveItineraryDayIdByDate);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -91,6 +93,10 @@ export function useCreateActivityForm({ tripId, onSuccess }: UseCreateActivityFo
 
       await createActivity({
         trip_id: tripId,
+        itinerary_day_id:
+          currentTrip?.id === tripId && formData.date
+            ? (getActiveItineraryDayIdByDate(formData.date) ?? undefined)
+            : undefined,
         title: formData.title.trim(),
         description: formData.description.trim() || undefined,
         category: formData.category || undefined,

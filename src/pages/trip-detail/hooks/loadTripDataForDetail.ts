@@ -131,10 +131,12 @@ export async function loadTripDataForDetail(params: LoadTripDataParams): Promise
       setMemberProfiles({});
     }
 
-    const { ensureActiveItinerary, loadActivities, loadVotes } = getState();
+    const { ensureActiveItinerary, loadActiveItineraryDays, loadActivities, loadVotes } =
+      getState();
     // Ensure the trip has a single source-of-truth itinerary.
     // This is required for AI scenarios ("use as base" + "import activity") later.
-    await ensureActiveItinerary(mappedTrip);
+    const activeItineraryId = await ensureActiveItinerary(mappedTrip);
+    await loadActiveItineraryDays(activeItineraryId);
     await loadActivities(tripId);
     const { activities } = getState();
     if (activities.length > 0) {

@@ -7,6 +7,7 @@ import { moveActivityWithinDay, moveActivityToOtherDay } from './itinerary-reord
 interface UseItineraryDragAndDropArgs {
   activitiesByDate: Record<string, Activity[]>;
   sortedDates: string[];
+  itineraryDayIdByDate: Record<string, string>;
   canEdit: boolean;
 }
 
@@ -26,6 +27,7 @@ interface UseItineraryDragAndDropResult {
 export function useItineraryDragAndDrop({
   activitiesByDate,
   sortedDates,
+  itineraryDayIdByDate,
   canEdit,
 }: UseItineraryDragAndDropArgs): UseItineraryDragAndDropResult {
   const [draggingActivityId, setDraggingActivityId] = useState<string | null>(null);
@@ -55,17 +57,12 @@ export function useItineraryDragAndDrop({
       const all = sortedDates.flatMap((d) => activitiesByDate[d] ?? []);
       const activity = all.find((a) => a.id === activityId);
       if (!activity) return;
-      const currentDate = activity.start_time?.includes('T')
-        ? activity.start_time.split('T')[0]
-        : activity.created_at.split('T')[0];
-      if (currentDate === newDate) return; // Same day: order not persisted yet (no order field).
-      const timePart = activity.start_time?.includes('T')
-        ? (activity.start_time.split('T')[1] ?? '10:00:00')
-        : '10:00:00';
-      const newStartTime = `${newDate}T${timePart}`;
-      await updateActivity(activityId, { start_time: newStartTime });
+      const targetDayId = itineraryDayIdByDate[newDate];
+      if (!targetDayId) return;
+      if (activity.itinerary_day_id === targetDayId) return; // Same day: order not persisted yet (no order field).
+      await updateActivity(activityId, { itinerary_day_id: targetDayId });
     },
-    [activitiesByDate, sortedDates, updateActivity],
+    [activitiesByDate, itineraryDayIdByDate, sortedDates, updateActivity],
   );
 
   const handleDropOnActivity = useCallback(
@@ -84,16 +81,13 @@ export function useItineraryDragAndDrop({
           );
 
       if (!sameDay) {
+        const targetDayId = itineraryDayIdByDate[targetDate];
         const targetList = nextByDate[targetDate] ?? [];
         const movedIndex = targetList.findIndex((a) => a.id === draggingActivityId);
-        if (movedIndex !== -1) {
+        if (movedIndex !== -1 && targetDayId) {
           const moved = targetList[movedIndex];
-          const timePart = moved.start_time?.includes('T')
-            ? (moved.start_time.split('T')[1] ?? '10:00:00')
-            : '10:00:00';
-          const newStartTime = `${targetDate}T${timePart}`;
           const patched = [...targetList];
-          patched[movedIndex] = { ...moved, start_time: newStartTime };
+          patched[movedIndex] = { ...moved, itinerary_day_id: targetDayId };
           nextByDate = { ...nextByDate, [targetDate]: patched };
         }
       }
@@ -109,6 +103,7 @@ export function useItineraryDragAndDrop({
       canEdit,
       draggingActivityId,
       draggingDate,
+      itineraryDayIdByDate,
       persistReorder,
       setActivities,
       sortedDates,
@@ -127,16 +122,13 @@ export function useItineraryDragAndDrop({
         0,
       );
 
+      const targetDayId = itineraryDayIdByDate[targetDate];
       const targetList = nextByDate[targetDate] ?? [];
       const movedIndex = targetList.findIndex((a) => a.id === draggingActivityId);
-      if (movedIndex !== -1) {
+      if (movedIndex !== -1 && targetDayId) {
         const moved = targetList[movedIndex];
-        const timePart = moved.start_time?.includes('T')
-          ? (moved.start_time.split('T')[1] ?? '10:00:00')
-          : '10:00:00';
-        const newStartTime = `${targetDate}T${timePart}`;
         const patched = [...targetList];
-        patched[movedIndex] = { ...moved, start_time: newStartTime };
+        patched[movedIndex] = { ...moved, itinerary_day_id: targetDayId };
         nextByDate = { ...nextByDate, [targetDate]: patched };
       }
 
@@ -151,6 +143,7 @@ export function useItineraryDragAndDrop({
       canEdit,
       draggingActivityId,
       draggingDate,
+      itineraryDayIdByDate,
       persistReorder,
       setActivities,
       sortedDates,

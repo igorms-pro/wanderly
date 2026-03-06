@@ -4,10 +4,17 @@ interface TripScenarioListProps {
   scenarios: TripScenario[];
   canManage: boolean;
   onDelete: (scenarioId: string) => void;
+  onPreview: (scenarioId: string) => void;
   t: (key: string) => string;
 }
 
-export function TripScenarioList({ scenarios, canManage, onDelete, t }: TripScenarioListProps) {
+export function TripScenarioList({
+  scenarios,
+  canManage,
+  onDelete,
+  onPreview,
+  t,
+}: TripScenarioListProps) {
   if (scenarios.length === 0) {
     return (
       <p className="text-sm text-gray-500 dark:text-gray-400">{t('tripDetail.noScenariosYet')}</p>
@@ -30,15 +37,24 @@ export function TripScenarioList({ scenarios, canManage, onDelete, t }: TripScen
               {scenario.isAiGenerated ? ` · ${t('tripDetail.scenarioAiBadge')}` : ''}
             </p>
           </div>
-          {canManage && (
+          <div className="ml-3 flex items-center gap-3">
             <button
               type="button"
-              onClick={() => onDelete(scenario.id)}
-              className="ml-3 text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+              onClick={() => onPreview(scenario.id)}
+              className="text-xs text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100"
             >
-              {t('tripDetail.deleteScenario')}
+              {t('tripDetail.previewScenario')}
             </button>
-          )}
+            {canManage && (
+              <button
+                type="button"
+                onClick={() => onDelete(scenario.id)}
+                className="text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+              >
+                {t('tripDetail.deleteScenario')}
+              </button>
+            )}
+          </div>
         </li>
       ))}
     </ul>

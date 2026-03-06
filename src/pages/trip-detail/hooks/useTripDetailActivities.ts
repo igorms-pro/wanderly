@@ -2,12 +2,13 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { useStore } from '@/lib/store';
 import type { Activity, Vote } from '@/lib/types/database.types';
-import { groupActivitiesByDate } from './itinerary-utils';
+import { buildActivitiesByDateForItinerary, buildItineraryDayMaps } from './itinerary-utils';
 import { supabase } from '@/lib/supabase';
 
 interface UseTripDetailActivitiesResult {
   activitiesByDate: Record<string, Activity[]>;
   sortedDates: string[];
+  itineraryDayIdByDate: Record<string, string>;
   votingActivityId: string | null;
   handleVote: (activityId: string, choice: 'up' | 'down') => Promise<void>;
   getVoteCounts: (activityId: string) => { upvotes: number; downvotes: number };
@@ -17,15 +18,41 @@ interface UseTripDetailActivitiesResult {
 export function useTripDetailActivities(t: (key: string) => string): UseTripDetailActivitiesResult {
   const user = useStore((state) => state.user);
   const activities = useStore((state) => state.activities);
+  const activeItineraryDays = useStore((state) => state.activeItineraryDays ?? []);
   const votes = useStore((state) => state.votes);
   const setVotes = useStore((state) => state.setVotes);
   const createOrUpdateVote = useStore((state) => state.createOrUpdateVote);
 
   const [votingActivityId, setVotingActivityId] = useState<string | null>(null);
 
-  const activitiesByDate = useMemo(() => groupActivitiesByDate(activities), [activities]);
+  const dayMaps = useMemo(() => buildItineraryDayMaps(activeItineraryDays), [activeItineraryDays]);
 
-  const sortedDates = useMemo(() => Object.keys(activitiesByDate).sort(), [activitiesByDate]);
+  const fallbackActivitiesByDate = useMemo(() => {
+    return activities.reduce<Record<string, Activity[]>>((acc, a) => {
+      const date = a.created_at.split('T')[0];
+      if (!acc[date]) acc[date] = [];
+      acc[date].push(a);
+      return acc;
+    }, {});
+  }, [activities]);
+
+  const sortedDates = useMemo(() => {
+    return dayMaps.sortedDates.length > 0
+      ? dayMaps.sortedDates
+      : Object.keys(fallbackActivitiesByDate).sort();
+  }, [dayMaps.sortedDates, fallbackActivitiesByDate]);
+
+  const activitiesByDate = useMemo(() => {
+    if (dayMaps.sortedDates.length === 0) return fallbackActivitiesByDate;
+
+    const grouped = buildActivitiesByDateForItinerary(activities, dayMaps.dateByItineraryDayId);
+    // Ensure all trip days exist as keys (even if no activities).
+    const withEmptyDays: Record<string, Activity[]> = {};
+    for (const date of dayMaps.sortedDates) {
+      withEmptyDays[date] = grouped[date] ?? [];
+    }
+    return withEmptyDays;
+  }, [activities, dayMaps.dateByItineraryDayId, dayMaps.sortedDates, fallbackActivitiesByDate]);
 
   const getUserVote = useCallback(
     (activityId: string): 'up' | 'down' | null => {
@@ -94,6 +121,7 @@ export function useTripDetailActivities(t: (key: string) => string): UseTripDeta
   return {
     activitiesByDate,
     sortedDates,
+    itineraryDayIdByDate: dayMaps.itineraryDayIdByDate,
     votingActivityId,
     handleVote,
     getVoteCounts,

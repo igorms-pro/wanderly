@@ -6,6 +6,7 @@ import { useItineraryDragAndDrop } from '../../hooks/useItineraryDragAndDrop';
 interface TripItineraryListViewProps {
   sortedDates: string[];
   activitiesByDate: Record<string, Activity[]>;
+  itineraryDayIdByDate: Record<string, string>;
   canVote: boolean;
   votingActivityId: string | null;
   getVoteCounts: (activityId: string) => { upvotes: number; downvotes: number };
@@ -25,6 +26,7 @@ interface TripItineraryListViewProps {
 export function TripItineraryListView({
   sortedDates,
   activitiesByDate,
+  itineraryDayIdByDate,
   canVote,
   votingActivityId,
   getVoteCounts,
@@ -43,6 +45,7 @@ export function TripItineraryListView({
   const dragAndDrop = useItineraryDragAndDrop({
     activitiesByDate,
     sortedDates,
+    itineraryDayIdByDate,
     canEdit: true,
   });
 

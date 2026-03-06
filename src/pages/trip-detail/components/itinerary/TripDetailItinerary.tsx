@@ -23,6 +23,7 @@ interface TripDetailItineraryProps {
   canVote: boolean;
   activitiesByDate: Record<string, Activity[]>;
   sortedDates: string[];
+  itineraryDayIdByDate: Record<string, string>;
   votingActivityId: string | null;
   getVoteCounts: (activityId: string) => { upvotes: number; downvotes: number };
   getUserVote: (activityId: string) => 'up' | 'down' | null;
@@ -40,8 +41,14 @@ interface TripDetailItineraryProps {
   scenarios?: import('@/lib/store/tripDetailSlice.scenarios').TripScenario[];
   canCreateScenarios?: boolean;
   canManageScenarios?: boolean;
+  onGenerateAiScenario?: () => Promise<void>;
   onCreateScenario?: (title: string | null, days: { date: string; dayIndex?: number }[]) => void;
   onDeleteScenario?: (scenarioId: string) => void;
+  onUseScenarioAsBase?: (scenarioItineraryId: string) => Promise<void>;
+  onAddScenarioActivityToItinerary?: (
+    date: string,
+    activity: import('@/lib/types/database.types').Activity,
+  ) => Promise<void>;
 }
 
 export function TripDetailItinerary({
@@ -51,6 +58,7 @@ export function TripDetailItinerary({
   canVote,
   activitiesByDate,
   sortedDates,
+  itineraryDayIdByDate,
   votingActivityId,
   getVoteCounts,
   getUserVote,
@@ -68,8 +76,11 @@ export function TripDetailItinerary({
   scenarios = [],
   canCreateScenarios = false,
   canManageScenarios = false,
+  onGenerateAiScenario,
   onCreateScenario,
   onDeleteScenario,
+  onUseScenarioAsBase,
+  onAddScenarioActivityToItinerary,
 }: TripDetailItineraryProps) {
   const {
     viewMode,
@@ -109,6 +120,7 @@ export function TripDetailItinerary({
         <TripItineraryListView
           sortedDates={sortedDatesForView}
           activitiesByDate={activitiesByDateForView}
+          itineraryDayIdByDate={itineraryDayIdByDate}
           canVote={canVote}
           votingActivityId={votingActivityId}
           getVoteCounts={getVoteCounts}
@@ -160,17 +172,24 @@ export function TripDetailItinerary({
         />
       )}
 
-      {onCreateScenario && onDeleteScenario && (
-        <TripScenariosSection
-          scenarios={scenarios}
-          sortedDates={sortedDates}
-          canCreate={canCreateScenarios}
-          canManage={canManageScenarios}
-          onCreateScenario={onCreateScenario}
-          onDeleteScenario={onDeleteScenario}
-          t={t}
-        />
-      )}
+      {onCreateScenario &&
+        onDeleteScenario &&
+        onGenerateAiScenario &&
+        onUseScenarioAsBase &&
+        onAddScenarioActivityToItinerary && (
+          <TripScenariosSection
+            scenarios={scenarios}
+            sortedDates={sortedDates}
+            canCreate={canCreateScenarios}
+            canManage={canManageScenarios}
+            onGenerateAiScenario={onGenerateAiScenario}
+            onCreateScenario={onCreateScenario}
+            onDeleteScenario={onDeleteScenario}
+            onUseScenarioAsBase={onUseScenarioAsBase}
+            onAddScenarioActivityToItinerary={onAddScenarioActivityToItinerary}
+            t={t}
+          />
+        )}
     </div>
   );
 }

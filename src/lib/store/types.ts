@@ -1,5 +1,6 @@
 import type { User, Trip, Activity, Message, Vote } from '../types/database.types';
 import type { TripScenario } from './tripDetailSlice.scenarios';
+import type { Database } from '../types/database.types';
 
 /** Full app state and actions – composed from slices in store/*.ts */
 export interface AppState {
@@ -28,6 +29,12 @@ export interface AppState {
   ensureActiveItinerary: (trip: Trip) => Promise<string>;
   setActiveItinerary: (tripId: string, itineraryId: string) => Promise<void>;
 
+  // Active itinerary days (source of truth)
+  activeItineraryDays: Database['public']['Tables']['itinerary_days']['Row'][];
+  setActiveItineraryDays: (days: Database['public']['Tables']['itinerary_days']['Row'][]) => void;
+  loadActiveItineraryDays: (itineraryId: string) => Promise<void>;
+  getActiveItineraryDayIdByDate: (date: string) => string | null;
+
   // Activities
   activities: Activity[];
   setActivities: (activities: Activity[]) => void;
@@ -48,6 +55,36 @@ export interface AppState {
     payload: { title: string | null; days: { date: string; dayIndex?: number }[] },
   ) => Promise<TripScenario>;
   deleteScenario: (scenarioId: string) => Promise<void>;
+  generateAiScenario: (trip: Trip, membersCount: number, locale?: string) => Promise<void>;
+  applyScenarioAsBase: (tripId: string, scenarioItineraryId: string) => Promise<void>;
+  importScenarioActivityToItinerary: (
+    tripId: string,
+    date: string,
+    activity: Pick<
+      Activity,
+      | 'title'
+      | 'description'
+      | 'category'
+      | 'start_time'
+      | 'end_time'
+      | 'cost_cents'
+      | 'cost_min_cents'
+      | 'cost_max_cents'
+      | 'currency'
+      | 'place_id'
+      | 'place_name'
+      | 'lat'
+      | 'lon'
+      | 'transport_type'
+      | 'transport_notes'
+      | 'transport_duration_minutes'
+      | 'transport_cost_cents'
+      | 'organizer_notes'
+      | 'packing_checklist'
+      | 'source'
+      | 'status'
+    >,
+  ) => Promise<void>;
 
   // Votes
   votes: Record<string, Vote[]>;
