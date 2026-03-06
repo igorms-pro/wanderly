@@ -25,6 +25,8 @@ export interface AppState {
   createTrip: (tripData: CreateTripData) => Promise<Trip>;
   updateTrip: (tripId: string, updates: Partial<Trip>) => Promise<void>;
   deleteTrip: (tripId: string) => Promise<void>;
+  ensureActiveItinerary: (trip: Trip) => Promise<string>;
+  setActiveItinerary: (tripId: string, itineraryId: string) => Promise<void>;
 
   // Activities
   activities: Activity[];

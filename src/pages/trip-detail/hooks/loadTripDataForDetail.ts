@@ -68,6 +68,7 @@ export async function loadTripDataForDetail(params: LoadTripDataParams): Promise
       budget_cents: tripData.budget_cents ?? null,
       currency: tripData.currency ?? null,
       constraints: tripData.constraints ?? null,
+      active_itinerary_id: tripData.active_itinerary_id ?? null,
       created_at: tripData.created_at,
       updated_at: tripData.updated_at,
       deleted_at: tripData.deleted_at ?? null,
@@ -130,7 +131,10 @@ export async function loadTripDataForDetail(params: LoadTripDataParams): Promise
       setMemberProfiles({});
     }
 
-    const { loadActivities, loadVotes } = getState();
+    const { ensureActiveItinerary, loadActivities, loadVotes } = getState();
+    // Ensure the trip has a single source-of-truth itinerary.
+    // This is required for AI scenarios ("use as base" + "import activity") later.
+    await ensureActiveItinerary(mappedTrip);
     await loadActivities(tripId);
     const { activities } = getState();
     if (activities.length > 0) {

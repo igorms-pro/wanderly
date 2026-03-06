@@ -52,16 +52,20 @@ export function useItineraryDragAndDrop({
 
   const persistReorder = useCallback(
     async (activityId: string, newDate: string) => {
-      const all = Object.values(activitiesByDate).flat();
+      const all = sortedDates.flatMap((d) => activitiesByDate[d] ?? []);
       const activity = all.find((a) => a.id === activityId);
       if (!activity) return;
-      await updateActivity(activityId, {
-        itinerary_day_id: activity.itinerary_day_id,
-        start_time: activity.start_time,
-        // In future we might store explicit order per day.
-      });
+      const currentDate = activity.start_time?.includes('T')
+        ? activity.start_time.split('T')[0]
+        : activity.created_at.split('T')[0];
+      if (currentDate === newDate) return; // Same day: order not persisted yet (no order field).
+      const timePart = activity.start_time?.includes('T')
+        ? (activity.start_time.split('T')[1] ?? '10:00:00')
+        : '10:00:00';
+      const newStartTime = `${newDate}T${timePart}`;
+      await updateActivity(activityId, { start_time: newStartTime });
     },
-    [activitiesByDate, updateActivity],
+    [activitiesByDate, sortedDates, updateActivity],
   );
 
   const handleDropOnActivity = useCallback(
@@ -69,7 +73,7 @@ export function useItineraryDragAndDrop({
       if (!canEdit || !draggingActivityId || !draggingDate) return;
       const sameDay = draggingDate === targetDate;
 
-      const nextByDate = sameDay
+      let nextByDate = sameDay
         ? moveActivityWithinDay(activitiesByDate, targetDate, draggingActivityId, targetIndex)
         : moveActivityToOtherDay(
             activitiesByDate,
@@ -79,19 +83,43 @@ export function useItineraryDragAndDrop({
             targetIndex,
           );
 
-      setActivities(Object.values(nextByDate).flat());
+      if (!sameDay) {
+        const targetList = nextByDate[targetDate] ?? [];
+        const movedIndex = targetList.findIndex((a) => a.id === draggingActivityId);
+        if (movedIndex !== -1) {
+          const moved = targetList[movedIndex];
+          const timePart = moved.start_time?.includes('T')
+            ? (moved.start_time.split('T')[1] ?? '10:00:00')
+            : '10:00:00';
+          const newStartTime = `${targetDate}T${timePart}`;
+          const patched = [...targetList];
+          patched[movedIndex] = { ...moved, start_time: newStartTime };
+          nextByDate = { ...nextByDate, [targetDate]: patched };
+        }
+      }
+
+      const flat = sortedDates.flatMap((d) => nextByDate[d] ?? []);
+      setActivities(flat);
       await persistReorder(draggingActivityId, targetDate);
       setDraggingActivityId(null);
       setDraggingDate(null);
     },
-    [activitiesByDate, canEdit, draggingActivityId, draggingDate, persistReorder, setActivities],
+    [
+      activitiesByDate,
+      canEdit,
+      draggingActivityId,
+      draggingDate,
+      persistReorder,
+      setActivities,
+      sortedDates,
+    ],
   );
 
   const handleDropOnEmptyDay = useCallback(
     async (targetDate: string) => {
       if (!canEdit || !draggingActivityId || !draggingDate) return;
 
-      const nextByDate = moveActivityToOtherDay(
+      let nextByDate = moveActivityToOtherDay(
         activitiesByDate,
         draggingDate,
         targetDate,
@@ -99,12 +127,34 @@ export function useItineraryDragAndDrop({
         0,
       );
 
-      setActivities(Object.values(nextByDate).flat());
+      const targetList = nextByDate[targetDate] ?? [];
+      const movedIndex = targetList.findIndex((a) => a.id === draggingActivityId);
+      if (movedIndex !== -1) {
+        const moved = targetList[movedIndex];
+        const timePart = moved.start_time?.includes('T')
+          ? (moved.start_time.split('T')[1] ?? '10:00:00')
+          : '10:00:00';
+        const newStartTime = `${targetDate}T${timePart}`;
+        const patched = [...targetList];
+        patched[movedIndex] = { ...moved, start_time: newStartTime };
+        nextByDate = { ...nextByDate, [targetDate]: patched };
+      }
+
+      const flat = sortedDates.flatMap((d) => nextByDate[d] ?? []);
+      setActivities(flat);
       await persistReorder(draggingActivityId, targetDate);
       setDraggingActivityId(null);
       setDraggingDate(null);
     },
-    [activitiesByDate, canEdit, draggingActivityId, draggingDate, persistReorder, setActivities],
+    [
+      activitiesByDate,
+      canEdit,
+      draggingActivityId,
+      draggingDate,
+      persistReorder,
+      setActivities,
+      sortedDates,
+    ],
   );
 
   return {

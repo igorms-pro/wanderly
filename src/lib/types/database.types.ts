@@ -58,6 +58,7 @@ export interface Database {
           budget_cents: number | null; // INTEGER
           currency: string | null;
           constraints: Json | null; // JSONB - use TripConstraints for typed access
+          active_itinerary_id?: string | null; // UUID, references itineraries(id)
           created_at: string; // TIMESTAMPTZ
           updated_at?: string; // TIMESTAMPTZ (optional: API may omit)
           deleted_at?: string | null; // TIMESTAMPTZ (optional: API may omit)
@@ -73,6 +74,7 @@ export interface Database {
           budget_cents?: number | null;
           currency?: string | null;
           constraints?: Json | null;
+          active_itinerary_id?: string | null;
           created_at?: string;
           updated_at?: string;
           deleted_at?: string | null;
@@ -88,6 +90,7 @@ export interface Database {
           budget_cents?: number | null;
           currency?: string | null;
           constraints?: Json | null;
+          active_itinerary_id?: string | null;
           created_at?: string;
           updated_at?: string;
           deleted_at?: string | null;

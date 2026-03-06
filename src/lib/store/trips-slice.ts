@@ -69,6 +69,7 @@ export function createTripsSlice(set: SetState, get: GetState): Partial<AppState
           budget_cents: trip.budget_cents ?? undefined,
           currency: trip.currency ?? undefined,
           constraints: trip.constraints ?? undefined,
+          active_itinerary_id: trip.active_itinerary_id ?? undefined,
           created_at: trip.created_at,
           updated_at: trip.updated_at,
         }));
@@ -121,6 +122,7 @@ export function createTripsSlice(set: SetState, get: GetState): Partial<AppState
           budget_cents: tripFromDb.budget_cents ?? undefined,
           currency: tripFromDb.currency ?? undefined,
           constraints: tripFromDb.constraints ?? undefined,
+          active_itinerary_id: tripFromDb.active_itinerary_id ?? undefined,
           created_at: tripFromDb.created_at,
           updated_at: tripFromDb.updated_at,
         };
@@ -146,6 +148,8 @@ export function createTripsSlice(set: SetState, get: GetState): Partial<AppState
           updateData.budget_cents = updates.budget_cents ?? null;
         if (updates.currency !== undefined) updateData.currency = updates.currency ?? null;
         if (updates.constraints !== undefined) updateData.constraints = updates.constraints ?? null;
+        if (updates.active_itinerary_id !== undefined)
+          updateData.active_itinerary_id = updates.active_itinerary_id ?? null;
 
         const { data: trip, error } = await (supabase.from('trips') as any)
           .update(updateData)
@@ -171,6 +175,7 @@ export function createTripsSlice(set: SetState, get: GetState): Partial<AppState
           budget_cents: tripData.budget_cents ?? undefined,
           currency: tripData.currency ?? undefined,
           constraints: tripData.constraints ?? undefined,
+          active_itinerary_id: tripData.active_itinerary_id ?? undefined,
           created_at: tripData.created_at,
           updated_at: tripData.updated_at,
         };
