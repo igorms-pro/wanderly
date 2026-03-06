@@ -777,7 +777,7 @@ Complete trip detail screen core: header, tabs, trip info, edit/delete trip. Vue
 
 ## 🎯 Issue #9: Trip Detail Screen - Activities & Scenarios
 
-**Status:** 🔴 **NOT STARTED**  
+**Status:** 🟡 **PARTIALLY DONE**  
 **Priority:** HIGH  
 **Phase:** Screen 4b  
 **Dependencies:** Issue #8 (trip detail core)
@@ -878,6 +878,18 @@ Implement activities and scenarios CRUD in trip detail screen.
   - [ ] Buttons
   - [ ] Activity statuses
   - [ ] Error messages
+
+### État actuel (février 2026)
+
+- Déjà en place via `TripDetailItinerary` + `CreateActivityModal` + slice `activities` du store :
+  - Affichage des activités jour par jour avec vues **liste / calendrier / timeline** et recherche.
+  - Cartes d’activités avec statut (proposed/confirmed/rejected), source (humain / IA), coût, lieu, participants et badge IA.
+  - Création d’activités humaines via modal dédiée (validation, persistance Supabase, i18n, realtime).
+- Pas encore fait / à garder dans le scope de **#9** (ou à splitter plus tard) :
+  - Scénarios (builder, liste, édition, suppression).
+  - Drag & drop pour réordonner les activités et les déplacer entre jours.
+  - Permissions fines par rôle + phase (planning vs trip verrouillé) sur CRUD activité.
+  - Couverture de tests (unit + E2E) ciblée sur activités & scénarios.
 
 ### Acceptance Criteria
 
@@ -1356,7 +1368,7 @@ _Will be tracked here as discovered_
 - **Issue #6 (Auth Screens)**: 🟢 100% - Completed (MVP, passwordless + OAuth)
 - **Issue #7 (Dashboard)**: 🟢 100% - Completed (constraints, design overhaul, quick actions)
 - **Issue #8 (Trip Detail Core)**: 🟡 70% - Partially Done (reste : animations + realtime post-edit + tests)
-- **Issue #9 (Activities & Scenarios)**: 🔴 0% - Not Started
+- **Issue #9 (Activities & Scenarios)**: 🟡 40% - Partially Done (activités listées + création humaines ; scénarios & drag/drop à faire)
 - **Issue #10 (Voting System)**: 🔴 0% - Not Started (BLOCKED by #9)
 - **Issue #11 (Chat)**: 🟡 50% - Partially Done
 - **Issue #12 (AI Generation)**: 🔴 0% - Not Started

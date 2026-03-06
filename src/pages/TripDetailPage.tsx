@@ -96,6 +96,13 @@ export default function TripDetailPage() {
     memberProfiles,
     showAddActivityModal,
     setShowAddActivityModal,
+    scenarios,
+    scenariosLoading,
+    scenariosError,
+    canCreateActivitiesAndScenarios,
+    canManageScenarios,
+    createScenario,
+    deleteScenario,
   } = useTripDetail();
 
   if (loading) {
@@ -212,6 +219,11 @@ export default function TripDetailPage() {
             activityParticipantsMap={activityParticipantsMap}
             tripMembers={tripMembers}
             memberProfiles={memberProfiles}
+            scenarios={scenarios}
+            canCreateScenarios={canCreateActivitiesAndScenarios()}
+            canManageScenarios={canManageScenarios()}
+            onCreateScenario={createScenario}
+            onDeleteScenario={deleteScenario}
           />
         )}
         {activeTab === 'chat' && tripId && <TripChat tripId={tripId} userRole={getUserRole()} />}

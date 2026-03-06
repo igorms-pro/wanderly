@@ -1,14 +1,12 @@
-import { useState, useEffect } from 'react';
 import type { Activity, TripMember } from '@/lib/types/database.types';
-import { useItinerarySearch } from './useItinerarySearch';
 import { TripItineraryContextSummary } from './TripItineraryContextSummary';
 import { ItineraryViewTabs } from './ItineraryViewTabs';
 import { TripItineraryEmptyState } from './TripItineraryEmptyState';
 import { TripItineraryListView } from './TripItineraryListView';
 import { TripItineraryCalendarView } from './TripItineraryCalendarView';
 import { TripItineraryTimelineView } from './TripItineraryTimelineView';
-
-const ITINERARY_VIEW_KEY = 'tripDetail:itineraryView';
+import { TripScenariosSection } from '../scenarios/TripScenariosSection';
+import { useItineraryViewState } from './useItineraryViewState';
 
 export type ItineraryViewMode = 'list' | 'calendar' | 'timeline';
 
@@ -39,80 +37,11 @@ interface TripDetailItineraryProps {
   activityParticipantsMap?: Record<string, string[]>;
   tripMembers?: TripMember[];
   memberProfiles?: Record<string, { display_name: string | null; avatar_url: string | null }>;
-}
-
-interface UseItineraryViewStateArgs {
-  activitiesByDate: Record<string, Activity[]>;
-  sortedDates: string[];
-}
-
-interface UseItineraryViewStateResult {
-  viewMode: ItineraryViewMode;
-  selectedDate: string | null;
-  searchQuery: string;
-  activitiesByDateForView: Record<string, Activity[]>;
-  sortedDatesForView: string[];
-  handleChangeViewMode: (mode: ItineraryViewMode) => void;
-  handleSelectDate: (date: string | null) => void;
-  handleSearchChange: (value: string) => void;
-}
-
-function useItineraryViewState({
-  activitiesByDate,
-  sortedDates,
-}: UseItineraryViewStateArgs): UseItineraryViewStateResult {
-  const [viewMode, setViewMode] = useState<ItineraryViewMode>(() => {
-    try {
-      const s = sessionStorage.getItem(ITINERARY_VIEW_KEY);
-      if (s === 'list' || s === 'calendar' || s === 'timeline') return s;
-    } catch {
-      /* ignore */
-    }
-    return 'list';
-  });
-
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const { activitiesByDate: filteredActivitiesByDate, sortedDates: filteredSortedDates } =
-    useItinerarySearch(activitiesByDate, sortedDates, searchQuery);
-
-  useEffect(() => {
-    try {
-      sessionStorage.setItem(ITINERARY_VIEW_KEY, viewMode);
-    } catch {
-      /* ignore */
-    }
-  }, [viewMode]);
-
-  const isSearching = searchQuery.trim().length > 0;
-
-  const activitiesByDateForView = isSearching ? filteredActivitiesByDate : activitiesByDate;
-  const sortedDatesForView = isSearching ? filteredSortedDates : sortedDates;
-
-  const handleChangeViewMode = (mode: ItineraryViewMode) => {
-    setViewMode(mode);
-    setSelectedDate(null);
-  };
-
-  const handleSelectDate = (date: string | null) => {
-    setSelectedDate(date);
-  };
-
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value);
-  };
-
-  return {
-    viewMode,
-    selectedDate,
-    searchQuery,
-    activitiesByDateForView,
-    sortedDatesForView,
-    handleChangeViewMode,
-    handleSelectDate,
-    handleSearchChange,
-  };
+  scenarios?: import('@/lib/store/tripDetailSlice.scenarios').TripScenario[];
+  canCreateScenarios?: boolean;
+  canManageScenarios?: boolean;
+  onCreateScenario?: (title: string | null, days: { date: string; dayIndex?: number }[]) => void;
+  onDeleteScenario?: (scenarioId: string) => void;
 }
 
 export function TripDetailItinerary({
@@ -136,6 +65,11 @@ export function TripDetailItinerary({
   activityParticipantsMap = {},
   tripMembers = [],
   memberProfiles = {},
+  scenarios = [],
+  canCreateScenarios = false,
+  canManageScenarios = false,
+  onCreateScenario,
+  onDeleteScenario,
 }: TripDetailItineraryProps) {
   const {
     viewMode,
@@ -223,6 +157,18 @@ export function TripDetailItinerary({
           activityParticipantsMap={activityParticipantsMap}
           tripMembers={tripMembers}
           memberProfiles={memberProfiles}
+        />
+      )}
+
+      {onCreateScenario && onDeleteScenario && (
+        <TripScenariosSection
+          scenarios={scenarios}
+          sortedDates={sortedDates}
+          canCreate={canCreateScenarios}
+          canManage={canManageScenarios}
+          onCreateScenario={onCreateScenario}
+          onDeleteScenario={onDeleteScenario}
+          t={t}
         />
       )}
     </div>

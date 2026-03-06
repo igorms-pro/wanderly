@@ -1,4 +1,5 @@
 import type { User, Trip, Activity, Message, Vote } from '../types/database.types';
+import type { TripScenario } from './tripDetailSlice.scenarios';
 
 /** Full app state and actions – composed from slices in store/*.ts */
 export interface AppState {
@@ -33,6 +34,18 @@ export interface AppState {
   loadActivities: (tripId: string) => Promise<void>;
   createActivity: (activityData: CreateActivityData) => Promise<Activity>;
   updateActivity: (activityId: string, updates: Partial<Activity>) => Promise<void>;
+
+  // Scenarios
+  scenarios: TripScenario[];
+  setScenarios: (scenarios: TripScenario[]) => void;
+  addScenario: (scenario: TripScenario) => void;
+  removeScenario: (scenarioId: string) => void;
+  loadScenarios: (tripId: string) => Promise<void>;
+  createScenario: (
+    tripId: string,
+    payload: { title: string | null; days: { date: string; dayIndex?: number }[] },
+  ) => Promise<TripScenario>;
+  deleteScenario: (scenarioId: string) => Promise<void>;
 
   // Votes
   votes: Record<string, Vote[]>;
