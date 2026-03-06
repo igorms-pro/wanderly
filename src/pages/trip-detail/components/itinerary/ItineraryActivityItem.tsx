@@ -19,6 +19,10 @@ interface ItineraryActivityItemProps {
   activityParticipantsMap: Record<string, string[]>;
   tripMembers: TripMember[];
   memberProfiles: Record<string, MemberProfile>;
+  onDragStart?: (activityId: string, date: string) => void;
+  onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDrop?: (activityId: string, date: string, index: number) => void;
+  date?: string;
 }
 
 export function ItineraryActivityItem({
@@ -35,6 +39,10 @@ export function ItineraryActivityItem({
   activityParticipantsMap,
   tripMembers,
   memberProfiles,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  date,
 }: ItineraryActivityItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -47,7 +55,26 @@ export function ItineraryActivityItem({
       : 'border-l-2 border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900/40 dark:hover:bg-gray-800/70 transition';
 
   return (
-    <div className={accentClass}>
+    <div
+      className={accentClass}
+      draggable={!!onDragStart && !!date}
+      onDragStart={
+        onDragStart && date
+          ? () => {
+              onDragStart(activity.id, date);
+            }
+          : undefined
+      }
+      onDragOver={onDragOver}
+      onDrop={
+        onDrop && date
+          ? (event) => {
+              event.preventDefault();
+              onDrop(activity.id, date, index);
+            }
+          : undefined
+      }
+    >
       <ItineraryActivityHeaderRow
         activity={activity}
         isExpanded={isExpanded}

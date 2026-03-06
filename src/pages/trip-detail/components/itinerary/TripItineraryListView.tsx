@@ -1,6 +1,7 @@
 import type { Activity, TripMember } from '@/lib/types/database.types';
 import type { ConstraintsSummary } from './TripDetailItinerary';
 import { ItineraryDayBlock } from './ItineraryDayBlock';
+import { useItineraryDragAndDrop } from '../../hooks/useItineraryDragAndDrop';
 
 interface TripItineraryListViewProps {
   sortedDates: string[];
@@ -39,6 +40,12 @@ export function TripItineraryListView({
 }: TripItineraryListViewProps) {
   const hasSearchNoResults = searchQuery.trim() !== '' && sortedDates.length === 0;
 
+  const dragAndDrop = useItineraryDragAndDrop({
+    activitiesByDate,
+    sortedDates,
+    canEdit: true,
+  });
+
   if (hasSearchNoResults) {
     return (
       <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-6 py-8 text-center">
@@ -65,6 +72,10 @@ export function TripItineraryListView({
           activityParticipantsMap={activityParticipantsMap}
           tripMembers={tripMembers}
           memberProfiles={memberProfiles}
+          onDragStart={dragAndDrop.handleDragStart}
+          onDragOver={dragAndDrop.handleDragOver}
+          onDropOnActivity={dragAndDrop.handleDropOnActivity}
+          onDropOnEmpty={dragAndDrop.handleDropOnEmptyDay}
         />
       ))}
     </div>

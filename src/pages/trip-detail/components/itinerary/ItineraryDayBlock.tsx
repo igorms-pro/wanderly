@@ -20,6 +20,10 @@ interface ItineraryDayBlockProps {
   memberProfiles?: Record<string, MemberProfile>;
   showClose?: boolean;
   onClose?: () => void;
+  onDragStart?: (activityId: string, date: string) => void;
+  onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDropOnActivity?: (activityId: string, date: string, index: number) => void;
+  onDropOnEmpty?: (date: string) => void;
 }
 
 export function ItineraryDayBlock({
@@ -38,6 +42,10 @@ export function ItineraryDayBlock({
   memberProfiles = {},
   showClose,
   onClose,
+  onDragStart,
+  onDragOver,
+  onDropOnActivity,
+  onDropOnEmpty,
 }: ItineraryDayBlockProps) {
   const sorted = [...activities].sort((a, b) =>
     (a.start_time || '').localeCompare(b.start_time || ''),
@@ -65,7 +73,20 @@ export function ItineraryDayBlock({
         )}
       </div>
 
-      <div className="divide-y divide-gray-100 dark:divide-gray-700">
+      <div
+        className="divide-y divide-gray-100 dark:divide-gray-700"
+        onDragOver={onDragOver}
+        onDrop={
+          onDropOnEmpty
+            ? (event) => {
+                event.preventDefault();
+                if (activities.length === 0) {
+                  onDropOnEmpty(date);
+                }
+              }
+            : undefined
+        }
+      >
         {sorted.map((activity, index) => (
           <ItineraryActivityItem
             key={activity.id}
@@ -82,6 +103,10 @@ export function ItineraryDayBlock({
             activityParticipantsMap={activityParticipantsMap || {}}
             tripMembers={tripMembers}
             memberProfiles={memberProfiles || {}}
+            onDragStart={onDragStart}
+            onDragOver={onDragOver}
+            onDrop={onDropOnActivity}
+            date={date}
           />
         ))}
       </div>
