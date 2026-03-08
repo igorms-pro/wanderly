@@ -26,7 +26,7 @@ export function ItineraryViewTabs({
   ];
 
   return (
-    <div className="flex flex-col gap-3 sticky top-16 sm:top-20 z-20 py-2 -mx-4 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+    <div className="flex flex-col gap-3 sticky top-[10rem] sm:top-[11rem] z-10 py-2 -mx-4 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div
           className="flex rounded-xl bg-gray-100 dark:bg-gray-700 p-1 w-fit"

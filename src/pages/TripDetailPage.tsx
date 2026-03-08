@@ -114,6 +114,7 @@ export default function TripDetailPage() {
     canCreateActivitiesAndScenarios,
     canManageScenarios,
     canEditActivities,
+    canReorderActivities,
     canDeleteActivities,
     createScenario,
     deleteScenario,
@@ -217,6 +218,7 @@ export default function TripDetailPage() {
             startDate={currentTrip.start_date}
             endDate={currentTrip.end_date}
             canEdit={canEditActivities()}
+            canReorder={canReorderActivities()}
             canVote={!!user}
             activitiesByDate={activitiesByDate}
             sortedDates={sortedDates}

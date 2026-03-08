@@ -73,6 +73,14 @@ export function useTripDetailPermissions({
     return role === 'owner' || role === 'editor' || role === 'moderator';
   }, [currentTrip, getUserRole, user]);
 
+  /** Only owner/editor/moderator can reorder activities (aligns with RLS can_write_trip). */
+  const canReorderActivities = useCallback((): boolean => {
+    if (!user || !currentTrip) return false;
+    if (currentTrip.status === 'archived') return false;
+    const role = getUserRole();
+    return role === 'owner' || role === 'editor' || role === 'moderator';
+  }, [currentTrip, getUserRole, user]);
+
   return {
     getUserRole,
     canEdit,
@@ -81,5 +89,6 @@ export function useTripDetailPermissions({
     canManageScenarios,
     canEditActivities,
     canDeleteActivities,
+    canReorderActivities,
   };
 }

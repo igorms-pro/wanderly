@@ -20,6 +20,7 @@ interface TripDetailItineraryProps {
   startDate: string;
   endDate: string;
   canEdit: boolean;
+  canReorder: boolean;
   canVote: boolean;
   activitiesByDate: Record<string, Activity[]>;
   sortedDates: string[];
@@ -57,6 +58,7 @@ export function TripDetailItinerary({
   startDate,
   endDate,
   canEdit,
+  canReorder,
   canVote,
   activitiesByDate,
   sortedDates,
@@ -126,6 +128,7 @@ export function TripDetailItinerary({
           activitiesByDate={activitiesByDateForView}
           itineraryDayIdByDate={itineraryDayIdByDate}
           canEdit={canEdit}
+          canReorder={canReorder}
           canVote={canVote}
           votingActivityId={votingActivityId}
           getVoteCounts={getVoteCounts}

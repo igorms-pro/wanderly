@@ -8,6 +8,7 @@ interface TripItineraryListViewProps {
   activitiesByDate: Record<string, Activity[]>;
   itineraryDayIdByDate: Record<string, string>;
   canEdit: boolean;
+  canReorder: boolean;
   canVote: boolean;
   votingActivityId: string | null;
   getVoteCounts: (activityId: string) => { upvotes: number; downvotes: number };
@@ -31,6 +32,7 @@ export function TripItineraryListView({
   activitiesByDate,
   itineraryDayIdByDate,
   canEdit,
+  canReorder,
   canVote,
   votingActivityId,
   getVoteCounts,
@@ -52,7 +54,7 @@ export function TripItineraryListView({
     activitiesByDate,
     sortedDates,
     itineraryDayIdByDate,
-    canEdit,
+    canEdit: canReorder,
   });
 
   if (hasSearchNoResults) {
@@ -81,10 +83,10 @@ export function TripItineraryListView({
           activityParticipantsMap={activityParticipantsMap}
           tripMembers={tripMembers}
           memberProfiles={memberProfiles}
-          onDragStart={dragAndDrop.handleDragStart}
-          onDragOver={dragAndDrop.handleDragOver}
-          onDropOnActivity={dragAndDrop.handleDropOnActivity}
-          onDropOnEmpty={dragAndDrop.handleDropOnEmptyDay}
+          onDragStart={canReorder ? dragAndDrop.handleDragStart : undefined}
+          onDragOver={canReorder ? dragAndDrop.handleDragOver : undefined}
+          onDropOnActivity={canReorder ? dragAndDrop.handleDropOnActivity : undefined}
+          onDropOnEmpty={canReorder ? dragAndDrop.handleDropOnEmptyDay : undefined}
           canEditActivities={canEdit}
           onEditActivity={onEditActivity}
           onDeleteActivity={onDeleteActivity}
