@@ -1,11 +1,5 @@
 ---
 description: UI and design-system guidelines for Voyagely (screens, components, themes, accessibility)
-globs: src/**/*.tsx
-alwaysApply: false
----
-
----
-description: UI and design-system guidelines for Voyagely (screens, components, themes, accessibility)
 alwaysApply: true
 ---
 

@@ -48,9 +48,11 @@ const createMockQuery = (finalValue: any, resolveOnMethod: string = 'order') => 
       let callCount = 0;
       chain[method] = vi.fn().mockImplementation((...args: any[]) => {
         callCount++;
-        // For 'order', the second call resolves (loadActivities calls order twice)
+        // For 'order', resolve on last call (loadActivities chains order 3x: order_index, start_time, created_at)
         // For other methods, first call resolves
-        const shouldResolve = resolveOnMethod === 'order' ? callCount >= 2 : callCount >= 1;
+        const orderCallCountForResolve = 3;
+        const shouldResolve =
+          resolveOnMethod === 'order' ? callCount >= orderCallCountForResolve : callCount >= 1;
         if (shouldResolve) {
           return Promise.resolve(finalValue);
         }

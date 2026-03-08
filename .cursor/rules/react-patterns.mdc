@@ -1,11 +1,5 @@
 ---
 description: React component patterns and anti-patterns for Voyagely
-globs: src/**/*.tsx
-alwaysApply: false
----
-
----
-description: React component patterns and anti-patterns for Voyagely
 alwaysApply: true
 ---
 

@@ -1,16 +1,16 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '@/lib/store';
 import { useToast } from '@/contexts/ToastContext';
-import { supabase } from '@/lib/supabase';
-import type { Activity, Vote } from '@/lib/types/database.types';
 import { TripMember } from '@/lib/types/database.types';
 import { useTripDetailRealtime } from './useTripDetailRealtime';
-import { groupActivitiesByDate } from './itinerary-utils';
-import { loadTripDataForDetail } from './loadTripDataForDetail';
+import { loadTripDataForDetail, fetchActivityParticipants } from './loadTripDataForDetail';
 import { updateTripHandler, deleteTripHandler } from './tripDetailHandlers';
 import type { EditFormState } from '../components/layout/TripDetailHero';
+import { useTripScenarios } from './useTripScenarios';
+import { useTripDetailPermissions } from './useTripDetailPermissions';
+import { useTripDetailActivities } from './useTripDetailActivities';
 
 type TripDetailTab = 'itinerary' | 'chat' | 'weather' | 'explore';
 
@@ -91,6 +91,11 @@ function useTripDetailData() {
     });
   }, [tripId, user, navigate, setCurrentTrip, t, setActiveTabState]);
 
+  const refreshActivityParticipants = useCallback(async () => {
+    const activityIds = useStore.getState().activities.map((a) => a.id);
+    await fetchActivityParticipants(activityIds, setActivityParticipantsMap);
+  }, []);
+
   const handleUpdateTrip = useCallback(async () => {
     await updateTripHandler({
       tripId,
@@ -145,6 +150,7 @@ function useTripDetailData() {
     activityParticipantsMap,
     memberProfiles,
     loadTripData,
+    refreshActivityParticipants,
     handleUpdateTrip,
     handleDeleteTrip,
     activeTab,
@@ -154,151 +160,38 @@ function useTripDetailData() {
   };
 }
 
-function useTripDetailPermissions(
-  user: { id: string } | null,
-  tripMembers: TripMember[],
-  currentTrip: { owner_id: string } | null,
-) {
-  const getUserRole = useCallback((): 'owner' | 'editor' | 'viewer' | 'moderator' | null => {
-    if (!user) return null;
-    const member = tripMembers.find((m) => m.user_id === user.id);
-    return member?.role || null;
-  }, [tripMembers, user]);
-
-  const canEdit = useCallback((): boolean => {
-    if (!user || !currentTrip) return false;
-    const role = getUserRole();
-    return role === 'owner' || role === 'editor' || user.id === currentTrip.owner_id;
-  }, [currentTrip, getUserRole, user]);
-
-  const canDelete = useCallback((): boolean => {
-    if (!user || !currentTrip) return false;
-    return user.id === currentTrip.owner_id;
-  }, [currentTrip, user]);
-
-  return {
-    getUserRole,
-    canEdit,
-    canDelete,
-  };
-}
-
-function useTripDetailDerivedState(activities: Activity[]) {
-  const activitiesByDate = useMemo(() => groupActivitiesByDate(activities), [activities]);
-
-  const sortedDates = useMemo(() => Object.keys(activitiesByDate).sort(), [activitiesByDate]);
-
-  return {
-    activitiesByDate,
-    sortedDates,
-  };
-}
-
-function useTripDetailActions(
-  t: (key: string) => string,
-  user: { id: string } | null,
-  votes: Record<string, Vote[]>,
-  setVotes: (nextVotes: Record<string, Vote[]>) => void,
-  createOrUpdateVote: (activityId: string, choice: 'up' | 'down') => Promise<void>,
-) {
-  const [votingActivityId, setVotingActivityId] = useState<string | null>(null);
-
-  const getUserVote = useCallback(
-    (activityId: string): 'up' | 'down' | null => {
-      if (!user) return null;
-      const activityVotes = votes[activityId] || [];
-      const userVote = activityVotes.find((v) => v.user_id === user.id);
-      return userVote ? userVote.choice : null;
-    },
-    [user, votes],
-  );
-
-  const getVoteCounts = useCallback(
-    (activityId: string) => {
-      const activityVotes = votes[activityId] || [];
-      const upvotes = activityVotes.filter((v) => v.choice === 'up').length;
-      const downvotes = activityVotes.filter((v) => v.choice === 'down').length;
-      return { upvotes, downvotes };
-    },
-    [votes],
-  );
-
-  const handleVote = useCallback(
-    async (activityId: string, choice: 'up' | 'down') => {
-      if (!user) {
-        alert(t('errors.mustBeLoggedIn') || 'You must be logged in to vote');
-        return;
-      }
-      setVotingActivityId(activityId);
-      const currentVote = getUserVote(activityId);
-      const isRemovingVote = currentVote === choice;
-      const originalVotes = { ...votes };
-      const activityVotes = votes[activityId] || [];
-
-      try {
-        if (isRemovingVote) {
-          const filteredVotes = activityVotes.filter((v) => v.user_id !== user.id);
-          setVotes({ ...votes, [activityId]: filteredVotes });
-          const userVote = activityVotes.find((v) => v.user_id === user.id);
-          if (userVote) {
-            const { error } = await supabase.from('votes').delete().eq('id', userVote.id);
-            if (error) throw error;
-          }
-        } else {
-          const filteredVotes = activityVotes.filter((v) => v.user_id !== user.id);
-          const optimisticVote: Vote = {
-            id: `temp-${Date.now()}`,
-            activity_id: activityId,
-            user_id: user.id,
-            choice,
-            created_at: new Date().toISOString(),
-          };
-          setVotes({ ...votes, [activityId]: [...filteredVotes, optimisticVote] });
-          await createOrUpdateVote(activityId, choice);
-        }
-      } catch (err: any) {
-        console.error('Error voting:', err);
-        setVotes(originalVotes);
-        alert(err.message || t('errors.failedToVote') || 'Failed to vote. Please try again.');
-      } finally {
-        setVotingActivityId(null);
-      }
-    },
-    [createOrUpdateVote, getUserVote, t, user, votes, setVotes],
-  );
-
-  return {
-    votingActivityId,
-    handleVote,
-    getVoteCounts,
-    getUserVote,
-  };
-}
-
-function useTripDetailActivities(t: (key: string) => string) {
-  const user = useStore((state) => state.user);
-  const activities = useStore((state) => state.activities);
-  const votes = useStore((state) => state.votes);
-  const setVotes = useStore((state) => state.setVotes);
-  const createOrUpdateVote = useStore((state) => state.createOrUpdateVote);
-
-  const derivedState = useTripDetailDerivedState(activities);
-  const actions = useTripDetailActions(t, user, votes, setVotes, createOrUpdateVote);
-
-  return {
-    ...derivedState,
-    ...actions,
-  };
-}
-
 export function useTripDetail() {
   const data = useTripDetailData();
   const activities = useTripDetailActivities(data.t);
-  const permissions = useTripDetailPermissions(data.user, data.tripMembers, data.currentTrip);
+  const permissions = useTripDetailPermissions({
+    user: data.user,
+    tripMembers: data.tripMembers,
+    currentTrip: data.currentTrip,
+  });
+  const scenariosState = useTripScenarios(data.tripId);
+  const generateAiScenario = useStore((s) => s.generateAiScenario);
+  const applyScenarioAsBase = useStore((s) => s.applyScenarioAsBase);
+  const importScenarioActivityToItinerary = useStore((s) => s.importScenarioActivityToItinerary);
+
+  useEffect(() => {
+    scenariosState.load();
+  }, [scenariosState, scenariosState.load]);
+
+  const scenarios = data.currentTrip?.active_itinerary_id
+    ? scenariosState.scenarios.filter((s) => s.id !== data.currentTrip?.active_itinerary_id)
+    : scenariosState.scenarios;
 
   return {
     ...data,
     ...activities,
     ...permissions,
+    scenarios,
+    scenariosLoading: scenariosState.loading,
+    scenariosError: scenariosState.error,
+    createScenario: scenariosState.create,
+    deleteScenario: scenariosState.remove,
+    generateAiScenario,
+    applyScenarioAsBase,
+    importScenarioActivityToItinerary,
   };
 }

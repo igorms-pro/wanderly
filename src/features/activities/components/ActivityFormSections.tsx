@@ -3,6 +3,7 @@ import { ActivityFormAdvancedSection } from './ActivityFormAdvancedSection';
 import { ActivityFormBasicSection } from './ActivityFormBasicSection';
 import { ActivityFormCostSection } from './ActivityFormCostSection';
 import { ActivityFormScheduleSection } from './ActivityFormScheduleSection';
+import { ActivityFormTransportSection } from './ActivityFormTransportSection';
 
 interface ActivityFormSectionsProps {
   formData: ActivityFormData;
@@ -15,6 +16,7 @@ export function ActivityFormSections({ formData, onChange }: ActivityFormSection
       <ActivityFormBasicSection formData={formData} onChange={onChange} />
       <ActivityFormScheduleSection formData={formData} onChange={onChange} />
       <ActivityFormCostSection formData={formData} onChange={onChange} />
+      <ActivityFormTransportSection formData={formData} onChange={onChange} />
       <ActivityFormAdvancedSection formData={formData} onChange={onChange} />
     </>
   );

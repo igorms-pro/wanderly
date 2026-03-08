@@ -1,11 +1,5 @@
 ---
 description: Project architecture, folder structure, and dependency rules for Voyagely
-globs: src/**/*
-alwaysApply: true
----
-
----
-description: Project architecture, folder structure, and dependency rules for Voyagely
 alwaysApply: true
 ---
 

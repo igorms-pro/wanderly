@@ -1,11 +1,5 @@
 ---
 description: Unit, integration, and E2E testing guidelines for Voyagely
-globs: **/*.{test,spec}.{ts,tsx}
-alwaysApply: false
----
-
----
-description: Unit, integration, and E2E testing guidelines for Voyagely
 alwaysApply: true
 ---
 

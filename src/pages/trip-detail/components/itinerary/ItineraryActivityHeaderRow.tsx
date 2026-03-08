@@ -1,6 +1,7 @@
 import { useCallback, KeyboardEvent } from 'react';
-import { Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { Clock, ChevronDown, ChevronUp, Pencil, Trash2 } from 'lucide-react';
 import type { Activity } from '../../../../lib/types/database.types';
+import { formatTimeDisplay } from '../../ItineraryActivityTypes';
 
 interface ItineraryActivityHeaderRowProps {
   activity: Activity;
@@ -9,6 +10,9 @@ interface ItineraryActivityHeaderRowProps {
   t: (key: string) => string;
   upvotes: number;
   downvotes: number;
+  canEdit?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 export function ItineraryActivityHeaderRow({
@@ -18,6 +22,9 @@ export function ItineraryActivityHeaderRow({
   t,
   upvotes,
   downvotes,
+  canEdit,
+  onEdit,
+  onDelete,
 }: ItineraryActivityHeaderRowProps) {
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
@@ -46,8 +53,8 @@ export function ItineraryActivityHeaderRow({
             <span className="flex items-center gap-1">
               <Clock className="w-4 h-4 shrink-0" />
               {activity.end_time
-                ? `${activity.start_time} – ${activity.end_time}`
-                : activity.start_time}
+                ? `${formatTimeDisplay(activity.start_time)} – ${formatTimeDisplay(activity.end_time)}`
+                : formatTimeDisplay(activity.start_time)}
             </span>
           )}
           {activity.status === 'proposed' && (upvotes > 0 || downvotes > 0) && (
@@ -67,9 +74,41 @@ export function ItineraryActivityHeaderRow({
           )}
         </div>
       </div>
-      <span className="shrink-0 text-gray-400 dark:text-gray-500" aria-hidden>
-        {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-      </span>
+      <div className="flex items-center gap-2 shrink-0 text-gray-400 dark:text-gray-500">
+        {canEdit && (
+          <>
+            {onEdit && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                aria-label={t('activities.actions.edit')}
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
+            )}
+            {onDelete && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+                className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400"
+                aria-label={t('activities.actions.delete')}
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
+          </>
+        )}
+        <span aria-hidden>
+          {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+        </span>
+      </div>
     </div>
   );
 }

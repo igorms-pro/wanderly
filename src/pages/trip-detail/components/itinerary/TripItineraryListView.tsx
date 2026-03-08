@@ -5,6 +5,9 @@ import { ItineraryDayBlock } from './ItineraryDayBlock';
 interface TripItineraryListViewProps {
   sortedDates: string[];
   activitiesByDate: Record<string, Activity[]>;
+  itineraryDayIdByDate: Record<string, string>;
+  canEdit: boolean;
+  canReorder: boolean;
   canVote: boolean;
   votingActivityId: string | null;
   getVoteCounts: (activityId: string) => { upvotes: number; downvotes: number };
@@ -19,11 +22,25 @@ interface TripItineraryListViewProps {
   constraintsSummary?: ConstraintsSummary | null;
   /** When set and no results, show search empty state */
   searchQuery?: string;
+  onEditActivity?: (activity: Activity, date: string) => void;
+  onDeleteActivity?: (activity: Activity) => void;
+  lastEditedActivityId?: string | null;
+  onDragStart?: (activityId: string, date: string) => void;
+  onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDropOnActivity?: (
+    targetActivityId: string,
+    targetDate: string,
+    targetIndex: number,
+  ) => Promise<void>;
+  onDropOnEmptyDay?: (targetDate: string) => Promise<void>;
 }
 
 export function TripItineraryListView({
   sortedDates,
   activitiesByDate,
+  itineraryDayIdByDate,
+  canEdit,
+  canReorder,
   canVote,
   votingActivityId,
   getVoteCounts,
@@ -36,6 +53,13 @@ export function TripItineraryListView({
   tripMembers,
   memberProfiles,
   searchQuery = '',
+  onEditActivity,
+  onDeleteActivity,
+  lastEditedActivityId = null,
+  onDragStart,
+  onDragOver,
+  onDropOnActivity,
+  onDropOnEmptyDay,
 }: TripItineraryListViewProps) {
   const hasSearchNoResults = searchQuery.trim() !== '' && sortedDates.length === 0;
 
@@ -65,6 +89,14 @@ export function TripItineraryListView({
           activityParticipantsMap={activityParticipantsMap}
           tripMembers={tripMembers}
           memberProfiles={memberProfiles}
+          onDragStart={canReorder ? onDragStart : undefined}
+          onDragOver={canReorder ? onDragOver : undefined}
+          onDropOnActivity={canReorder ? onDropOnActivity : undefined}
+          onDropOnEmpty={canReorder ? onDropOnEmptyDay : undefined}
+          canEditActivities={canEdit}
+          onEditActivity={onEditActivity}
+          onDeleteActivity={onDeleteActivity}
+          lastEditedActivityId={lastEditedActivityId}
         />
       ))}
     </div>

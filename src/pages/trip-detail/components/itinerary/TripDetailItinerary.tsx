@@ -1,14 +1,13 @@
-import { useState, useEffect } from 'react';
 import type { Activity, TripMember } from '@/lib/types/database.types';
-import { useItinerarySearch } from './useItinerarySearch';
 import { TripItineraryContextSummary } from './TripItineraryContextSummary';
 import { ItineraryViewTabs } from './ItineraryViewTabs';
 import { TripItineraryEmptyState } from './TripItineraryEmptyState';
 import { TripItineraryListView } from './TripItineraryListView';
 import { TripItineraryCalendarView } from './TripItineraryCalendarView';
 import { TripItineraryTimelineView } from './TripItineraryTimelineView';
-
-const ITINERARY_VIEW_KEY = 'tripDetail:itineraryView';
+import { TripScenariosSection } from '../scenarios/TripScenariosSection';
+import { useItineraryViewState } from './useItineraryViewState';
+import { useItineraryDragAndDrop } from '../../hooks/useItineraryDragAndDrop';
 
 export type ItineraryViewMode = 'list' | 'calendar' | 'timeline';
 
@@ -22,9 +21,11 @@ interface TripDetailItineraryProps {
   startDate: string;
   endDate: string;
   canEdit: boolean;
+  canReorder: boolean;
   canVote: boolean;
   activitiesByDate: Record<string, Activity[]>;
   sortedDates: string[];
+  itineraryDayIdByDate: Record<string, string>;
   votingActivityId: string | null;
   getVoteCounts: (activityId: string) => { upvotes: number; downvotes: number };
   getUserVote: (activityId: string) => 'up' | 'down' | null;
@@ -39,89 +40,31 @@ interface TripDetailItineraryProps {
   activityParticipantsMap?: Record<string, string[]>;
   tripMembers?: TripMember[];
   memberProfiles?: Record<string, { display_name: string | null; avatar_url: string | null }>;
-}
-
-interface UseItineraryViewStateArgs {
-  activitiesByDate: Record<string, Activity[]>;
-  sortedDates: string[];
-}
-
-interface UseItineraryViewStateResult {
-  viewMode: ItineraryViewMode;
-  selectedDate: string | null;
-  searchQuery: string;
-  activitiesByDateForView: Record<string, Activity[]>;
-  sortedDatesForView: string[];
-  handleChangeViewMode: (mode: ItineraryViewMode) => void;
-  handleSelectDate: (date: string | null) => void;
-  handleSearchChange: (value: string) => void;
-}
-
-function useItineraryViewState({
-  activitiesByDate,
-  sortedDates,
-}: UseItineraryViewStateArgs): UseItineraryViewStateResult {
-  const [viewMode, setViewMode] = useState<ItineraryViewMode>(() => {
-    try {
-      const s = sessionStorage.getItem(ITINERARY_VIEW_KEY);
-      if (s === 'list' || s === 'calendar' || s === 'timeline') return s;
-    } catch {
-      /* ignore */
-    }
-    return 'list';
-  });
-
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const { activitiesByDate: filteredActivitiesByDate, sortedDates: filteredSortedDates } =
-    useItinerarySearch(activitiesByDate, sortedDates, searchQuery);
-
-  useEffect(() => {
-    try {
-      sessionStorage.setItem(ITINERARY_VIEW_KEY, viewMode);
-    } catch {
-      /* ignore */
-    }
-  }, [viewMode]);
-
-  const isSearching = searchQuery.trim().length > 0;
-
-  const activitiesByDateForView = isSearching ? filteredActivitiesByDate : activitiesByDate;
-  const sortedDatesForView = isSearching ? filteredSortedDates : sortedDates;
-
-  const handleChangeViewMode = (mode: ItineraryViewMode) => {
-    setViewMode(mode);
-    setSelectedDate(null);
-  };
-
-  const handleSelectDate = (date: string | null) => {
-    setSelectedDate(date);
-  };
-
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value);
-  };
-
-  return {
-    viewMode,
-    selectedDate,
-    searchQuery,
-    activitiesByDateForView,
-    sortedDatesForView,
-    handleChangeViewMode,
-    handleSelectDate,
-    handleSearchChange,
-  };
+  scenarios?: import('@/lib/store/tripDetailSlice.scenarios').TripScenario[];
+  canCreateScenarios?: boolean;
+  canManageScenarios?: boolean;
+  onGenerateAiScenario?: () => Promise<void>;
+  onCreateScenario?: (title: string | null, days: { date: string; dayIndex?: number }[]) => void;
+  onDeleteScenario?: (scenarioId: string) => void;
+  onUseScenarioAsBase?: (scenarioItineraryId: string) => Promise<void>;
+  onAddScenarioActivityToItinerary?: (
+    date: string,
+    activity: import('@/lib/types/database.types').Activity,
+  ) => Promise<void>;
+  onEditActivity?: (activity: Activity, date: string) => void;
+  onDeleteActivity?: (activity: Activity) => void;
+  lastEditedActivityId?: string | null;
 }
 
 export function TripDetailItinerary({
   startDate,
   endDate,
   canEdit,
+  canReorder,
   canVote,
   activitiesByDate,
   sortedDates,
+  itineraryDayIdByDate,
   votingActivityId,
   getVoteCounts,
   getUserVote,
@@ -136,6 +79,17 @@ export function TripDetailItinerary({
   activityParticipantsMap = {},
   tripMembers = [],
   memberProfiles = {},
+  scenarios = [],
+  canCreateScenarios = false,
+  canManageScenarios = false,
+  onGenerateAiScenario,
+  onCreateScenario,
+  onDeleteScenario,
+  onUseScenarioAsBase,
+  onAddScenarioActivityToItinerary,
+  onEditActivity,
+  onDeleteActivity,
+  lastEditedActivityId = null,
 }: TripDetailItineraryProps) {
   const {
     viewMode,
@@ -147,6 +101,13 @@ export function TripDetailItinerary({
     handleSelectDate,
     handleSearchChange,
   } = useItineraryViewState({ activitiesByDate, sortedDates });
+
+  const dragAndDrop = useItineraryDragAndDrop({
+    activitiesByDate: activitiesByDateForView,
+    sortedDates: sortedDatesForView,
+    itineraryDayIdByDate,
+    canEdit: canReorder,
+  });
 
   return (
     <div className="space-y-6">
@@ -175,7 +136,11 @@ export function TripDetailItinerary({
         <TripItineraryListView
           sortedDates={sortedDatesForView}
           activitiesByDate={activitiesByDateForView}
+          itineraryDayIdByDate={itineraryDayIdByDate}
+          canEdit={canEdit}
+          canReorder={canReorder}
           canVote={canVote}
+          lastEditedActivityId={lastEditedActivityId}
           votingActivityId={votingActivityId}
           getVoteCounts={getVoteCounts}
           getUserVote={getUserVote}
@@ -188,6 +153,12 @@ export function TripDetailItinerary({
           memberProfiles={memberProfiles}
           constraintsSummary={constraintsSummary}
           searchQuery={searchQuery}
+          onEditActivity={onEditActivity}
+          onDeleteActivity={onDeleteActivity}
+          onDragStart={canReorder ? dragAndDrop.handleDragStart : undefined}
+          onDragOver={canReorder ? dragAndDrop.handleDragOver : undefined}
+          onDropOnActivity={canReorder ? dragAndDrop.handleDropOnActivity : undefined}
+          onDropOnEmptyDay={canReorder ? dragAndDrop.handleDropOnEmptyDay : undefined}
         />
       ) : viewMode === 'calendar' ? (
         <TripItineraryCalendarView
@@ -197,6 +168,8 @@ export function TripDetailItinerary({
           selectedDate={selectedDate}
           onSelectDate={handleSelectDate}
           canVote={canVote}
+          canEdit={canEdit}
+          canReorder={canReorder}
           votingActivityId={votingActivityId}
           getVoteCounts={getVoteCounts}
           getUserVote={getUserVote}
@@ -207,12 +180,21 @@ export function TripDetailItinerary({
           activityParticipantsMap={activityParticipantsMap}
           tripMembers={tripMembers}
           memberProfiles={memberProfiles}
+          onEditActivity={onEditActivity}
+          onDeleteActivity={onDeleteActivity}
+          lastEditedActivityId={lastEditedActivityId}
+          onDragStart={canReorder ? dragAndDrop.handleDragStart : undefined}
+          onDragOver={canReorder ? dragAndDrop.handleDragOver : undefined}
+          onDropOnActivity={canReorder ? dragAndDrop.handleDropOnActivity : undefined}
+          onDropOnEmptyDay={canReorder ? dragAndDrop.handleDropOnEmptyDay : undefined}
         />
       ) : (
         <TripItineraryTimelineView
           sortedDates={sortedDatesForView}
           activitiesByDate={activitiesByDateForView}
           canVote={canVote}
+          canEdit={canEdit}
+          canReorder={canReorder}
           votingActivityId={votingActivityId}
           getVoteCounts={getVoteCounts}
           getUserVote={getUserVote}
@@ -223,8 +205,34 @@ export function TripDetailItinerary({
           activityParticipantsMap={activityParticipantsMap}
           tripMembers={tripMembers}
           memberProfiles={memberProfiles}
+          onEditActivity={onEditActivity}
+          onDeleteActivity={onDeleteActivity}
+          lastEditedActivityId={lastEditedActivityId}
+          onDragStart={canReorder ? dragAndDrop.handleDragStart : undefined}
+          onDragOver={canReorder ? dragAndDrop.handleDragOver : undefined}
+          onDropOnActivity={canReorder ? dragAndDrop.handleDropOnActivity : undefined}
+          onDropOnEmptyDay={canReorder ? dragAndDrop.handleDropOnEmptyDay : undefined}
         />
       )}
+
+      {onCreateScenario &&
+        onDeleteScenario &&
+        onGenerateAiScenario &&
+        onUseScenarioAsBase &&
+        onAddScenarioActivityToItinerary && (
+          <TripScenariosSection
+            scenarios={scenarios}
+            sortedDates={sortedDates}
+            canCreate={canCreateScenarios}
+            canManage={canManageScenarios}
+            onGenerateAiScenario={onGenerateAiScenario}
+            onCreateScenario={onCreateScenario}
+            onDeleteScenario={onDeleteScenario}
+            onUseScenarioAsBase={onUseScenarioAsBase}
+            onAddScenarioActivityToItinerary={onAddScenarioActivityToItinerary}
+            t={t}
+          />
+        )}
     </div>
   );
 }

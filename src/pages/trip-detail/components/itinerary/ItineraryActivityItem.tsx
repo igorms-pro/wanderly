@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ThumbsUp, ThumbsDown } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, GripVertical } from 'lucide-react';
 import type { Activity, TripMember } from '../../../../lib/types/database.types';
 import type { MemberProfile } from '../../ItineraryActivityTypes';
 import { ItineraryActivityHeaderRow } from './ItineraryActivityHeaderRow';
@@ -19,6 +19,14 @@ interface ItineraryActivityItemProps {
   activityParticipantsMap: Record<string, string[]>;
   tripMembers: TripMember[];
   memberProfiles: Record<string, MemberProfile>;
+  onDragStart?: (activityId: string, date: string) => void;
+  onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDrop?: (activityId: string, date: string, index: number) => void;
+  date?: string;
+  canEditActivity?: boolean;
+  onEditActivity?: (activity: Activity, date?: string) => void;
+  onDeleteActivity?: (activity: Activity) => void;
+  isJustEdited?: boolean;
 }
 
 export function ItineraryActivityItem({
@@ -35,6 +43,14 @@ export function ItineraryActivityItem({
   activityParticipantsMap,
   tripMembers,
   memberProfiles,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  date,
+  canEditActivity = false,
+  onEditActivity,
+  onDeleteActivity,
+  isJustEdited = false,
 }: ItineraryActivityItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -46,16 +62,79 @@ export function ItineraryActivityItem({
       ? 'border-l-2 border-emerald-300 bg-emerald-50/80 hover:bg-emerald-100 dark:border-emerald-400 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 transition'
       : 'border-l-2 border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900/40 dark:hover:bg-gray-800/70 transition';
 
+  const showDragHandle = !!onDragStart && !!date;
+  const justEditedClass = isJustEdited
+    ? ' ring-2 ring-blue-500 dark:ring-blue-400 animate-pulse rounded-lg'
+    : '';
+
   return (
-    <div className={accentClass}>
-      <ItineraryActivityHeaderRow
-        activity={activity}
-        isExpanded={isExpanded}
-        onToggleExpanded={() => setIsExpanded((prev) => !prev)}
-        t={t}
-        upvotes={upvotes}
-        downvotes={downvotes}
-      />
+    <div
+      className={accentClass + justEditedClass}
+      draggable={showDragHandle}
+      onDragStart={
+        onDragStart && date
+          ? (e) => {
+              if (import.meta.env.DEV) {
+                console.log('[DnD] ItineraryActivityItem dragStart', {
+                  activityId: activity.id,
+                  date,
+                  index,
+                  showDragHandle,
+                });
+              }
+              e.dataTransfer.effectAllowed = 'move';
+              e.dataTransfer.setData('text/plain', activity.id);
+              onDragStart(activity.id, date);
+            }
+          : undefined
+      }
+      onDragOver={onDragOver}
+      onDrop={
+        onDrop && date
+          ? (event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              if (import.meta.env.DEV) {
+                console.log('[DnD] ItineraryActivityItem drop', {
+                  targetActivityId: activity.id,
+                  date,
+                  index,
+                });
+              }
+              onDrop(activity.id, date, index);
+            }
+          : undefined
+      }
+    >
+      <div className="flex items-stretch">
+        {showDragHandle && (
+          <span
+            className="flex items-center pl-2 sm:pl-3 shrink-0 cursor-grab active:cursor-grabbing text-gray-400 dark:text-gray-500 touch-none"
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+            aria-label={t('tripDetail.reorderActivity')}
+          >
+            <GripVertical className="w-4 h-4" aria-hidden />
+          </span>
+        )}
+        <div className="flex-1 min-w-0">
+          <ItineraryActivityHeaderRow
+            activity={activity}
+            isExpanded={isExpanded}
+            onToggleExpanded={() => setIsExpanded((prev) => !prev)}
+            t={t}
+            upvotes={upvotes}
+            downvotes={downvotes}
+            canEdit={canEditActivity}
+            onEdit={
+              canEditActivity && onEditActivity ? () => onEditActivity(activity, date) : undefined
+            }
+            onDelete={
+              canEditActivity && onDeleteActivity ? () => onDeleteActivity(activity) : undefined
+            }
+          />
+        </div>
+      </div>
 
       {isExpanded && (
         <div className="px-4 pb-5 sm:px-5 sm:pb-6 pt-3 sm:pt-4 border-t border-gray-100 dark:border-gray-700">

@@ -2,6 +2,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import type { Activity, TripMember } from '../../../../lib/types/database.types';
 import type { MemberProfile } from '../../ItineraryActivityTypes';
+import { sortActivitiesByDayOrder } from '../../hooks/itinerary-utils';
 import { ItineraryActivityItem } from './ItineraryActivityItem';
 
 interface ItineraryDayBlockProps {
@@ -20,6 +21,14 @@ interface ItineraryDayBlockProps {
   memberProfiles?: Record<string, MemberProfile>;
   showClose?: boolean;
   onClose?: () => void;
+  onDragStart?: (activityId: string, date: string) => void;
+  onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDropOnActivity?: (activityId: string, date: string, index: number) => void;
+  onDropOnEmpty?: (date: string) => void;
+  canEditActivities?: boolean;
+  onEditActivity?: (activity: Activity, date: string) => void;
+  onDeleteActivity?: (activity: Activity) => void;
+  lastEditedActivityId?: string | null;
 }
 
 export function ItineraryDayBlock({
@@ -38,10 +47,16 @@ export function ItineraryDayBlock({
   memberProfiles = {},
   showClose,
   onClose,
+  onDragStart,
+  onDragOver,
+  onDropOnActivity,
+  onDropOnEmpty,
+  canEditActivities = false,
+  onEditActivity,
+  onDeleteActivity,
+  lastEditedActivityId = null,
 }: ItineraryDayBlockProps) {
-  const sorted = [...activities].sort((a, b) =>
-    (a.start_time || '').localeCompare(b.start_time || ''),
-  );
+  const sorted = sortActivitiesByDayOrder(activities);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm dark:shadow-lg overflow-hidden">
@@ -65,7 +80,20 @@ export function ItineraryDayBlock({
         )}
       </div>
 
-      <div className="divide-y divide-gray-100 dark:divide-gray-700">
+      <div
+        className="divide-y divide-gray-100 dark:divide-gray-700"
+        onDragOver={onDragOver}
+        onDrop={
+          onDropOnEmpty
+            ? (event) => {
+                event.preventDefault();
+                if (activities.length === 0) {
+                  onDropOnEmpty(date);
+                }
+              }
+            : undefined
+        }
+      >
         {sorted.map((activity, index) => (
           <ItineraryActivityItem
             key={activity.id}
@@ -82,6 +110,14 @@ export function ItineraryDayBlock({
             activityParticipantsMap={activityParticipantsMap || {}}
             tripMembers={tripMembers}
             memberProfiles={memberProfiles || {}}
+            onDragStart={onDragStart}
+            onDragOver={onDragOver}
+            onDrop={onDropOnActivity}
+            date={date}
+            canEditActivity={canEditActivities}
+            onEditActivity={onEditActivity}
+            onDeleteActivity={onDeleteActivity}
+            isJustEdited={activity.id === lastEditedActivityId}
           />
         ))}
       </div>

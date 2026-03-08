@@ -1,11 +1,5 @@
 ---
 description: Front-end performance guidelines for Voyagely – rendering, loading, bundle
-globs: src/**/*.{ts,tsx}
-alwaysApply: false
----
-
----
-description: Front-end performance guidelines for Voyagely – rendering, loading, bundle
 alwaysApply: true
 ---
 

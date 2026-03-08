@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import type { Activity, TripMember } from '@/lib/types/database.types';
 import type { MemberProfile } from '../../../ItineraryActivityTypes';
+import { sortActivitiesByDayOrder } from '../../../hooks/itinerary-utils';
 import { TimelineActivityCard } from './TimelineActivityCard';
 
 interface TimelineDaySectionProps {
@@ -9,6 +10,7 @@ interface TimelineDaySectionProps {
   expandedId: string | null;
   setExpandedId: (id: string | null) => void;
   canVote: boolean;
+  canEdit: boolean;
   votingActivityId: string | null;
   getVoteCounts: (activityId: string) => { upvotes: number; downvotes: number };
   getUserVote: (activityId: string) => 'up' | 'down' | null;
@@ -19,6 +21,18 @@ interface TimelineDaySectionProps {
   activityParticipantsMap: Record<string, string[]>;
   tripMembers: TripMember[];
   memberProfiles: Record<string, MemberProfile>;
+  onEditActivity?: (activity: Activity, date: string) => void;
+  onDeleteActivity?: (activity: Activity) => void;
+  lastEditedActivityId?: string | null;
+  canReorder?: boolean;
+  onDragStart?: (activityId: string, date: string) => void;
+  onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDropOnActivity?: (
+    targetActivityId: string,
+    targetDate: string,
+    targetIndex: number,
+  ) => Promise<void>;
+  onDropOnEmptyDay?: (targetDate: string) => Promise<void>;
 }
 
 export function TimelineDaySection({
@@ -27,6 +41,7 @@ export function TimelineDaySection({
   expandedId,
   setExpandedId,
   canVote,
+  canEdit,
   votingActivityId,
   getVoteCounts,
   getUserVote,
@@ -37,10 +52,16 @@ export function TimelineDaySection({
   activityParticipantsMap,
   tripMembers,
   memberProfiles,
+  onEditActivity,
+  onDeleteActivity,
+  lastEditedActivityId = null,
+  canReorder,
+  onDragStart,
+  onDragOver,
+  onDropOnActivity,
+  onDropOnEmptyDay,
 }: TimelineDaySectionProps) {
-  const sortedActivities = [...activities].sort((a, b) =>
-    (a.start_time || '').localeCompare(b.start_time || ''),
-  );
+  const sortedActivities = sortActivitiesByDayOrder(activities);
 
   return (
     <section key={date} className="relative pl-10 sm:pl-18 pb-8 last:pb-0">
@@ -58,8 +79,24 @@ export function TimelineDaySection({
         </span>
       </div>
 
-      {/* Cartes activités (alternance gauche/droite sur desktop) */}
-      <div className="space-y-3">
+      {/* Cartes activités (alternance gauche/droite sur desktop) + drop zone for empty day */}
+      <div
+        className={`space-y-3 ${sortedActivities.length === 0 && canReorder ? 'min-h-[80px] rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-600 flex items-center justify-center' : ''}`}
+        onDragOver={canReorder ? onDragOver : undefined}
+        onDrop={
+          canReorder && onDropOnEmptyDay && sortedActivities.length === 0
+            ? (event) => {
+                event.preventDefault();
+                onDropOnEmptyDay(date);
+              }
+            : undefined
+        }
+      >
+        {sortedActivities.length === 0 && canReorder && (
+          <p className="text-sm text-gray-500 dark:text-gray-400 px-4">
+            {t('tripDetail.dropActivityHere')}
+          </p>
+        )}
         {sortedActivities.map((activity, i) => {
           const isExpanded = expandedId === activity.id;
           return (
@@ -67,6 +104,7 @@ export function TimelineDaySection({
               key={activity.id}
               activity={activity}
               index={i}
+              date={date}
               currency={currency}
               canVote={canVote}
               votingActivityId={votingActivityId}
@@ -82,6 +120,14 @@ export function TimelineDaySection({
               activityParticipantsMap={activityParticipantsMap}
               tripMembers={tripMembers}
               memberProfiles={memberProfiles}
+              canEditActivity={canEdit}
+              onEditActivity={onEditActivity}
+              onDeleteActivity={onDeleteActivity}
+              isJustEdited={lastEditedActivityId === activity.id}
+              canReorder={canReorder}
+              onDragStart={onDragStart}
+              onDragOver={onDragOver}
+              onDrop={canReorder ? onDropOnActivity : undefined}
             />
           );
         })}

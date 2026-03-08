@@ -1,9 +1,10 @@
-import type { Activity } from '../types/database.types';
+import type { Activity, Database } from '../types/database.types';
 import { supabase } from '../supabase';
 import type { AppState, CreateActivityData, SetState, GetState } from './types';
 import { mapRowToActivity } from './activityMapping';
 
 export function createTripDetailActivitiesSlice(set: SetState, get: GetState): Partial<AppState> {
+  type ActivitiesUpdate = Database['public']['Tables']['activities']['Update'];
   return {
     activities: [],
     setActivities: (activities) => set({ activities }),
@@ -28,6 +29,7 @@ export function createTripDetailActivitiesSlice(set: SetState, get: GetState): P
           .select('*')
           .eq('trip_id', tripId)
           .is('deleted_at', null)
+          .order('order_index', { ascending: true, nullsFirst: false })
           .order('start_time', { ascending: true, nullsFirst: false })
           .order('created_at', { ascending: true });
 
@@ -62,12 +64,19 @@ export function createTripDetailActivitiesSlice(set: SetState, get: GetState): P
             category: activityData.category || null,
             start_time: activityData.start_time || null,
             end_time: activityData.end_time || null,
-            cost_cents: activityData.cost_cents ?? null,
+            cost_cents: activityData.cost_cents ?? activityData.cost_min_cents ?? null,
+            cost_min_cents: activityData.cost_min_cents ?? null,
+            cost_max_cents: activityData.cost_max_cents ?? null,
             currency: activityData.currency || 'USD',
             lat: activityData.lat ?? null,
             lon: activityData.lon ?? null,
+            place_name: activityData.place_name ?? null,
+            transport_type: activityData.transport_type ?? null,
+            transport_notes: activityData.transport_notes ?? null,
+            transport_duration_minutes: activityData.transport_duration_minutes ?? null,
             status: activityData.status || 'proposed',
             source: activityData.source || 'manual',
+            organizer_notes: activityData.organizer_notes ?? null,
           } as any)
           .select()
           .single();
@@ -119,6 +128,7 @@ export function createTripDetailActivitiesSlice(set: SetState, get: GetState): P
         if (updates.status !== undefined) updateData.status = updates.status;
         if (updates.lat !== undefined) updateData.lat = updates.lat ?? null;
         if (updates.lon !== undefined) updateData.lon = updates.lon ?? null;
+        if (updates.order_index !== undefined) updateData.order_index = updates.order_index ?? null;
 
         const { data: activity, error } = await (supabase.from('activities') as any)
           .update(updateData)
@@ -138,6 +148,26 @@ export function createTripDetailActivitiesSlice(set: SetState, get: GetState): P
         );
       } catch (error) {
         console.error('Error updating activity:', error);
+        throw error;
+      }
+    },
+
+    deleteActivity: async (activityId) => {
+      try {
+        const { error } = await (supabase.from('activities') as any)
+          .update({ deleted_at: new Date().toISOString() } as ActivitiesUpdate)
+          .eq('id', activityId);
+
+        if (error) {
+          console.error('Error deleting activity:', error);
+          throw error;
+        }
+
+        set((state) => ({
+          activities: state.activities.filter((a) => a.id !== activityId),
+        }));
+      } catch (error) {
+        console.error('Error deleting activity:', error);
         throw error;
       }
     },

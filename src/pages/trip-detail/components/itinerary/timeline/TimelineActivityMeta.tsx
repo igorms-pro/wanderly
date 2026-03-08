@@ -1,16 +1,11 @@
-import { format } from 'date-fns';
 import { Clock, DollarSign, Sparkles, MapPin, Car } from 'lucide-react';
 import type { Activity } from '@/lib/types/database.types';
+import { formatTimeDisplay } from '@/pages/trip-detail/ItineraryActivityTypes';
 
 interface TimelineActivityMetaProps {
   activity: Activity;
   currency: string;
   t: (key: string) => string;
-}
-
-function formatTime(timeStr: string): string {
-  const normalized = timeStr.includes('T') ? timeStr : `2000-01-01T${timeStr}`;
-  return format(new Date(normalized), 'HH:mm');
 }
 
 function formatActivityCost(
@@ -59,7 +54,7 @@ export function TimelineActivityMeta({ activity, currency, t }: TimelineActivity
       {activity.start_time && (
         <span className="flex items-center gap-1">
           <Clock className="w-3 h-3" />
-          {formatTime(activity.start_time)}
+          {formatTimeDisplay(activity.start_time)}
         </span>
       )}
       <>

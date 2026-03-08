@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import type { Activity, TripMember } from '@/lib/types/database.types';
 import type { MemberProfile } from '../../ItineraryActivityTypes';
+import { sortActivitiesByDayOrder } from '../../hooks/itinerary-utils';
 import { TimelineDaySection } from './timeline/TimelineDaySection';
 
 interface TripTimelineProps {
   sortedDates: string[];
   activitiesByDate: Record<string, Activity[]>;
   canVote: boolean;
+  canEdit: boolean;
+  canReorder?: boolean;
   votingActivityId: string | null;
   getVoteCounts: (activityId: string) => { upvotes: number; downvotes: number };
   getUserVote: (activityId: string) => 'up' | 'down' | null;
@@ -17,12 +20,25 @@ interface TripTimelineProps {
   activityParticipantsMap: Record<string, string[]>;
   tripMembers: TripMember[];
   memberProfiles: Record<string, MemberProfile>;
+  onEditActivity?: (activity: Activity, date: string) => void;
+  onDeleteActivity?: (activity: Activity) => void;
+  lastEditedActivityId?: string | null;
+  onDragStart?: (activityId: string, date: string) => void;
+  onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDropOnActivity?: (
+    targetActivityId: string,
+    targetDate: string,
+    targetIndex: number,
+  ) => Promise<void>;
+  onDropOnEmptyDay?: (targetDate: string) => Promise<void>;
 }
 
 export function TripTimeline({
   sortedDates,
   activitiesByDate,
   canVote,
+  canEdit,
+  canReorder,
   votingActivityId,
   getVoteCounts,
   getUserVote,
@@ -33,6 +49,13 @@ export function TripTimeline({
   activityParticipantsMap,
   tripMembers,
   memberProfiles,
+  onEditActivity,
+  onDeleteActivity,
+  lastEditedActivityId = null,
+  onDragStart,
+  onDragOver,
+  onDropOnActivity,
+  onDropOnEmptyDay,
 }: TripTimelineProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -46,9 +69,7 @@ export function TripTimeline({
 
       <div className="space-y-0">
         {sortedDates.map((date) => {
-          const activities = [...(activitiesByDate[date] || [])].sort((a, b) =>
-            (a.start_time || '').localeCompare(b.start_time || ''),
-          );
+          const activities = sortActivitiesByDayOrder(activitiesByDate[date] || []);
 
           return (
             <TimelineDaySection
@@ -58,6 +79,8 @@ export function TripTimeline({
               expandedId={expandedId}
               setExpandedId={setExpandedId}
               canVote={canVote}
+              canEdit={canEdit}
+              canReorder={canReorder}
               votingActivityId={votingActivityId}
               getVoteCounts={getVoteCounts}
               getUserVote={getUserVote}
@@ -68,6 +91,13 @@ export function TripTimeline({
               activityParticipantsMap={activityParticipantsMap}
               tripMembers={tripMembers}
               memberProfiles={memberProfiles}
+              onEditActivity={onEditActivity}
+              onDeleteActivity={onDeleteActivity}
+              lastEditedActivityId={lastEditedActivityId}
+              onDragStart={onDragStart}
+              onDragOver={onDragOver}
+              onDropOnActivity={onDropOnActivity}
+              onDropOnEmptyDay={onDropOnEmptyDay}
             />
           );
         })}

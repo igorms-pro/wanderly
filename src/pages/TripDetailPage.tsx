@@ -3,10 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import WeatherWidget from '@/components/WeatherWidget';
 import NearbyPlaces from '@/components/NearbyPlaces';
 import { TripChat } from '@/features/chat';
-import { CreateActivityModal } from '@/features/activities';
+import {
+  ActivityDeleteConfirmModal,
+  CreateActivityModal,
+  EditActivityModal,
+} from '@/features/activities';
 import { useStore } from '@/lib/store';
+import { supabase } from '@/lib/supabase';
 import { DashboardHeader } from '@/pages/dashboard/DashboardHeader';
 import type { TripConstraints } from '@/lib/types/database.types';
+import type { Activity } from '@/lib/types/database.types';
 import {
   useTripDetail,
   TripDetailHeader,
@@ -53,9 +59,15 @@ function getConstraintsSummary(currentTrip: { constraints: unknown }) {
 
 export default function TripDetailPage() {
   const navigate = useNavigate();
-  const user = useStore((s) => s.user);
   const signOut = useStore((s) => s.signOut);
+  const deleteActivity = useStore((s) => s.deleteActivity);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [activityToEdit, setActivityToEdit] = useState<{
+    activity: Activity;
+    date: string;
+  } | null>(null);
+  const [activityToDelete, setActivityToDelete] = useState<Activity | null>(null);
+  const [lastEditedActivityId, setLastEditedActivityId] = useState<string | null>(null);
 
   const handleLogout = async () => {
     try {
@@ -68,6 +80,7 @@ export default function TripDetailPage() {
 
   const {
     t,
+    user,
     tripId,
     loading,
     error,
@@ -92,11 +105,56 @@ export default function TripDetailPage() {
     getUserVote,
     activitiesByDate,
     sortedDates,
+    itineraryDayIdByDate,
     activityParticipantsMap,
     memberProfiles,
+    refreshActivityParticipants,
     showAddActivityModal,
     setShowAddActivityModal,
+    scenarios,
+    scenariosLoading,
+    scenariosError,
+    canCreateActivitiesAndScenarios,
+    canManageScenarios,
+    canEditActivities,
+    canReorderActivities,
+    canDeleteActivities,
+    createScenario,
+    deleteScenario,
+    generateAiScenario,
+    applyScenarioAsBase,
+    importScenarioActivityToItinerary,
   } = useTripDetail();
+
+  const handleAddMeToActivity = async (activityId: string) => {
+    if (!user?.id) return;
+    const table = supabase.from('activity_participants') as unknown as {
+      insert: (v: { activity_id: string; user_id: string }) => Promise<unknown>;
+    };
+    await table.insert({ activity_id: activityId, user_id: user.id });
+    await refreshActivityParticipants();
+  };
+
+  const handleRemoveMeFromActivity = async (activityId: string) => {
+    if (!user?.id) return;
+    const hasExplicit =
+      activityParticipantsMap[activityId] != null && activityParticipantsMap[activityId].length > 0;
+    const table = supabase.from('activity_participants') as unknown as {
+      delete: () => {
+        eq: (col: string, val: string) => { eq: (col: string, val: string) => Promise<unknown> };
+      };
+      insert: (v: { activity_id: string; user_id: string }[]) => Promise<unknown>;
+    };
+    if (hasExplicit) {
+      await table.delete().eq('activity_id', activityId).eq('user_id', user.id);
+    } else {
+      const otherIds = tripMembers.filter((m) => m.user_id !== user.id).map((m) => m.user_id);
+      if (otherIds.length > 0) {
+        await table.insert(otherIds.map((uid) => ({ activity_id: activityId, user_id: uid })));
+      }
+    }
+    await refreshActivityParticipants();
+  };
 
   if (loading) {
     return (
@@ -192,10 +250,13 @@ export default function TripDetailPage() {
           <TripDetailItinerary
             startDate={currentTrip.start_date}
             endDate={currentTrip.end_date}
-            canEdit={canEdit()}
+            canEdit={canEditActivities()}
+            canReorder={canReorderActivities()}
             canVote={!!user}
+            lastEditedActivityId={lastEditedActivityId}
             activitiesByDate={activitiesByDate}
             sortedDates={sortedDates}
+            itineraryDayIdByDate={itineraryDayIdByDate}
             votingActivityId={votingActivityId}
             getVoteCounts={getVoteCounts}
             getUserVote={getUserVote}
@@ -212,6 +273,30 @@ export default function TripDetailPage() {
             activityParticipantsMap={activityParticipantsMap}
             tripMembers={tripMembers}
             memberProfiles={memberProfiles}
+            scenarios={scenarios}
+            canCreateScenarios={canCreateActivitiesAndScenarios()}
+            canManageScenarios={canManageScenarios()}
+            onGenerateAiScenario={async () => {
+              if (!currentTrip) return;
+              await generateAiScenario(currentTrip, tripMembers.length);
+            }}
+            onCreateScenario={createScenario}
+            onDeleteScenario={deleteScenario}
+            onUseScenarioAsBase={async (scenarioId) => {
+              if (!tripId) return;
+              await applyScenarioAsBase(tripId, scenarioId);
+            }}
+            onAddScenarioActivityToItinerary={async (date, activity) => {
+              if (!tripId) return;
+              await importScenarioActivityToItinerary(tripId, date, activity);
+            }}
+            onEditActivity={(activity, date) => {
+              if (!date) return;
+              setActivityToEdit({ activity, date });
+            }}
+            onDeleteActivity={(activity) => {
+              setActivityToDelete(activity);
+            }}
           />
         )}
         {activeTab === 'chat' && tripId && <TripChat tripId={tripId} userRole={getUserRole()} />}
@@ -220,6 +305,36 @@ export default function TripDetailPage() {
       {showAddActivityModal && tripId && (
         <CreateActivityModal tripId={tripId} onClose={() => setShowAddActivityModal(false)} />
       )}
+
+      {activityToEdit && tripId && (
+        <EditActivityModal
+          tripId={tripId}
+          activity={activityToEdit.activity}
+          date={activityToEdit.date}
+          onClose={() => setActivityToEdit(null)}
+          onSaveSuccess={(activityId) => {
+            setLastEditedActivityId(activityId);
+            setActivityToEdit(null);
+            setTimeout(() => setLastEditedActivityId(null), 2500);
+          }}
+          currentUserId={user?.id ?? null}
+          activityParticipantsMap={activityParticipantsMap}
+          tripMembers={tripMembers}
+          memberProfiles={memberProfiles}
+          onAddMe={handleAddMeToActivity}
+          onRemoveMe={handleRemoveMeFromActivity}
+        />
+      )}
+
+      <ActivityDeleteConfirmModal
+        activity={activityToDelete}
+        isOpen={!!activityToDelete}
+        onClose={() => setActivityToDelete(null)}
+        onConfirm={async (activityId) => {
+          await deleteActivity(activityId);
+          setActivityToDelete(null);
+        }}
+      />
     </div>
   );
 }

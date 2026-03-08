@@ -1,11 +1,5 @@
 ---
 description: General coding guidelines for Voyagely – TypeScript, code style, file limits, naming
-globs: src/**/*.{ts,tsx}
-alwaysApply: true
----
-
----
-description: General coding guidelines for Voyagely – TypeScript, code style, file limits, naming
 alwaysApply: true
 ---
 
