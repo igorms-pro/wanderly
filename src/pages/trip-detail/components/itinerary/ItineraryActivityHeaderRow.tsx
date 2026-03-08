@@ -1,6 +1,7 @@
 import { useCallback, KeyboardEvent } from 'react';
 import { Clock, ChevronDown, ChevronUp, Pencil, Trash2 } from 'lucide-react';
 import type { Activity } from '../../../../lib/types/database.types';
+import { formatTimeDisplay } from '../../ItineraryActivityTypes';
 
 interface ItineraryActivityHeaderRowProps {
   activity: Activity;
@@ -52,8 +53,8 @@ export function ItineraryActivityHeaderRow({
             <span className="flex items-center gap-1">
               <Clock className="w-4 h-4 shrink-0" />
               {activity.end_time
-                ? `${activity.start_time} – ${activity.end_time}`
-                : activity.start_time}
+                ? `${formatTimeDisplay(activity.start_time)} – ${formatTimeDisplay(activity.end_time)}`
+                : formatTimeDisplay(activity.start_time)}
             </span>
           )}
           {activity.status === 'proposed' && (upvotes > 0 || downvotes > 0) && (

@@ -43,6 +43,14 @@ function buildInitialFormData(options: UseActivityFormOptions): ActivityFormData
         typeof activity.cost_cents === 'number'
           ? (activity.cost_cents / 100).toFixed(2).replace(/\.00$/, '')
           : '',
+      costMin:
+        activity.cost_min_cents != null
+          ? (activity.cost_min_cents / 100).toFixed(2).replace(/\.00$/, '')
+          : '',
+      costMax:
+        activity.cost_max_cents != null
+          ? (activity.cost_max_cents / 100).toFixed(2).replace(/\.00$/, '')
+          : '',
       currency: activity.currency ?? 'USD',
       lat: activity.lat != null ? String(activity.lat) : '',
       lon: activity.lon != null ? String(activity.lon) : '',
@@ -65,6 +73,8 @@ function buildInitialFormData(options: UseActivityFormOptions): ActivityFormData
     startTime: '',
     endTime: '',
     cost: '',
+    costMin: '',
+    costMax: '',
     currency: 'USD',
     lat: '',
     lon: '',
@@ -109,8 +119,18 @@ export function useActivityForm(options: UseActivityFormOptions) {
       }
     }
 
-    if (formData.cost && (isNaN(parseFloat(formData.cost)) || parseFloat(formData.cost) < 0)) {
+    const costMinVal = formData.costMin.trim() ? parseFloat(formData.costMin) : NaN;
+    const costMaxVal = formData.costMax.trim() ? parseFloat(formData.costMax) : NaN;
+    if (formData.costMin.trim() && (Number.isNaN(costMinVal) || costMinVal < 0)) {
       setError(t('activityModal.invalidCost') || 'Cost must be a positive number');
+      return;
+    }
+    if (formData.costMax.trim() && (Number.isNaN(costMaxVal) || costMaxVal < 0)) {
+      setError(t('activityModal.invalidCost') || 'Cost must be a positive number');
+      return;
+    }
+    if (!Number.isNaN(costMinVal) && !Number.isNaN(costMaxVal) && costMinVal > costMaxVal) {
+      setError(t('activityModal.costMinMaxOrder') || 'Min cost must be less than or equal to max');
       return;
     }
 
@@ -162,6 +182,23 @@ export function useActivityForm(options: UseActivityFormOptions) {
           ? transportDuration
           : undefined;
 
+      const hasMin = formData.costMin.trim() !== '' && !Number.isNaN(parseFloat(formData.costMin));
+      const hasMax = formData.costMax.trim() !== '' && !Number.isNaN(parseFloat(formData.costMax));
+      let cost_min_cents: number | undefined;
+      let cost_max_cents: number | undefined;
+      if (hasMin && hasMax) {
+        cost_min_cents = Math.round(parseFloat(formData.costMin) * 100);
+        cost_max_cents = Math.round(parseFloat(formData.costMax) * 100);
+      } else if (hasMin) {
+        const c = Math.round(parseFloat(formData.costMin) * 100);
+        cost_min_cents = c;
+        cost_max_cents = c;
+      } else if (hasMax) {
+        const c = Math.round(parseFloat(formData.costMax) * 100);
+        cost_min_cents = c;
+        cost_max_cents = c;
+      }
+
       if (options.mode === 'create') {
         await createActivity({
           trip_id: tripId,
@@ -171,7 +208,9 @@ export function useActivityForm(options: UseActivityFormOptions) {
           category: formData.category || undefined,
           start_time,
           end_time,
-          cost_cents: formData.cost ? Math.round(parseFloat(formData.cost) * 100) : undefined,
+          cost_cents: cost_min_cents ?? undefined,
+          cost_min_cents,
+          cost_max_cents,
           currency: formData.currency,
           lat: formData.lat ? parseFloat(formData.lat) : undefined,
           lon: formData.lon ? parseFloat(formData.lon) : undefined,
@@ -199,7 +238,9 @@ export function useActivityForm(options: UseActivityFormOptions) {
           itinerary_day_id,
           start_time,
           end_time,
-          cost_cents: formData.cost ? Math.round(parseFloat(formData.cost) * 100) : undefined,
+          cost_cents: cost_min_cents ?? undefined,
+          cost_min_cents,
+          cost_max_cents,
           currency: formData.currency,
           lat: formData.lat ? parseFloat(formData.lat) : undefined,
           lon: formData.lon ? parseFloat(formData.lon) : undefined,

@@ -129,6 +129,8 @@ export interface CreateActivityData {
   start_time?: string;
   end_time?: string;
   cost_cents?: number;
+  cost_min_cents?: number;
+  cost_max_cents?: number;
   currency?: string;
   lat?: number;
   lon?: number;

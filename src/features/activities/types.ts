@@ -6,6 +6,8 @@ export interface ActivityFormData {
   startTime: string;
   endTime: string;
   cost: string;
+  costMin: string;
+  costMax: string;
   currency: string;
   lat: string;
   lon: string;

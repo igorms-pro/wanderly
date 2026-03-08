@@ -26,6 +26,16 @@ export function formatTime(timeStr: string, pattern: string = 'h:mm a'): string 
   return format(new Date(normalized), pattern);
 }
 
+/** Display time without seconds; "18h" when minutes are 00, else "18:30". */
+export function formatTimeDisplay(timeStr: string): string {
+  if (!timeStr?.trim()) return '';
+  const part = timeStr.trim().slice(0, 5);
+  const [hh, mm] = part.split(':');
+  if (!hh) return timeStr;
+  const minutes = mm ?? '00';
+  return minutes === '00' ? `${hh}h` : `${hh}:${minutes}`;
+}
+
 export function formatActivityCost(
   activity: Activity,
   currency: string,

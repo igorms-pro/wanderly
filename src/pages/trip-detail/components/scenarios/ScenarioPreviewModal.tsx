@@ -1,5 +1,6 @@
 import type { Activity } from '@/lib/types/database.types';
 import type { TripScenario } from '@/lib/store/tripDetailSlice.scenarios';
+import { formatTimeDisplay } from '@/pages/trip-detail/ItineraryActivityTypes';
 
 interface ScenarioPreviewModalProps {
   scenario: TripScenario;
@@ -9,13 +10,6 @@ interface ScenarioPreviewModalProps {
   onUseAsBase: (scenarioItineraryId: string) => Promise<void>;
   onAddToItinerary: (date: string, activity: Activity) => Promise<void>;
   t: (key: string, options?: Record<string, unknown>) => string;
-}
-
-function formatTime(value: string | null | undefined): string | null {
-  if (!value) return null;
-  // DB column is TIME => usually HH:MM:SS
-  if (value.includes(':')) return value.slice(0, 5);
-  return value;
 }
 
 export function ScenarioPreviewModal({
@@ -83,9 +77,12 @@ export function ScenarioPreviewModal({
               ) : (
                 <ul className="divide-y divide-gray-200 dark:divide-gray-800">
                   {day.activities.map((a) => {
-                    const time = [formatTime(a.start_time), formatTime(a.end_time)]
+                    const time = [
+                      formatTimeDisplay(a.start_time ?? ''),
+                      formatTimeDisplay(a.end_time ?? ''),
+                    ]
                       .filter(Boolean)
-                      .join('–');
+                      .join(' – ');
                     return (
                       <li key={a.id} className="px-3 py-3 flex items-start justify-between gap-3">
                         <div className="min-w-0">

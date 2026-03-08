@@ -17,11 +17,11 @@ export function ActivityFormCostSection({ formData, onChange }: ActivityFormCost
         <DollarSign className="w-4 h-4 inline mr-1" />
         {t('activityModal.costPerPerson')}
       </label>
-      <div className="flex space-x-2">
+      <div className="flex flex-wrap gap-2 items-start">
         <select
           value={formData.currency}
           onChange={(e) => onChange({ currency: e.target.value })}
-          className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
         >
           <option value="USD">USD</option>
           <option value="EUR">EUR</option>
@@ -32,10 +32,21 @@ export function ActivityFormCostSection({ formData, onChange }: ActivityFormCost
           type="number"
           step="0.01"
           min="0"
-          value={formData.cost}
-          onChange={(e) => onChange({ cost: e.target.value })}
-          className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-          placeholder="0.00"
+          value={formData.costMin}
+          onChange={(e) => onChange({ costMin: e.target.value })}
+          className="flex-1 min-w-[100px] px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          placeholder={t('activityModal.costMinPlaceholder')}
+          aria-label={t('activityModal.costMin')}
+        />
+        <input
+          type="number"
+          step="0.01"
+          min="0"
+          value={formData.costMax}
+          onChange={(e) => onChange({ costMax: e.target.value })}
+          className="flex-1 min-w-[100px] px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          placeholder={t('activityModal.costMaxPlaceholder')}
+          aria-label={t('activityModal.costMax')}
         />
       </div>
     </div>
