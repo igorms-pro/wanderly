@@ -1,13 +1,11 @@
 import type { Activity, TripMember } from '@/lib/types/database.types';
+
 import { TripItineraryContextSummary } from './TripItineraryContextSummary';
 import { ItineraryViewTabs } from './ItineraryViewTabs';
-import { TripItineraryEmptyState } from './TripItineraryEmptyState';
-import { TripItineraryListView } from './TripItineraryListView';
-import { TripItineraryCalendarView } from './TripItineraryCalendarView';
-import { TripItineraryTimelineView } from './TripItineraryTimelineView';
-import { TripScenariosSection } from '../scenarios/TripScenariosSection';
 import { useItineraryViewState } from './useItineraryViewState';
 import { useItineraryDragAndDrop } from '../../hooks/useItineraryDragAndDrop';
+import { TripDetailItineraryViews } from './TripDetailItineraryViews';
+import { TripDetailItineraryScenarios } from './TripDetailItineraryScenarios';
 
 export type ItineraryViewMode = 'list' | 'calendar' | 'timeline';
 
@@ -47,10 +45,7 @@ interface TripDetailItineraryProps {
   onCreateScenario?: (title: string | null, days: { date: string; dayIndex?: number }[]) => void;
   onDeleteScenario?: (scenarioId: string) => void;
   onUseScenarioAsBase?: (scenarioItineraryId: string) => Promise<void>;
-  onAddScenarioActivityToItinerary?: (
-    date: string,
-    activity: import('@/lib/types/database.types').Activity,
-  ) => Promise<void>;
+  onAddScenarioActivityToItinerary?: (date: string, activity: Activity) => Promise<void>;
   onEditActivity?: (activity: Activity, date: string) => void;
   onDeleteActivity?: (activity: Activity) => void;
   lastEditedActivityId?: string | null;
@@ -130,109 +125,50 @@ export function TripDetailItinerary({
         onSearchChange={handleSearchChange}
       />
 
-      {sortedDates.length === 0 ? (
-        <TripItineraryEmptyState t={t} canEdit={canEdit} onAddActivity={onAddActivity} />
-      ) : viewMode === 'list' ? (
-        <TripItineraryListView
-          sortedDates={sortedDatesForView}
-          activitiesByDate={activitiesByDateForView}
-          itineraryDayIdByDate={itineraryDayIdByDate}
-          canEdit={canEdit}
-          canReorder={canReorder}
-          canVote={canVote}
-          lastEditedActivityId={lastEditedActivityId}
-          votingActivityId={votingActivityId}
-          getVoteCounts={getVoteCounts}
-          getUserVote={getUserVote}
-          onVote={onVote}
-          t={t}
-          currency={currency}
-          membersCount={membersCount}
-          activityParticipantsMap={activityParticipantsMap}
-          tripMembers={tripMembers}
-          memberProfiles={memberProfiles}
-          constraintsSummary={constraintsSummary}
-          searchQuery={searchQuery}
-          onEditActivity={onEditActivity}
-          onDeleteActivity={onDeleteActivity}
-          onDragStart={canReorder ? dragAndDrop.handleDragStart : undefined}
-          onDragOver={canReorder ? dragAndDrop.handleDragOver : undefined}
-          onDropOnActivity={canReorder ? dragAndDrop.handleDropOnActivity : undefined}
-          onDropOnEmptyDay={canReorder ? dragAndDrop.handleDropOnEmptyDay : undefined}
-        />
-      ) : viewMode === 'calendar' ? (
-        <TripItineraryCalendarView
-          startDate={startDate}
-          endDate={endDate}
-          activitiesByDate={activitiesByDateForView}
-          selectedDate={selectedDate}
-          onSelectDate={handleSelectDate}
-          canVote={canVote}
-          canEdit={canEdit}
-          canReorder={canReorder}
-          votingActivityId={votingActivityId}
-          getVoteCounts={getVoteCounts}
-          getUserVote={getUserVote}
-          onVote={onVote}
-          t={t}
-          currency={currency}
-          membersCount={membersCount}
-          activityParticipantsMap={activityParticipantsMap}
-          tripMembers={tripMembers}
-          memberProfiles={memberProfiles}
-          onEditActivity={onEditActivity}
-          onDeleteActivity={onDeleteActivity}
-          lastEditedActivityId={lastEditedActivityId}
-          onDragStart={canReorder ? dragAndDrop.handleDragStart : undefined}
-          onDragOver={canReorder ? dragAndDrop.handleDragOver : undefined}
-          onDropOnActivity={canReorder ? dragAndDrop.handleDropOnActivity : undefined}
-          onDropOnEmptyDay={canReorder ? dragAndDrop.handleDropOnEmptyDay : undefined}
-        />
-      ) : (
-        <TripItineraryTimelineView
-          sortedDates={sortedDatesForView}
-          activitiesByDate={activitiesByDateForView}
-          canVote={canVote}
-          canEdit={canEdit}
-          canReorder={canReorder}
-          votingActivityId={votingActivityId}
-          getVoteCounts={getVoteCounts}
-          getUserVote={getUserVote}
-          onVote={onVote}
-          t={t}
-          currency={currency}
-          membersCount={membersCount}
-          activityParticipantsMap={activityParticipantsMap}
-          tripMembers={tripMembers}
-          memberProfiles={memberProfiles}
-          onEditActivity={onEditActivity}
-          onDeleteActivity={onDeleteActivity}
-          lastEditedActivityId={lastEditedActivityId}
-          onDragStart={canReorder ? dragAndDrop.handleDragStart : undefined}
-          onDragOver={canReorder ? dragAndDrop.handleDragOver : undefined}
-          onDropOnActivity={canReorder ? dragAndDrop.handleDropOnActivity : undefined}
-          onDropOnEmptyDay={canReorder ? dragAndDrop.handleDropOnEmptyDay : undefined}
-        />
-      )}
+      <TripDetailItineraryViews
+        startDate={startDate}
+        endDate={endDate}
+        viewMode={viewMode}
+        selectedDate={selectedDate}
+        sortedDates={sortedDates}
+        sortedDatesForView={sortedDatesForView}
+        activitiesByDateForView={activitiesByDateForView}
+        itineraryDayIdByDate={itineraryDayIdByDate}
+        canEdit={canEdit}
+        canReorder={canReorder}
+        canVote={canVote}
+        votingActivityId={votingActivityId}
+        getVoteCounts={getVoteCounts}
+        getUserVote={getUserVote}
+        onVote={onVote}
+        onAddActivity={onAddActivity}
+        onSelectDate={handleSelectDate}
+        onEditActivity={onEditActivity}
+        onDeleteActivity={onDeleteActivity}
+        lastEditedActivityId={lastEditedActivityId}
+        t={t}
+        currency={currency}
+        membersCount={membersCount}
+        activityParticipantsMap={activityParticipantsMap}
+        tripMembers={tripMembers}
+        memberProfiles={memberProfiles}
+        constraintsSummary={constraintsSummary}
+        searchQuery={searchQuery}
+        dragAndDrop={dragAndDrop}
+      />
 
-      {onCreateScenario &&
-        onDeleteScenario &&
-        onGenerateAiScenario &&
-        onUseScenarioAsBase &&
-        onAddScenarioActivityToItinerary && (
-          <TripScenariosSection
-            scenarios={scenarios}
-            sortedDates={sortedDates}
-            canCreate={canCreateScenarios}
-            canManage={canManageScenarios}
-            onGenerateAiScenario={onGenerateAiScenario}
-            onCreateScenario={onCreateScenario}
-            onDeleteScenario={onDeleteScenario}
-            onUseScenarioAsBase={onUseScenarioAsBase}
-            onAddScenarioActivityToItinerary={onAddScenarioActivityToItinerary}
-            t={t}
-          />
-        )}
+      <TripDetailItineraryScenarios
+        scenarios={scenarios}
+        sortedDates={sortedDates}
+        canCreate={canCreateScenarios}
+        canManage={canManageScenarios}
+        t={t}
+        onGenerateAiScenario={onGenerateAiScenario}
+        onCreateScenario={onCreateScenario}
+        onDeleteScenario={onDeleteScenario}
+        onUseScenarioAsBase={onUseScenarioAsBase}
+        onAddScenarioActivityToItinerary={onAddScenarioActivityToItinerary}
+      />
     </div>
   );
 }

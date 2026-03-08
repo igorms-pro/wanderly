@@ -1,19 +1,11 @@
-import type { User, Profile } from '../types/database.types';
+import type { User } from '../types/database.types';
 import { supabase } from '../supabase';
 import { setSentryUser, clearSentryUser } from '../sentry';
 import { Analytics } from '../analytics';
 import type { AppState, SetState, GetState } from './types';
+import { profileToUser, fetchUserFromSession, upsertAndBuildUser } from './auth-utils';
 
-export function profileToUser(profile: Profile): User {
-  return {
-    id: profile.id,
-    email: profile.email,
-    display_name: profile.display_name || profile.email.split('@')[0],
-    avatar_url:
-      profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.email}`,
-    created_at: profile.created_at,
-  };
-}
+export { profileToUser };
 
 export function createAuthSlice(set: SetState, get: GetState): Partial<AppState> {
   return {
@@ -36,45 +28,15 @@ export function createAuthSlice(set: SetState, get: GetState): Partial<AppState>
           return;
         }
 
-        const {
-          data: { session },
-          error: sessionError,
-        } = await supabase.auth.getSession();
-
-        if (sessionError) {
-          console.error('Error getting session:', sessionError);
-          clearTimeout(safetyTimeout);
-          done();
-          return;
-        }
-
-        if (!session?.user) {
+        const user = await fetchUserFromSession();
+        if (!user) {
           set({ user: null });
           clearSentryUser();
-          clearTimeout(safetyTimeout);
-          done();
-          return;
+        } else {
+          set({ user });
+          setSentryUser({ id: user.id, email: user.email, username: user.display_name });
+          Analytics.identify(user.id, { email: user.email, displayName: user.display_name });
         }
-
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-
-        if (profileError || !profile) {
-          console.error('Error fetching profile:', profileError);
-          set({ user: null });
-          clearSentryUser();
-          clearTimeout(safetyTimeout);
-          done();
-          return;
-        }
-
-        const user = profileToUser(profile);
-        set({ user });
-        setSentryUser({ id: user.id, email: user.email, username: user.display_name });
-        Analytics.identify(user.id, { email: user.email, displayName: user.display_name });
       } catch (error) {
         console.error('Error initializing auth:', error);
         set({ user: null });
@@ -149,6 +111,7 @@ export function createAuthSlice(set: SetState, get: GetState): Partial<AppState>
 
     refreshUser: async () => {
       if (import.meta.env.DEV) console.log('[Auth] refreshUser() start');
+
       const setUserIfChanged = (newUser: User) => {
         const current = get().user;
         if (
@@ -196,65 +159,11 @@ export function createAuthSlice(set: SetState, get: GetState): Partial<AppState>
         if (profileError || !profile) {
           if (import.meta.env.DEV)
             console.log('[Auth] refreshUser no profile → upsert then refetch');
-          const displayName =
-            (authUser.user_metadata?.full_name as string) ||
-            (authUser.user_metadata?.name as string) ||
-            authUser.email?.split('@')[0] ||
-            'User';
-          const avatarUrl =
-            (authUser.user_metadata?.avatar_url as string) ||
-            (authUser.user_metadata?.picture as string) ||
-            null;
-          const profileRow = {
-            id: authUser.id,
-            email: authUser.email ?? '',
-            display_name: displayName,
-            avatar_url: avatarUrl,
-          };
-
-          const { error: upsertError } = await (supabase.from('profiles') as any).upsert(
-            profileRow,
-            { onConflict: 'id' },
-          );
-          if (import.meta.env.DEV)
-            console.log('[Auth] refreshUser upsert', { ok: !upsertError, error: upsertError });
-          if (upsertError && import.meta.env.DEV)
-            console.warn('[Auth] Profile upsert failed:', upsertError);
-
-          const { data: profileAfter } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', authUser.id)
-            .single();
-
-          if (profileAfter) {
-            const user = profileToUser(profileAfter);
-            setUserIfChanged(user);
-            setSentryUser({ id: user.id, email: user.email, username: user.display_name });
-            Analytics.identify(user.id, { email: user.email, displayName: user.display_name });
-            if (import.meta.env.DEV) console.log('[Auth] user set (from profile after upsert)');
-            return;
-          }
-
-          const fallbackUser: User = {
-            id: authUser.id,
-            email: authUser.email ?? '',
-            display_name: displayName,
-            avatar_url:
-              avatarUrl ?? `https://api.dicebear.com/7.x/avataaars/svg?seed=${authUser.id}`,
-            created_at: authUser.created_at ?? new Date().toISOString(),
-          };
-          setUserIfChanged(fallbackUser);
-          setSentryUser({
-            id: fallbackUser.id,
-            email: fallbackUser.email,
-            username: fallbackUser.display_name,
-          });
-          Analytics.identify(fallbackUser.id, {
-            email: fallbackUser.email,
-            displayName: fallbackUser.display_name,
-          });
-          if (import.meta.env.DEV) console.log('[Auth] user set (fallback from auth)');
+          const user = await upsertAndBuildUser(authUser);
+          setUserIfChanged(user);
+          setSentryUser({ id: user.id, email: user.email, username: user.display_name });
+          Analytics.identify(user.id, { email: user.email, displayName: user.display_name });
+          if (import.meta.env.DEV) console.log('[Auth] user set (from upsert)');
           return;
         }
 
