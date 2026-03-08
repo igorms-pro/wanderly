@@ -140,6 +140,7 @@ export interface CreateActivityData {
   transport_duration_minutes?: number;
   status?: 'proposed' | 'confirmed' | 'rejected';
   source?: 'manual' | 'ai' | 'import';
+  organizer_notes?: string | null;
 }
 
 export type SetState = (

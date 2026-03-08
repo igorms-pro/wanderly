@@ -80,6 +80,20 @@ export function ActivityFormAdvancedSection({
           ))}
         </div>
       </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {t('activityModal.organizerNote')}
+        </label>
+        <textarea
+          value={formData.organizerNotes}
+          onChange={(e) => onChange({ organizerNotes: e.target.value })}
+          rows={3}
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-y"
+          placeholder={t('activityModal.organizerNotePlaceholder')}
+          aria-label={t('activityModal.organizerNote')}
+        />
+      </div>
     </>
   );
 }

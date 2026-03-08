@@ -361,6 +361,8 @@
     "transportDurationPlaceholder": "ex. 20",
     "placeName": "Lieu / adresse",
     "placeNamePlaceholder": "ex. Parc Ueno, Tokyo",
+    "organizerNote": "Note de l'organisateur",
+    "organizerNotePlaceholder": "ex. N'oubliez pas vos tongs pour les petits bars",
     "participantsSectionTitle": "Participants",
     "addMe": "M'ajouter",
     "removeMe": "Me retirer"

@@ -62,6 +62,7 @@ function buildInitialFormData(options: UseActivityFormOptions): ActivityFormData
           ? String(activity.transport_duration_minutes)
           : '',
       status: activity.status,
+      organizerNotes: activity.organizer_notes ?? '',
     };
   }
 
@@ -83,6 +84,7 @@ function buildInitialFormData(options: UseActivityFormOptions): ActivityFormData
     transportNotes: '',
     transportDurationMinutes: '',
     status: 'proposed',
+    organizerNotes: '',
   };
 }
 
@@ -220,6 +222,7 @@ export function useActivityForm(options: UseActivityFormOptions) {
           transport_duration_minutes: validDuration,
           status: formData.status,
           source: 'manual',
+          organizer_notes: formData.organizerNotes.trim() || undefined,
         });
 
         setFormData(
@@ -249,6 +252,7 @@ export function useActivityForm(options: UseActivityFormOptions) {
           transport_notes: formData.transportNotes.trim() || undefined,
           transport_duration_minutes: validDuration,
           status: formData.status,
+          organizer_notes: formData.organizerNotes.trim() || undefined,
         });
         onSuccess(options.activity.id);
       }

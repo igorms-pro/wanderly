@@ -75,6 +75,7 @@ export function createTripDetailActivitiesSlice(set: SetState, get: GetState): P
             transport_duration_minutes: activityData.transport_duration_minutes ?? null,
             status: activityData.status || 'proposed',
             source: activityData.source || 'manual',
+            organizer_notes: activityData.organizer_notes ?? null,
           } as any)
           .select()
           .single();

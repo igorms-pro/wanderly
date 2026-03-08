@@ -361,6 +361,8 @@
     "transportDurationPlaceholder": "e.g. 20",
     "placeName": "Place / address",
     "placeNamePlaceholder": "e.g. Ueno Park, Tokyo",
+    "organizerNote": "Organizer note",
+    "organizerNotePlaceholder": "e.g. Don't forget flip-flops for the beach bars",
     "participantsSectionTitle": "Participants",
     "addMe": "Add me",
     "removeMe": "Remove me"

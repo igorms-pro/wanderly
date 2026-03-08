@@ -16,4 +16,5 @@ export interface ActivityFormData {
   transportNotes: string;
   transportDurationMinutes: string;
   status: 'proposed' | 'confirmed' | 'rejected';
+  organizerNotes: string;
 }
