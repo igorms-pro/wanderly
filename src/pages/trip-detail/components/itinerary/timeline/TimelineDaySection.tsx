@@ -23,6 +23,15 @@ interface TimelineDaySectionProps {
   onEditActivity?: (activity: Activity, date: string) => void;
   onDeleteActivity?: (activity: Activity) => void;
   lastEditedActivityId?: string | null;
+  canReorder?: boolean;
+  onDragStart?: (activityId: string, date: string) => void;
+  onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDropOnActivity?: (
+    targetActivityId: string,
+    targetDate: string,
+    targetIndex: number,
+  ) => Promise<void>;
+  onDropOnEmptyDay?: (targetDate: string) => Promise<void>;
 }
 
 export function TimelineDaySection({
@@ -45,6 +54,11 @@ export function TimelineDaySection({
   onEditActivity,
   onDeleteActivity,
   lastEditedActivityId = null,
+  canReorder,
+  onDragStart,
+  onDragOver,
+  onDropOnActivity,
+  onDropOnEmptyDay,
 }: TimelineDaySectionProps) {
   const sortedActivities = [...activities].sort((a, b) =>
     (a.start_time || '').localeCompare(b.start_time || ''),
@@ -66,8 +80,24 @@ export function TimelineDaySection({
         </span>
       </div>
 
-      {/* Cartes activités (alternance gauche/droite sur desktop) */}
-      <div className="space-y-3">
+      {/* Cartes activités (alternance gauche/droite sur desktop) + drop zone for empty day */}
+      <div
+        className={`space-y-3 ${sortedActivities.length === 0 && canReorder ? 'min-h-[80px] rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-600 flex items-center justify-center' : ''}`}
+        onDragOver={canReorder ? onDragOver : undefined}
+        onDrop={
+          canReorder && onDropOnEmptyDay && sortedActivities.length === 0
+            ? (event) => {
+                event.preventDefault();
+                onDropOnEmptyDay(date);
+              }
+            : undefined
+        }
+      >
+        {sortedActivities.length === 0 && canReorder && (
+          <p className="text-sm text-gray-500 dark:text-gray-400 px-4">
+            {t('tripDetail.dropActivityHere')}
+          </p>
+        )}
         {sortedActivities.map((activity, i) => {
           const isExpanded = expandedId === activity.id;
           return (
@@ -95,6 +125,10 @@ export function TimelineDaySection({
               onEditActivity={onEditActivity}
               onDeleteActivity={onDeleteActivity}
               isJustEdited={lastEditedActivityId === activity.id}
+              canReorder={canReorder}
+              onDragStart={onDragStart}
+              onDragOver={onDragOver}
+              onDrop={canReorder ? onDropOnActivity : undefined}
             />
           );
         })}

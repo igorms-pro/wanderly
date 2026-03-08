@@ -7,6 +7,7 @@ import { TripItineraryCalendarView } from './TripItineraryCalendarView';
 import { TripItineraryTimelineView } from './TripItineraryTimelineView';
 import { TripScenariosSection } from '../scenarios/TripScenariosSection';
 import { useItineraryViewState } from './useItineraryViewState';
+import { useItineraryDragAndDrop } from '../../hooks/useItineraryDragAndDrop';
 
 export type ItineraryViewMode = 'list' | 'calendar' | 'timeline';
 
@@ -101,6 +102,13 @@ export function TripDetailItinerary({
     handleSearchChange,
   } = useItineraryViewState({ activitiesByDate, sortedDates });
 
+  const dragAndDrop = useItineraryDragAndDrop({
+    activitiesByDate: activitiesByDateForView,
+    sortedDates: sortedDatesForView,
+    itineraryDayIdByDate,
+    canEdit: canReorder,
+  });
+
   return (
     <div className="space-y-6">
       <TripItineraryContextSummary
@@ -147,6 +155,10 @@ export function TripDetailItinerary({
           searchQuery={searchQuery}
           onEditActivity={onEditActivity}
           onDeleteActivity={onDeleteActivity}
+          onDragStart={canReorder ? dragAndDrop.handleDragStart : undefined}
+          onDragOver={canReorder ? dragAndDrop.handleDragOver : undefined}
+          onDropOnActivity={canReorder ? dragAndDrop.handleDropOnActivity : undefined}
+          onDropOnEmptyDay={canReorder ? dragAndDrop.handleDropOnEmptyDay : undefined}
         />
       ) : viewMode === 'calendar' ? (
         <TripItineraryCalendarView
@@ -157,6 +169,7 @@ export function TripDetailItinerary({
           onSelectDate={handleSelectDate}
           canVote={canVote}
           canEdit={canEdit}
+          canReorder={canReorder}
           votingActivityId={votingActivityId}
           getVoteCounts={getVoteCounts}
           getUserVote={getUserVote}
@@ -170,6 +183,10 @@ export function TripDetailItinerary({
           onEditActivity={onEditActivity}
           onDeleteActivity={onDeleteActivity}
           lastEditedActivityId={lastEditedActivityId}
+          onDragStart={canReorder ? dragAndDrop.handleDragStart : undefined}
+          onDragOver={canReorder ? dragAndDrop.handleDragOver : undefined}
+          onDropOnActivity={canReorder ? dragAndDrop.handleDropOnActivity : undefined}
+          onDropOnEmptyDay={canReorder ? dragAndDrop.handleDropOnEmptyDay : undefined}
         />
       ) : (
         <TripItineraryTimelineView
@@ -177,6 +194,7 @@ export function TripDetailItinerary({
           activitiesByDate={activitiesByDateForView}
           canVote={canVote}
           canEdit={canEdit}
+          canReorder={canReorder}
           votingActivityId={votingActivityId}
           getVoteCounts={getVoteCounts}
           getUserVote={getUserVote}
@@ -190,6 +208,10 @@ export function TripDetailItinerary({
           onEditActivity={onEditActivity}
           onDeleteActivity={onDeleteActivity}
           lastEditedActivityId={lastEditedActivityId}
+          onDragStart={canReorder ? dragAndDrop.handleDragStart : undefined}
+          onDragOver={canReorder ? dragAndDrop.handleDragOver : undefined}
+          onDropOnActivity={canReorder ? dragAndDrop.handleDropOnActivity : undefined}
+          onDropOnEmptyDay={canReorder ? dragAndDrop.handleDropOnEmptyDay : undefined}
         />
       )}
 

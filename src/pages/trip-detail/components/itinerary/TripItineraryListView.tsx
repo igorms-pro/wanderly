@@ -1,7 +1,6 @@
 import type { Activity, TripMember } from '@/lib/types/database.types';
 import type { ConstraintsSummary } from './TripDetailItinerary';
 import { ItineraryDayBlock } from './ItineraryDayBlock';
-import { useItineraryDragAndDrop } from '../../hooks/useItineraryDragAndDrop';
 
 interface TripItineraryListViewProps {
   sortedDates: string[];
@@ -26,6 +25,14 @@ interface TripItineraryListViewProps {
   onEditActivity?: (activity: Activity, date: string) => void;
   onDeleteActivity?: (activity: Activity) => void;
   lastEditedActivityId?: string | null;
+  onDragStart?: (activityId: string, date: string) => void;
+  onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDropOnActivity?: (
+    targetActivityId: string,
+    targetDate: string,
+    targetIndex: number,
+  ) => Promise<void>;
+  onDropOnEmptyDay?: (targetDate: string) => Promise<void>;
 }
 
 export function TripItineraryListView({
@@ -49,15 +56,12 @@ export function TripItineraryListView({
   onEditActivity,
   onDeleteActivity,
   lastEditedActivityId = null,
+  onDragStart,
+  onDragOver,
+  onDropOnActivity,
+  onDropOnEmptyDay,
 }: TripItineraryListViewProps) {
   const hasSearchNoResults = searchQuery.trim() !== '' && sortedDates.length === 0;
-
-  const dragAndDrop = useItineraryDragAndDrop({
-    activitiesByDate,
-    sortedDates,
-    itineraryDayIdByDate,
-    canEdit: canReorder,
-  });
 
   if (hasSearchNoResults) {
     return (
@@ -85,10 +89,10 @@ export function TripItineraryListView({
           activityParticipantsMap={activityParticipantsMap}
           tripMembers={tripMembers}
           memberProfiles={memberProfiles}
-          onDragStart={canReorder ? dragAndDrop.handleDragStart : undefined}
-          onDragOver={canReorder ? dragAndDrop.handleDragOver : undefined}
-          onDropOnActivity={canReorder ? dragAndDrop.handleDropOnActivity : undefined}
-          onDropOnEmpty={canReorder ? dragAndDrop.handleDropOnEmptyDay : undefined}
+          onDragStart={canReorder ? onDragStart : undefined}
+          onDragOver={canReorder ? onDragOver : undefined}
+          onDropOnActivity={canReorder ? onDropOnActivity : undefined}
+          onDropOnEmpty={canReorder ? onDropOnEmptyDay : undefined}
           canEditActivities={canEdit}
           onEditActivity={onEditActivity}
           onDeleteActivity={onDeleteActivity}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { GripVertical } from 'lucide-react';
 import type { Activity, TripMember } from '@/lib/types/database.types';
 import type { MemberProfile } from '../../../ItineraryActivityTypes';
 import { TimelineActivityHeader } from './TimelineActivityHeader';
@@ -28,6 +29,14 @@ export interface TimelineActivityCardProps {
   onEditActivity?: (activity: Activity, date: string) => void;
   onDeleteActivity?: (activity: Activity) => void;
   isJustEdited?: boolean;
+  canReorder?: boolean;
+  onDragStart?: (activityId: string, date: string) => void;
+  onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDrop?: (
+    targetActivityId: string,
+    targetDate: string,
+    targetIndex: number,
+  ) => void | Promise<void>;
 }
 
 export function TimelineActivityCard({
@@ -51,6 +60,10 @@ export function TimelineActivityCard({
   onEditActivity,
   onDeleteActivity,
   isJustEdited = false,
+  canReorder = false,
+  onDragStart,
+  onDragOver,
+  onDrop,
 }: TimelineActivityCardProps) {
   const { upvotes, downvotes } = getVoteCounts(activity.id);
   const userVote = getUserVote(activity.id);
@@ -58,6 +71,7 @@ export function TimelineActivityCard({
   const justEditedClass = isJustEdited
     ? 'ring-2 ring-green-400 dark:ring-green-500 ring-offset-2 dark:ring-offset-gray-800'
     : '';
+  const showDragHandle = canReorder && !!onDragStart && !!date;
 
   const [openParticipants, setOpenParticipants] = useState(false);
 
@@ -81,58 +95,95 @@ export function TimelineActivityCard({
       className={`rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm overflow-hidden ${justEditedClass} ${
         isRight ? 'sm:ml-8' : 'sm:mr-8'
       }`}
+      draggable={showDragHandle}
+      onDragStart={
+        showDragHandle && onDragStart
+          ? (e) => {
+              onDragStart(activity.id, date);
+              e.dataTransfer.effectAllowed = 'move';
+            }
+          : undefined
+      }
+      onDragOver={
+        canReorder && onDragOver
+          ? (e) => {
+              e.preventDefault();
+              onDragOver(e);
+            }
+          : undefined
+      }
+      onDrop={
+        canReorder && onDrop
+          ? (e) => {
+              e.preventDefault();
+              void onDrop(activity.id, date, index);
+            }
+          : undefined
+      }
     >
-      <div className="px-4 py-4 sm:px-6 sm:py-5 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div className="min-w-0 flex-1">
-          <TimelineActivityHeader
-            activity={activity}
-            isExpanded={isExpanded}
-            onToggleExpanded={onToggleExpanded}
-            canEdit={canEditActivity}
-            onEdit={
-              canEditActivity && onEditActivity ? () => onEditActivity(activity, date) : undefined
-            }
-            onDelete={
-              canEditActivity && onDeleteActivity ? () => onDeleteActivity(activity) : undefined
-            }
-            t={t}
-          />
-          {activity.category && (
-            <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">
-              {activity.category}
-            </span>
-          )}
-          {isExpanded && (
-            <div className="mt-3 space-y-3">
-              {activity.description && (
-                <p className="text-sm text-gray-600 dark:text-gray-300">{activity.description}</p>
-              )}
-              <TimelineActivityParticipants
-                participantIds={participantIds}
-                participantsCount={participantsCount}
-                participantsLabel={participantsLabel}
-                memberProfiles={memberProfiles}
-                isOpen={openParticipants}
-                onToggle={() => setOpenParticipants((prev) => !prev)}
-                t={t}
-              />
-              <TimelineActivityNotes notes={activity.organizer_notes} t={t} />
-              <TimelineActivityMeta activity={activity} currency={currency} t={t} />
-            </div>
-          )}
-        </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <TimelineActivityVotes
-            activityStatus={activity.status}
-            canVote={canVote}
-            votingActivityId={votingActivityId}
-            activityId={activity.id}
-            upvotes={upvotes}
-            downvotes={downvotes}
-            userVote={userVote}
-            onVote={onVote}
-            t={t}
-          />
+      <div className="flex items-stretch">
+        {showDragHandle && (
+          <span
+            className="flex items-center pl-2 sm:pl-3 shrink-0 cursor-grab active:cursor-grabbing text-gray-400 dark:text-gray-500 touch-none"
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+            aria-label={t('tripDetail.reorderActivity')}
+          >
+            <GripVertical className="w-4 h-4" aria-hidden />
+          </span>
+        )}
+        <div className="flex-1 min-w-0 px-4 py-4 sm:px-6 sm:py-5 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <TimelineActivityHeader
+              activity={activity}
+              isExpanded={isExpanded}
+              onToggleExpanded={onToggleExpanded}
+              canEdit={canEditActivity}
+              onEdit={
+                canEditActivity && onEditActivity ? () => onEditActivity(activity, date) : undefined
+              }
+              onDelete={
+                canEditActivity && onDeleteActivity ? () => onDeleteActivity(activity) : undefined
+              }
+              t={t}
+            />
+            {activity.category && (
+              <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">
+                {activity.category}
+              </span>
+            )}
+            {isExpanded && (
+              <div className="mt-3 space-y-3">
+                {activity.description && (
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{activity.description}</p>
+                )}
+                <TimelineActivityParticipants
+                  participantIds={participantIds}
+                  participantsCount={participantsCount}
+                  participantsLabel={participantsLabel}
+                  memberProfiles={memberProfiles}
+                  isOpen={openParticipants}
+                  onToggle={() => setOpenParticipants((prev) => !prev)}
+                  t={t}
+                />
+                <TimelineActivityNotes notes={activity.organizer_notes} t={t} />
+                <TimelineActivityMeta activity={activity} currency={currency} t={t} />
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <TimelineActivityVotes
+              activityStatus={activity.status}
+              canVote={canVote}
+              votingActivityId={votingActivityId}
+              activityId={activity.id}
+              upvotes={upvotes}
+              downvotes={downvotes}
+              userVote={userVote}
+              onVote={onVote}
+              t={t}
+            />
+          </div>
         </div>
       </div>
     </div>

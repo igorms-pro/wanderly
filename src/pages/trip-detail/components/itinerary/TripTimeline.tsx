@@ -8,6 +8,7 @@ interface TripTimelineProps {
   activitiesByDate: Record<string, Activity[]>;
   canVote: boolean;
   canEdit: boolean;
+  canReorder?: boolean;
   votingActivityId: string | null;
   getVoteCounts: (activityId: string) => { upvotes: number; downvotes: number };
   getUserVote: (activityId: string) => 'up' | 'down' | null;
@@ -21,6 +22,14 @@ interface TripTimelineProps {
   onEditActivity?: (activity: Activity, date: string) => void;
   onDeleteActivity?: (activity: Activity) => void;
   lastEditedActivityId?: string | null;
+  onDragStart?: (activityId: string, date: string) => void;
+  onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDropOnActivity?: (
+    targetActivityId: string,
+    targetDate: string,
+    targetIndex: number,
+  ) => Promise<void>;
+  onDropOnEmptyDay?: (targetDate: string) => Promise<void>;
 }
 
 export function TripTimeline({
@@ -28,6 +37,7 @@ export function TripTimeline({
   activitiesByDate,
   canVote,
   canEdit,
+  canReorder,
   votingActivityId,
   getVoteCounts,
   getUserVote,
@@ -41,6 +51,10 @@ export function TripTimeline({
   onEditActivity,
   onDeleteActivity,
   lastEditedActivityId = null,
+  onDragStart,
+  onDragOver,
+  onDropOnActivity,
+  onDropOnEmptyDay,
 }: TripTimelineProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -67,6 +81,7 @@ export function TripTimeline({
               setExpandedId={setExpandedId}
               canVote={canVote}
               canEdit={canEdit}
+              canReorder={canReorder}
               votingActivityId={votingActivityId}
               getVoteCounts={getVoteCounts}
               getUserVote={getUserVote}
@@ -80,6 +95,10 @@ export function TripTimeline({
               onEditActivity={onEditActivity}
               onDeleteActivity={onDeleteActivity}
               lastEditedActivityId={lastEditedActivityId}
+              onDragStart={onDragStart}
+              onDragOver={onDragOver}
+              onDropOnActivity={onDropOnActivity}
+              onDropOnEmptyDay={onDropOnEmptyDay}
             />
           );
         })}

@@ -319,7 +319,8 @@
     "removeDownvote": "Retirer le vote contre",
     "searchPlaceholder": "Rechercher par nom, lieu ou description...",
     "searchNoResults": "Aucune activité ne correspond à votre recherche.",
-    "reorderActivity": "Réordonner"
+    "reorderActivity": "Réordonner",
+    "dropActivityHere": "Déposer l'activité ici"
   },
   "activityModal": {
     "addActivity": "Ajouter une activité",

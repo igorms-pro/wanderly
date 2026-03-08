@@ -10,6 +10,7 @@ interface TripItineraryCalendarViewProps {
   onSelectDate: (date: string | null) => void;
   canVote: boolean;
   canEdit: boolean;
+  canReorder?: boolean;
   votingActivityId: string | null;
   getVoteCounts: (activityId: string) => { upvotes: number; downvotes: number };
   getUserVote: (activityId: string) => 'up' | 'down' | null;
@@ -23,6 +24,14 @@ interface TripItineraryCalendarViewProps {
   onEditActivity?: (activity: Activity, date: string) => void;
   onDeleteActivity?: (activity: Activity) => void;
   lastEditedActivityId?: string | null;
+  onDragStart?: (activityId: string, date: string) => void;
+  onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDropOnActivity?: (
+    targetActivityId: string,
+    targetDate: string,
+    targetIndex: number,
+  ) => Promise<void>;
+  onDropOnEmptyDay?: (targetDate: string) => Promise<void>;
 }
 
 export function TripItineraryCalendarView({
@@ -33,6 +42,7 @@ export function TripItineraryCalendarView({
   onSelectDate,
   canVote,
   canEdit,
+  canReorder,
   votingActivityId,
   getVoteCounts,
   getUserVote,
@@ -46,6 +56,10 @@ export function TripItineraryCalendarView({
   onEditActivity,
   onDeleteActivity,
   lastEditedActivityId = null,
+  onDragStart,
+  onDragOver,
+  onDropOnActivity,
+  onDropOnEmptyDay,
 }: TripItineraryCalendarViewProps) {
   return (
     <div className="space-y-6">
@@ -57,10 +71,10 @@ export function TripItineraryCalendarView({
         onSelectDay={onSelectDate}
         t={t}
       />
-      {selectedDate && activitiesByDate[selectedDate]?.length > 0 && (
+      {selectedDate && (
         <ItineraryDayBlock
           date={selectedDate}
-          activities={activitiesByDate[selectedDate]}
+          activities={activitiesByDate[selectedDate] ?? []}
           canVote={canVote}
           votingActivityId={votingActivityId}
           getVoteCounts={getVoteCounts}
@@ -76,6 +90,10 @@ export function TripItineraryCalendarView({
           onEditActivity={onEditActivity}
           onDeleteActivity={onDeleteActivity}
           lastEditedActivityId={lastEditedActivityId}
+          onDragStart={canReorder ? onDragStart : undefined}
+          onDragOver={canReorder ? onDragOver : undefined}
+          onDropOnActivity={canReorder ? onDropOnActivity : undefined}
+          onDropOnEmpty={canReorder ? onDropOnEmptyDay : undefined}
           showClose
           onClose={() => onSelectDate(null)}
         />

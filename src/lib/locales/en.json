@@ -319,7 +319,8 @@
     "removeDownvote": "Remove downvote",
     "searchPlaceholder": "Search by name, place or description...",
     "searchNoResults": "No activities match your search.",
-    "reorderActivity": "Reorder"
+    "reorderActivity": "Reorder",
+    "dropActivityHere": "Drop activity here"
   },
   "activityModal": {
     "addActivity": "Add Activity",
