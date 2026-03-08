@@ -1,20 +1,18 @@
-import type { Database, Trip, TripConstraints } from '../types/database.types';
+import type { Database } from '../types/database.types';
 import { supabase } from '../supabase';
 import type { AppState, SetState, GetState } from './types';
 import { generateItineraryFromConstraints } from '../ai/openai-itinerary-service';
 import type { TripScenario } from './tripDetailSlice.scenarios';
+import {
+  normalizeTime,
+  parseTripConstraints,
+  persistGeneratedItinerary,
+} from './tripDetailSlice.utils';
+
+export { normalizeTime, parseTripConstraints } from './tripDetailSlice.utils';
 
 type ItineraryRow = Database['public']['Tables']['itineraries']['Row'];
 type ItineraryDayRow = Database['public']['Tables']['itinerary_days']['Row'];
-
-export function normalizeTime(value: string): string {
-  return value.length === 5 ? `${value}:00` : value;
-}
-
-export function parseTripConstraints(constraints: unknown): TripConstraints | null {
-  if (!constraints || typeof constraints !== 'object') return null;
-  return constraints as TripConstraints;
-}
 
 export function createTripDetailAiScenarioOpsSlice(
   set: SetState,
@@ -45,66 +43,7 @@ export function createTripDetailAiScenarioOpsSlice(
           locale,
         });
 
-        const { data: itinerary, error: itError } = await (supabase.from('itineraries') as any)
-          .insert({
-            trip_id: trip.id,
-            title: result.title,
-            generated_by_ai: true,
-          })
-          .select()
-          .single();
-
-        if (itError) throw itError;
-        if (!itinerary) throw new Error('Failed to create AI scenario itinerary');
-        const itineraryId = (itinerary as ItineraryRow).id;
-
-        const dayPayload = result.days.map((d) => ({
-          itinerary_id: itineraryId,
-          date: d.date,
-          day_index: d.dayIndex,
-        }));
-
-        const { data: insertedDays, error: daysError } = await (
-          supabase.from('itinerary_days') as any
-        )
-          .insert(dayPayload)
-          .select();
-        if (daysError) throw daysError;
-
-        const dayIdByDate: Record<string, string> = {};
-        for (const row of (insertedDays || []) as ItineraryDayRow[]) {
-          dayIdByDate[row.date] = row.id;
-        }
-
-        const toInsertActivities = result.days.flatMap((d) => {
-          const dayId = dayIdByDate[d.date];
-          if (!dayId) return [];
-          return d.activities.map((a) => ({
-            trip_id: trip.id,
-            itinerary_day_id: dayId,
-            title: a.title,
-            description: a.description ?? null,
-            category: a.category ?? null,
-            start_time: a.startTime ? normalizeTime(a.startTime) : null,
-            end_time: a.endTime ? normalizeTime(a.endTime) : null,
-            cost_cents:
-              typeof a.estimatedCost === 'number' ? Math.round(a.estimatedCost * 100) : null,
-            currency: trip.currency ?? null,
-            place_name: a.location?.address ?? null,
-            lat: a.location?.lat ?? null,
-            lon: a.location?.lon ?? null,
-            status: 'proposed',
-            source: 'ai',
-          }));
-        });
-
-        if (toInsertActivities.length > 0) {
-          const { error: actError } = await (supabase.from('activities') as any).insert(
-            toInsertActivities,
-          );
-          if (actError) throw actError;
-        }
-
+        await persistGeneratedItinerary(trip, result);
         await get().loadScenarios(trip.id);
       } catch (err) {
         console.error('Error generating AI scenario:', err);

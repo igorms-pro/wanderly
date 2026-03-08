@@ -81,6 +81,36 @@ export function patchMovedActivityDayId(
 }
 
 /**
+ * Applies a completed drop: flattens the updated state into the store and
+ * persists the new order to the database.
+ */
+export async function commitDrop(
+  nextByDate: Record<string, Activity[]>,
+  activityId: string,
+  targetDate: string,
+  sortedDates: string[],
+  activitiesByDate: Record<string, Activity[]>,
+  itineraryDayIdByDate: Record<string, string>,
+  isSameDay: boolean,
+  setActivities: (activities: Activity[]) => void,
+  updateActivity: (id: string, updates: ActivityReorderUpdate) => Promise<void>,
+): Promise<void> {
+  const flat = sortedDates.flatMap((d) => nextByDate[d] ?? []);
+  const newOrderForDay = (nextByDate[targetDate] ?? []).map((a) => a.id);
+  setActivities(flat);
+  await persistReorder(
+    activityId,
+    targetDate,
+    itineraryDayIdByDate,
+    activitiesByDate,
+    sortedDates,
+    updateActivity,
+    newOrderForDay.length > 0 ? newOrderForDay : undefined,
+    isSameDay,
+  );
+}
+
+/**
  * Persists a drag-and-drop reorder to the database by updating
  * `order_index` (and optionally `itinerary_day_id`) for each activity.
  */

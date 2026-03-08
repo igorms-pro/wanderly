@@ -4,10 +4,10 @@ import { useStore } from '@/lib/store';
 import type { Activity } from '@/lib/types/database.types';
 
 import {
+  commitDrop,
   moveActivityToOtherDay,
   moveActivityWithinDay,
   patchMovedActivityDayId,
-  persistReorder,
 } from './itinerary-reorder-utils';
 
 interface UseItineraryDragAndDropArgs {
@@ -43,9 +43,6 @@ export function useItineraryDragAndDrop({
 
   const handleDragStart = useCallback(
     (activityId: string, date: string) => {
-      if (import.meta.env.DEV) {
-        console.log('[DnD] handleDragStart', { activityId, date, canEdit });
-      }
       if (!canEdit) return;
       setDraggingActivityId(activityId);
       setDraggingDate(date);
@@ -63,16 +60,7 @@ export function useItineraryDragAndDrop({
   );
 
   const handleDropOnActivity = useCallback(
-    async (targetActivityId: string, targetDate: string, targetIndex: number) => {
-      if (import.meta.env.DEV) {
-        console.log('[DnD] handleDropOnActivity called', {
-          targetActivityId,
-          targetDate,
-          targetIndex,
-          draggingActivityId,
-          draggingDate,
-        });
-      }
+    async (_targetActivityId: string, targetDate: string, targetIndex: number) => {
       if (!canEdit || !draggingActivityId || !draggingDate) return;
 
       const sameDay = draggingDate === targetDate;
@@ -95,19 +83,16 @@ export function useItineraryDragAndDrop({
         );
       }
 
-      const flat = sortedDates.flatMap((d) => nextByDate[d] ?? []);
-      const newOrderForDay = (nextByDate[targetDate] ?? []).map((a) => a.id);
-      setActivities(flat);
-
-      await persistReorder(
+      await commitDrop(
+        nextByDate,
         draggingActivityId,
         targetDate,
-        itineraryDayIdByDate,
-        activitiesByDate,
         sortedDates,
-        updateActivity,
-        newOrderForDay.length > 0 ? newOrderForDay : undefined,
+        activitiesByDate,
+        itineraryDayIdByDate,
         sameDay,
+        setActivities,
+        updateActivity,
       );
       setDraggingActivityId(null);
       setDraggingDate(null);
@@ -126,38 +111,25 @@ export function useItineraryDragAndDrop({
 
   const handleDropOnEmptyDay = useCallback(
     async (targetDate: string) => {
-      if (import.meta.env.DEV) {
-        console.log('[DnD] handleDropOnEmptyDay', { targetDate, draggingActivityId, draggingDate });
-      }
       if (!canEdit || !draggingActivityId || !draggingDate) return;
 
-      let nextByDate = moveActivityToOtherDay(
-        activitiesByDate,
-        draggingDate,
+      const nextByDate = patchMovedActivityDayId(
+        moveActivityToOtherDay(activitiesByDate, draggingDate, targetDate, draggingActivityId, 0),
         targetDate,
         draggingActivityId,
-        0,
+        itineraryDayIdByDate,
       );
-      nextByDate = patchMovedActivityDayId(
+
+      await commitDrop(
         nextByDate,
-        targetDate,
-        draggingActivityId,
-        itineraryDayIdByDate,
-      );
-
-      const flat = sortedDates.flatMap((d) => nextByDate[d] ?? []);
-      const newOrderForDay = (nextByDate[targetDate] ?? []).map((a) => a.id);
-      setActivities(flat);
-
-      await persistReorder(
         draggingActivityId,
         targetDate,
-        itineraryDayIdByDate,
-        activitiesByDate,
         sortedDates,
-        updateActivity,
-        newOrderForDay.length > 0 ? newOrderForDay : undefined,
+        activitiesByDate,
+        itineraryDayIdByDate,
         false,
+        setActivities,
+        updateActivity,
       );
       setDraggingActivityId(null);
       setDraggingDate(null);

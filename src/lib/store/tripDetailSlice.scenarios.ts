@@ -1,7 +1,7 @@
-import type { Activity, Database } from '../types/database.types';
+import type { Database } from '../types/database.types';
 import { supabase } from '../supabase';
 import type { AppState, SetState, GetState } from './types';
-import { mapRowToActivity } from './activityMapping';
+import { fetchScenariosData } from './tripDetailSlice.utils';
 
 type ItineraryRow = Database['public']['Tables']['itineraries']['Row'];
 type ItineraryDayRow = Database['public']['Tables']['itinerary_days']['Row'];
