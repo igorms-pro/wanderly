@@ -9,6 +9,7 @@ interface TimelineDaySectionProps {
   expandedId: string | null;
   setExpandedId: (id: string | null) => void;
   canVote: boolean;
+  canEdit: boolean;
   votingActivityId: string | null;
   getVoteCounts: (activityId: string) => { upvotes: number; downvotes: number };
   getUserVote: (activityId: string) => 'up' | 'down' | null;
@@ -19,6 +20,9 @@ interface TimelineDaySectionProps {
   activityParticipantsMap: Record<string, string[]>;
   tripMembers: TripMember[];
   memberProfiles: Record<string, MemberProfile>;
+  onEditActivity?: (activity: Activity, date: string) => void;
+  onDeleteActivity?: (activity: Activity) => void;
+  lastEditedActivityId?: string | null;
 }
 
 export function TimelineDaySection({
@@ -27,6 +31,7 @@ export function TimelineDaySection({
   expandedId,
   setExpandedId,
   canVote,
+  canEdit,
   votingActivityId,
   getVoteCounts,
   getUserVote,
@@ -37,6 +42,9 @@ export function TimelineDaySection({
   activityParticipantsMap,
   tripMembers,
   memberProfiles,
+  onEditActivity,
+  onDeleteActivity,
+  lastEditedActivityId = null,
 }: TimelineDaySectionProps) {
   const sortedActivities = [...activities].sort((a, b) =>
     (a.start_time || '').localeCompare(b.start_time || ''),
@@ -67,6 +75,7 @@ export function TimelineDaySection({
               key={activity.id}
               activity={activity}
               index={i}
+              date={date}
               currency={currency}
               canVote={canVote}
               votingActivityId={votingActivityId}
@@ -82,6 +91,10 @@ export function TimelineDaySection({
               activityParticipantsMap={activityParticipantsMap}
               tripMembers={tripMembers}
               memberProfiles={memberProfiles}
+              canEditActivity={canEdit}
+              onEditActivity={onEditActivity}
+              onDeleteActivity={onDeleteActivity}
+              isJustEdited={lastEditedActivityId === activity.id}
             />
           );
         })}

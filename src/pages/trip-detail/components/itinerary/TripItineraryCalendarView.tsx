@@ -9,6 +9,7 @@ interface TripItineraryCalendarViewProps {
   selectedDate: string | null;
   onSelectDate: (date: string | null) => void;
   canVote: boolean;
+  canEdit: boolean;
   votingActivityId: string | null;
   getVoteCounts: (activityId: string) => { upvotes: number; downvotes: number };
   getUserVote: (activityId: string) => 'up' | 'down' | null;
@@ -19,6 +20,9 @@ interface TripItineraryCalendarViewProps {
   activityParticipantsMap: Record<string, string[]>;
   tripMembers: TripMember[];
   memberProfiles: Record<string, { display_name: string | null; avatar_url: string | null }>;
+  onEditActivity?: (activity: Activity, date: string) => void;
+  onDeleteActivity?: (activity: Activity) => void;
+  lastEditedActivityId?: string | null;
 }
 
 export function TripItineraryCalendarView({
@@ -28,6 +32,7 @@ export function TripItineraryCalendarView({
   selectedDate,
   onSelectDate,
   canVote,
+  canEdit,
   votingActivityId,
   getVoteCounts,
   getUserVote,
@@ -38,6 +43,9 @@ export function TripItineraryCalendarView({
   activityParticipantsMap,
   tripMembers,
   memberProfiles,
+  onEditActivity,
+  onDeleteActivity,
+  lastEditedActivityId = null,
 }: TripItineraryCalendarViewProps) {
   return (
     <div className="space-y-6">
@@ -64,6 +72,10 @@ export function TripItineraryCalendarView({
           activityParticipantsMap={activityParticipantsMap}
           tripMembers={tripMembers}
           memberProfiles={memberProfiles}
+          canEditActivities={canEdit}
+          onEditActivity={onEditActivity}
+          onDeleteActivity={onDeleteActivity}
+          lastEditedActivityId={lastEditedActivityId}
           showClose
           onClose={() => onSelectDate(null)}
         />

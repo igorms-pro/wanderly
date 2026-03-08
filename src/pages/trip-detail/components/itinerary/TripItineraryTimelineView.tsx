@@ -6,6 +6,7 @@ interface TripItineraryTimelineViewProps {
   sortedDates: string[];
   activitiesByDate: Record<string, Activity[]>;
   canVote: boolean;
+  canEdit: boolean;
   votingActivityId: string | null;
   getVoteCounts: (activityId: string) => { upvotes: number; downvotes: number };
   getUserVote: (activityId: string) => 'up' | 'down' | null;
@@ -16,12 +17,16 @@ interface TripItineraryTimelineViewProps {
   activityParticipantsMap: Record<string, string[]>;
   tripMembers: TripMember[];
   memberProfiles: Record<string, MemberProfile>;
+  onEditActivity?: (activity: Activity, date: string) => void;
+  onDeleteActivity?: (activity: Activity) => void;
+  lastEditedActivityId?: string | null;
 }
 
 export function TripItineraryTimelineView({
   sortedDates,
   activitiesByDate,
   canVote,
+  canEdit,
   votingActivityId,
   getVoteCounts,
   getUserVote,
@@ -32,6 +37,9 @@ export function TripItineraryTimelineView({
   activityParticipantsMap,
   tripMembers,
   memberProfiles,
+  onEditActivity,
+  onDeleteActivity,
+  lastEditedActivityId = null,
 }: TripItineraryTimelineViewProps) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm dark:shadow-lg pl-3 pt-6 pr-6 pb-6 sm:p-8">
@@ -39,6 +47,7 @@ export function TripItineraryTimelineView({
         sortedDates={sortedDates}
         activitiesByDate={activitiesByDate}
         canVote={canVote}
+        canEdit={canEdit}
         votingActivityId={votingActivityId}
         getVoteCounts={getVoteCounts}
         getUserVote={getUserVote}
@@ -49,6 +58,9 @@ export function TripItineraryTimelineView({
         activityParticipantsMap={activityParticipantsMap}
         tripMembers={tripMembers}
         memberProfiles={memberProfiles}
+        onEditActivity={onEditActivity}
+        onDeleteActivity={onDeleteActivity}
+        lastEditedActivityId={lastEditedActivityId}
       />
     </div>
   );

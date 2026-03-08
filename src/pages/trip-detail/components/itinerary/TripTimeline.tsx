@@ -7,6 +7,7 @@ interface TripTimelineProps {
   sortedDates: string[];
   activitiesByDate: Record<string, Activity[]>;
   canVote: boolean;
+  canEdit: boolean;
   votingActivityId: string | null;
   getVoteCounts: (activityId: string) => { upvotes: number; downvotes: number };
   getUserVote: (activityId: string) => 'up' | 'down' | null;
@@ -17,12 +18,16 @@ interface TripTimelineProps {
   activityParticipantsMap: Record<string, string[]>;
   tripMembers: TripMember[];
   memberProfiles: Record<string, MemberProfile>;
+  onEditActivity?: (activity: Activity, date: string) => void;
+  onDeleteActivity?: (activity: Activity) => void;
+  lastEditedActivityId?: string | null;
 }
 
 export function TripTimeline({
   sortedDates,
   activitiesByDate,
   canVote,
+  canEdit,
   votingActivityId,
   getVoteCounts,
   getUserVote,
@@ -33,6 +38,9 @@ export function TripTimeline({
   activityParticipantsMap,
   tripMembers,
   memberProfiles,
+  onEditActivity,
+  onDeleteActivity,
+  lastEditedActivityId = null,
 }: TripTimelineProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -58,6 +66,7 @@ export function TripTimeline({
               expandedId={expandedId}
               setExpandedId={setExpandedId}
               canVote={canVote}
+              canEdit={canEdit}
               votingActivityId={votingActivityId}
               getVoteCounts={getVoteCounts}
               getUserVote={getUserVote}
@@ -68,6 +77,9 @@ export function TripTimeline({
               activityParticipantsMap={activityParticipantsMap}
               tripMembers={tripMembers}
               memberProfiles={memberProfiles}
+              onEditActivity={onEditActivity}
+              onDeleteActivity={onDeleteActivity}
+              lastEditedActivityId={lastEditedActivityId}
             />
           );
         })}

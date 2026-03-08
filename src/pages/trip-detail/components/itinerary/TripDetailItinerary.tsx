@@ -156,6 +156,7 @@ export function TripDetailItinerary({
           selectedDate={selectedDate}
           onSelectDate={handleSelectDate}
           canVote={canVote}
+          canEdit={canEdit}
           votingActivityId={votingActivityId}
           getVoteCounts={getVoteCounts}
           getUserVote={getUserVote}
@@ -166,12 +167,16 @@ export function TripDetailItinerary({
           activityParticipantsMap={activityParticipantsMap}
           tripMembers={tripMembers}
           memberProfiles={memberProfiles}
+          onEditActivity={onEditActivity}
+          onDeleteActivity={onDeleteActivity}
+          lastEditedActivityId={lastEditedActivityId}
         />
       ) : (
         <TripItineraryTimelineView
           sortedDates={sortedDatesForView}
           activitiesByDate={activitiesByDateForView}
           canVote={canVote}
+          canEdit={canEdit}
           votingActivityId={votingActivityId}
           getVoteCounts={getVoteCounts}
           getUserVote={getUserVote}
@@ -182,6 +187,9 @@ export function TripDetailItinerary({
           activityParticipantsMap={activityParticipantsMap}
           tripMembers={tripMembers}
           memberProfiles={memberProfiles}
+          onEditActivity={onEditActivity}
+          onDeleteActivity={onDeleteActivity}
+          lastEditedActivityId={lastEditedActivityId}
         />
       )}
 

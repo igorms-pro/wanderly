@@ -10,6 +10,7 @@ import { TimelineActivityNotes } from './TimelineActivityNotes';
 export interface TimelineActivityCardProps {
   activity: Activity;
   index: number;
+  date: string;
   currency: string;
   canVote: boolean;
   votingActivityId: string | null;
@@ -23,11 +24,16 @@ export interface TimelineActivityCardProps {
   activityParticipantsMap: Record<string, string[]>;
   tripMembers: TripMember[];
   memberProfiles: Record<string, MemberProfile>;
+  canEditActivity?: boolean;
+  onEditActivity?: (activity: Activity, date: string) => void;
+  onDeleteActivity?: (activity: Activity) => void;
+  isJustEdited?: boolean;
 }
 
 export function TimelineActivityCard({
   activity,
   index,
+  date,
   currency,
   canVote,
   votingActivityId,
@@ -41,10 +47,17 @@ export function TimelineActivityCard({
   activityParticipantsMap,
   tripMembers,
   memberProfiles,
+  canEditActivity = false,
+  onEditActivity,
+  onDeleteActivity,
+  isJustEdited = false,
 }: TimelineActivityCardProps) {
   const { upvotes, downvotes } = getVoteCounts(activity.id);
   const userVote = getUserVote(activity.id);
   const isRight = index % 2 === 0;
+  const justEditedClass = isJustEdited
+    ? 'ring-2 ring-green-400 dark:ring-green-500 ring-offset-2 dark:ring-offset-gray-800'
+    : '';
 
   const [openParticipants, setOpenParticipants] = useState(false);
 
@@ -65,7 +78,7 @@ export function TimelineActivityCard({
 
   return (
     <div
-      className={`rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm overflow-hidden ${
+      className={`rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm overflow-hidden ${justEditedClass} ${
         isRight ? 'sm:ml-8' : 'sm:mr-8'
       }`}
     >
@@ -75,6 +88,14 @@ export function TimelineActivityCard({
             activity={activity}
             isExpanded={isExpanded}
             onToggleExpanded={onToggleExpanded}
+            canEdit={canEditActivity}
+            onEdit={
+              canEditActivity && onEditActivity ? () => onEditActivity(activity, date) : undefined
+            }
+            onDelete={
+              canEditActivity && onDeleteActivity ? () => onDeleteActivity(activity) : undefined
+            }
+            t={t}
           />
           {activity.category && (
             <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">
