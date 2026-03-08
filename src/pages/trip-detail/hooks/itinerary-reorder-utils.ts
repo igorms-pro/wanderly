@@ -1,12 +1,24 @@
 import type { Activity } from '@/lib/types/database.types';
 
+/** Sort activities by order_index (persisted drag order), then start_time, then created_at. */
+function sortByDayOrder(activities: Activity[]): Activity[] {
+  return [...activities].sort((a, b) => {
+    const orderA = a.order_index ?? Infinity;
+    const orderB = b.order_index ?? Infinity;
+    if (orderA !== orderB) return orderA - orderB;
+    const timeCmp = (a.start_time || '').localeCompare(b.start_time || '');
+    if (timeCmp !== 0) return timeCmp;
+    return (a.created_at || '').localeCompare(b.created_at || '');
+  });
+}
+
 export function moveActivityWithinDay(
   activitiesByDate: Record<string, Activity[]>,
   date: string,
   activityId: string,
   targetIndex: number,
 ): Record<string, Activity[]> {
-  const dayActivities = activitiesByDate[date] || [];
+  const dayActivities = sortByDayOrder(activitiesByDate[date] || []);
   const currentIndex = dayActivities.findIndex((a) => a.id === activityId);
   if (currentIndex === -1 || currentIndex === targetIndex) return activitiesByDate;
 
@@ -27,8 +39,8 @@ export function moveActivityToOtherDay(
   activityId: string,
   targetIndex: number,
 ): Record<string, Activity[]> {
-  const sourceActivities = activitiesByDate[sourceDate] || [];
-  const targetActivities = activitiesByDate[targetDate] || [];
+  const sourceActivities = sortByDayOrder(activitiesByDate[sourceDate] || []);
+  const targetActivities = sortByDayOrder(activitiesByDate[targetDate] || []);
 
   const currentIndex = sourceActivities.findIndex((a) => a.id === activityId);
   if (currentIndex === -1) return activitiesByDate;

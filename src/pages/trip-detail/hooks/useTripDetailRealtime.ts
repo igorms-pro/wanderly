@@ -40,6 +40,7 @@ function mapActivityRow(row: Record<string, unknown>): Activity {
     status: r.status,
     source: r.source,
     created_at: r.created_at,
+    order_index: r.order_index ?? undefined,
   };
 }
 

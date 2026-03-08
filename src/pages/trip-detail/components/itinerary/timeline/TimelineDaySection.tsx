@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import type { Activity, TripMember } from '@/lib/types/database.types';
 import type { MemberProfile } from '../../../ItineraryActivityTypes';
+import { sortActivitiesByDayOrder } from '../../../hooks/itinerary-utils';
 import { TimelineActivityCard } from './TimelineActivityCard';
 
 interface TimelineDaySectionProps {
@@ -60,9 +61,7 @@ export function TimelineDaySection({
   onDropOnActivity,
   onDropOnEmptyDay,
 }: TimelineDaySectionProps) {
-  const sortedActivities = [...activities].sort((a, b) =>
-    (a.start_time || '').localeCompare(b.start_time || ''),
-  );
+  const sortedActivities = sortActivitiesByDayOrder(activities);
 
   return (
     <section key={date} className="relative pl-10 sm:pl-18 pb-8 last:pb-0">

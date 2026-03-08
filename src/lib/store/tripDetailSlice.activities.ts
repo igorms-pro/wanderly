@@ -29,6 +29,7 @@ export function createTripDetailActivitiesSlice(set: SetState, get: GetState): P
           .select('*')
           .eq('trip_id', tripId)
           .is('deleted_at', null)
+          .order('order_index', { ascending: true, nullsFirst: false })
           .order('start_time', { ascending: true, nullsFirst: false })
           .order('created_at', { ascending: true });
 
@@ -127,6 +128,7 @@ export function createTripDetailActivitiesSlice(set: SetState, get: GetState): P
         if (updates.status !== undefined) updateData.status = updates.status;
         if (updates.lat !== undefined) updateData.lat = updates.lat ?? null;
         if (updates.lon !== undefined) updateData.lon = updates.lon ?? null;
+        if (updates.order_index !== undefined) updateData.order_index = updates.order_index ?? null;
 
         const { data: activity, error } = await (supabase.from('activities') as any)
           .update(updateData)

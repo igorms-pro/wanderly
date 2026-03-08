@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Activity, TripMember } from '@/lib/types/database.types';
 import type { MemberProfile } from '../../ItineraryActivityTypes';
+import { sortActivitiesByDayOrder } from '../../hooks/itinerary-utils';
 import { TimelineDaySection } from './timeline/TimelineDaySection';
 
 interface TripTimelineProps {
@@ -68,9 +69,7 @@ export function TripTimeline({
 
       <div className="space-y-0">
         {sortedDates.map((date) => {
-          const activities = [...(activitiesByDate[date] || [])].sort((a, b) =>
-            (a.start_time || '').localeCompare(b.start_time || ''),
-          );
+          const activities = sortActivitiesByDayOrder(activitiesByDate[date] || []);
 
           return (
             <TimelineDaySection

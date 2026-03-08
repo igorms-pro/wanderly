@@ -73,7 +73,17 @@ export function ItineraryActivityItem({
       draggable={showDragHandle}
       onDragStart={
         onDragStart && date
-          ? () => {
+          ? (e) => {
+              if (import.meta.env.DEV) {
+                console.log('[DnD] ItineraryActivityItem dragStart', {
+                  activityId: activity.id,
+                  date,
+                  index,
+                  showDragHandle,
+                });
+              }
+              e.dataTransfer.effectAllowed = 'move';
+              e.dataTransfer.setData('text/plain', activity.id);
               onDragStart(activity.id, date);
             }
           : undefined
@@ -83,6 +93,14 @@ export function ItineraryActivityItem({
         onDrop && date
           ? (event) => {
               event.preventDefault();
+              event.stopPropagation();
+              if (import.meta.env.DEV) {
+                console.log('[DnD] ItineraryActivityItem drop', {
+                  targetActivityId: activity.id,
+                  date,
+                  index,
+                });
+              }
               onDrop(activity.id, date, index);
             }
           : undefined

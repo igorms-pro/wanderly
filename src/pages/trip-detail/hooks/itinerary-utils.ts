@@ -54,6 +54,18 @@ export function buildItineraryDayMaps(activeItineraryDays?: ItineraryDay[] | nul
   return { sortedDates, itineraryDayIdByDate, dateByItineraryDayId };
 }
 
+/** Display order: order_index (persisted drag order), then start_time, then created_at. */
+export function sortActivitiesByDayOrder(activities: Activity[]): Activity[] {
+  return [...activities].sort((a, b) => {
+    const orderA = a.order_index ?? Infinity;
+    const orderB = b.order_index ?? Infinity;
+    if (orderA !== orderB) return orderA - orderB;
+    const timeCmp = (a.start_time || '').localeCompare(b.start_time || '');
+    if (timeCmp !== 0) return timeCmp;
+    return (a.created_at || '').localeCompare(b.created_at || '');
+  });
+}
+
 export function buildActivitiesByDateForItinerary(
   activities: Activity[],
   dateByItineraryDayId: Record<string, string>,

@@ -215,11 +215,13 @@ export interface Database {
           created_at: string; // TIMESTAMPTZ
           updated_at?: string; // TIMESTAMPTZ (optional: API may omit)
           deleted_at?: string | null; // TIMESTAMPTZ (optional: API may omit)
+          order_index?: number | null; // migration 015: display order within itinerary day (0 = first)
         };
         Insert: {
           id?: string;
           itinerary_day_id?: string | null;
           trip_id: string;
+          order_index?: number | null;
           place_id?: string | null;
           place_name?: string | null;
           title: string;
@@ -249,6 +251,7 @@ export interface Database {
           id?: string;
           itinerary_day_id?: string | null;
           trip_id?: string;
+          order_index?: number | null;
           place_id?: string | null;
           place_name?: string | null;
           title?: string;

@@ -2,6 +2,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import type { Activity, TripMember } from '../../../../lib/types/database.types';
 import type { MemberProfile } from '../../ItineraryActivityTypes';
+import { sortActivitiesByDayOrder } from '../../hooks/itinerary-utils';
 import { ItineraryActivityItem } from './ItineraryActivityItem';
 
 interface ItineraryDayBlockProps {
@@ -55,9 +56,7 @@ export function ItineraryDayBlock({
   onDeleteActivity,
   lastEditedActivityId = null,
 }: ItineraryDayBlockProps) {
-  const sorted = [...activities].sort((a, b) =>
-    (a.start_time || '').localeCompare(b.start_time || ''),
-  );
+  const sorted = sortActivitiesByDayOrder(activities);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm dark:shadow-lg overflow-hidden">
