@@ -14,7 +14,7 @@ type ActivityFormMode = 'create' | 'edit';
 
 interface UseActivityFormBaseOptions {
   tripId: string;
-  onSuccess: () => void;
+  onSuccess: (activityId?: string) => void;
 }
 
 interface UseActivityFormCreateOptions extends UseActivityFormBaseOptions {
@@ -46,6 +46,13 @@ function buildInitialFormData(options: UseActivityFormOptions): ActivityFormData
       currency: activity.currency ?? 'USD',
       lat: activity.lat != null ? String(activity.lat) : '',
       lon: activity.lon != null ? String(activity.lon) : '',
+      placeName: activity.place_name ?? '',
+      transportType: activity.transport_type ?? '',
+      transportNotes: activity.transport_notes ?? '',
+      transportDurationMinutes:
+        activity.transport_duration_minutes != null
+          ? String(activity.transport_duration_minutes)
+          : '',
       status: activity.status,
     };
   }
@@ -61,6 +68,10 @@ function buildInitialFormData(options: UseActivityFormOptions): ActivityFormData
     currency: 'USD',
     lat: '',
     lon: '',
+    placeName: '',
+    transportType: '',
+    transportNotes: '',
+    transportDurationMinutes: '',
     status: 'proposed',
   };
 }
@@ -142,6 +153,15 @@ export function useActivityForm(options: UseActivityFormOptions) {
           ? (getActiveItineraryDayIdByDate(formData.date) ?? undefined)
           : undefined;
 
+      const transportDuration =
+        formData.transportDurationMinutes.trim() !== ''
+          ? parseInt(formData.transportDurationMinutes, 10)
+          : undefined;
+      const validDuration =
+        transportDuration !== undefined && !isNaN(transportDuration) && transportDuration >= 0
+          ? transportDuration
+          : undefined;
+
       if (options.mode === 'create') {
         await createActivity({
           trip_id: tripId,
@@ -155,6 +175,10 @@ export function useActivityForm(options: UseActivityFormOptions) {
           currency: formData.currency,
           lat: formData.lat ? parseFloat(formData.lat) : undefined,
           lon: formData.lon ? parseFloat(formData.lon) : undefined,
+          place_name: formData.placeName.trim() || undefined,
+          transport_type: formData.transportType.trim() || undefined,
+          transport_notes: formData.transportNotes.trim() || undefined,
+          transport_duration_minutes: validDuration,
           status: formData.status,
           source: 'manual',
         });
@@ -163,9 +187,10 @@ export function useActivityForm(options: UseActivityFormOptions) {
           buildInitialFormData({
             mode: 'create',
             tripId,
-            onSuccess,
+            onSuccess: () => {},
           }),
         );
+        onSuccess();
       } else {
         await updateActivity(options.activity.id, {
           title: formData.title.trim(),
@@ -178,11 +203,14 @@ export function useActivityForm(options: UseActivityFormOptions) {
           currency: formData.currency,
           lat: formData.lat ? parseFloat(formData.lat) : undefined,
           lon: formData.lon ? parseFloat(formData.lon) : undefined,
+          place_name: formData.placeName.trim() || undefined,
+          transport_type: formData.transportType.trim() || undefined,
+          transport_notes: formData.transportNotes.trim() || undefined,
+          transport_duration_minutes: validDuration,
           status: formData.status,
         });
+        onSuccess(options.activity.id);
       }
-
-      onSuccess();
     } catch (err: any) {
       console.error('Error saving activity:', err);
       let errorMessage =
@@ -220,7 +248,8 @@ export interface UseEditActivityFormOptions {
   tripId: string;
   activity: Activity;
   date?: string;
-  onSuccess: () => void;
+  /** Called after successful save; in edit mode, receives the activity id. */
+  onSuccess: (activityId?: string) => void;
 }
 
 export function useEditActivityForm({

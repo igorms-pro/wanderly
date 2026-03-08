@@ -26,6 +26,7 @@ interface ItineraryActivityItemProps {
   canEditActivity?: boolean;
   onEditActivity?: (activity: Activity, date?: string) => void;
   onDeleteActivity?: (activity: Activity) => void;
+  isJustEdited?: boolean;
 }
 
 export function ItineraryActivityItem({
@@ -49,6 +50,7 @@ export function ItineraryActivityItem({
   canEditActivity = false,
   onEditActivity,
   onDeleteActivity,
+  isJustEdited = false,
 }: ItineraryActivityItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -61,10 +63,13 @@ export function ItineraryActivityItem({
       : 'border-l-2 border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900/40 dark:hover:bg-gray-800/70 transition';
 
   const showDragHandle = !!onDragStart && !!date;
+  const justEditedClass = isJustEdited
+    ? ' ring-2 ring-blue-500 dark:ring-blue-400 animate-pulse rounded-lg'
+    : '';
 
   return (
     <div
-      className={accentClass}
+      className={accentClass + justEditedClass}
       draggable={showDragHandle}
       onDragStart={
         onDragStart && date

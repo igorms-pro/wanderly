@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next';
 
-import type { Activity } from '@/lib/types/database.types';
+import type { Activity, TripMember } from '@/lib/types/database.types';
+import type { MemberProfile } from '@/pages/trip-detail/ItineraryActivityTypes';
 import { ActivityModalShell } from './ActivityModalShell';
 import { ActivityFormSections } from './ActivityFormSections';
+import { ActivityEditParticipantsSection } from './ActivityEditParticipantsSection';
 import { useEditActivityForm } from '../hooks/useCreateActivityForm';
 
 interface EditActivityModalProps {
@@ -10,17 +12,47 @@ interface EditActivityModalProps {
   activity: Activity;
   date?: string;
   onClose: () => void;
+  /** Called after successful save with the edited activity id (e.g. to highlight the card). */
+  onSaveSuccess?: (activityId: string) => void;
+  currentUserId?: string | null;
+  activityParticipantsMap?: Record<string, string[]>;
+  tripMembers?: TripMember[];
+  memberProfiles?: Record<string, MemberProfile>;
+  onAddMe?: (activityId: string) => Promise<void>;
+  onRemoveMe?: (activityId: string) => Promise<void>;
 }
 
-export function EditActivityModal({ tripId, activity, date, onClose }: EditActivityModalProps) {
+export function EditActivityModal({
+  tripId,
+  activity,
+  date,
+  onClose,
+  onSaveSuccess,
+  currentUserId = null,
+  activityParticipantsMap = {},
+  tripMembers = [],
+  memberProfiles = {},
+  onAddMe,
+  onRemoveMe,
+}: EditActivityModalProps) {
   const { t } = useTranslation();
 
   const { formData, loading, error, handleChange, handleSubmit } = useEditActivityForm({
     tripId,
     activity,
     date,
-    onSuccess: onClose,
+    onSuccess: (activityId) => {
+      if (activityId) onSaveSuccess?.(activityId);
+      onClose();
+    },
   });
+
+  const hasExplicitParticipants =
+    activityParticipantsMap[activity.id] != null && activityParticipantsMap[activity.id].length > 0;
+  const participantIds = hasExplicitParticipants
+    ? activityParticipantsMap[activity.id]
+    : tripMembers.map((m) => m.user_id);
+  const isAllMembers = !hasExplicitParticipants;
 
   return (
     <ActivityModalShell
@@ -32,6 +64,19 @@ export function EditActivityModal({ tripId, activity, date, onClose }: EditActiv
       mode="edit"
     >
       <ActivityFormSections formData={formData} onChange={handleChange} />
+      {onAddMe && onRemoveMe && tripMembers.length > 0 && (
+        <ActivityEditParticipantsSection
+          activityId={activity.id}
+          participantIds={participantIds}
+          isAllMembers={isAllMembers}
+          tripMembersCount={tripMembers.length}
+          currentUserId={currentUserId}
+          memberProfiles={memberProfiles}
+          t={t}
+          onAddMe={onAddMe}
+          onRemoveMe={onRemoveMe}
+        />
+      )}
     </ActivityModalShell>
   );
 }

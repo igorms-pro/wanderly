@@ -132,6 +132,10 @@ export interface CreateActivityData {
   currency?: string;
   lat?: number;
   lon?: number;
+  place_name?: string;
+  transport_type?: string;
+  transport_notes?: string;
+  transport_duration_minutes?: number;
   status?: 'proposed' | 'confirmed' | 'rejected';
   source?: 'manual' | 'ai' | 'import';
 }

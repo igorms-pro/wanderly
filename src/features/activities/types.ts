@@ -9,5 +9,9 @@ export interface ActivityFormData {
   currency: string;
   lat: string;
   lon: string;
+  placeName: string;
+  transportType: string;
+  transportNotes: string;
+  transportDurationMinutes: string;
   status: 'proposed' | 'confirmed' | 'rejected';
 }

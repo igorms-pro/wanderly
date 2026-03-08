@@ -9,6 +9,7 @@ import {
   EditActivityModal,
 } from '@/features/activities';
 import { useStore } from '@/lib/store';
+import { supabase } from '@/lib/supabase';
 import { DashboardHeader } from '@/pages/dashboard/DashboardHeader';
 import type { TripConstraints } from '@/lib/types/database.types';
 import type { Activity } from '@/lib/types/database.types';
@@ -58,7 +59,6 @@ function getConstraintsSummary(currentTrip: { constraints: unknown }) {
 
 export default function TripDetailPage() {
   const navigate = useNavigate();
-  const user = useStore((s) => s.user);
   const signOut = useStore((s) => s.signOut);
   const deleteActivity = useStore((s) => s.deleteActivity);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -67,6 +67,7 @@ export default function TripDetailPage() {
     date: string;
   } | null>(null);
   const [activityToDelete, setActivityToDelete] = useState<Activity | null>(null);
+  const [lastEditedActivityId, setLastEditedActivityId] = useState<string | null>(null);
 
   const handleLogout = async () => {
     try {
@@ -79,6 +80,7 @@ export default function TripDetailPage() {
 
   const {
     t,
+    user,
     tripId,
     loading,
     error,
@@ -106,6 +108,7 @@ export default function TripDetailPage() {
     itineraryDayIdByDate,
     activityParticipantsMap,
     memberProfiles,
+    refreshActivityParticipants,
     showAddActivityModal,
     setShowAddActivityModal,
     scenarios,
@@ -122,6 +125,36 @@ export default function TripDetailPage() {
     applyScenarioAsBase,
     importScenarioActivityToItinerary,
   } = useTripDetail();
+
+  const handleAddMeToActivity = async (activityId: string) => {
+    if (!user?.id) return;
+    const table = supabase.from('activity_participants') as unknown as {
+      insert: (v: { activity_id: string; user_id: string }) => Promise<unknown>;
+    };
+    await table.insert({ activity_id: activityId, user_id: user.id });
+    await refreshActivityParticipants();
+  };
+
+  const handleRemoveMeFromActivity = async (activityId: string) => {
+    if (!user?.id) return;
+    const hasExplicit =
+      activityParticipantsMap[activityId] != null && activityParticipantsMap[activityId].length > 0;
+    const table = supabase.from('activity_participants') as unknown as {
+      delete: () => {
+        eq: (col: string, val: string) => { eq: (col: string, val: string) => Promise<unknown> };
+      };
+      insert: (v: { activity_id: string; user_id: string }[]) => Promise<unknown>;
+    };
+    if (hasExplicit) {
+      await table.delete().eq('activity_id', activityId).eq('user_id', user.id);
+    } else {
+      const otherIds = tripMembers.filter((m) => m.user_id !== user.id).map((m) => m.user_id);
+      if (otherIds.length > 0) {
+        await table.insert(otherIds.map((uid) => ({ activity_id: activityId, user_id: uid })));
+      }
+    }
+    await refreshActivityParticipants();
+  };
 
   if (loading) {
     return (
@@ -220,6 +253,7 @@ export default function TripDetailPage() {
             canEdit={canEditActivities()}
             canReorder={canReorderActivities()}
             canVote={!!user}
+            lastEditedActivityId={lastEditedActivityId}
             activitiesByDate={activitiesByDate}
             sortedDates={sortedDates}
             itineraryDayIdByDate={itineraryDayIdByDate}
@@ -278,6 +312,17 @@ export default function TripDetailPage() {
           activity={activityToEdit.activity}
           date={activityToEdit.date}
           onClose={() => setActivityToEdit(null)}
+          onSaveSuccess={(activityId) => {
+            setLastEditedActivityId(activityId);
+            setActivityToEdit(null);
+            setTimeout(() => setLastEditedActivityId(null), 2500);
+          }}
+          currentUserId={user?.id ?? null}
+          activityParticipantsMap={activityParticipantsMap}
+          tripMembers={tripMembers}
+          memberProfiles={memberProfiles}
+          onAddMe={handleAddMeToActivity}
+          onRemoveMe={handleRemoveMeFromActivity}
         />
       )}
 

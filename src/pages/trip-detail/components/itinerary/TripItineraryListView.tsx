@@ -25,6 +25,7 @@ interface TripItineraryListViewProps {
   searchQuery?: string;
   onEditActivity?: (activity: Activity, date: string) => void;
   onDeleteActivity?: (activity: Activity) => void;
+  lastEditedActivityId?: string | null;
 }
 
 export function TripItineraryListView({
@@ -47,6 +48,7 @@ export function TripItineraryListView({
   searchQuery = '',
   onEditActivity,
   onDeleteActivity,
+  lastEditedActivityId = null,
 }: TripItineraryListViewProps) {
   const hasSearchNoResults = searchQuery.trim() !== '' && sortedDates.length === 0;
 
@@ -90,6 +92,7 @@ export function TripItineraryListView({
           canEditActivities={canEdit}
           onEditActivity={onEditActivity}
           onDeleteActivity={onDeleteActivity}
+          lastEditedActivityId={lastEditedActivityId}
         />
       ))}
     </div>

@@ -1,5 +1,14 @@
 import { useState } from 'react';
-import { FileText, MapPin, Users, DollarSign, Car, Sparkles } from 'lucide-react';
+import {
+  FileText,
+  MapPin,
+  Users,
+  DollarSign,
+  Car,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import type { Activity, TripMember } from '../../../../lib/types/database.types';
 import type { MemberProfile } from '../../ItineraryActivityTypes';
 import {
@@ -105,7 +114,16 @@ export function ItineraryActivityDetailsSection({
               <span className="text-xs text-gray-400">+{participantIds.length - 6}</span>
             )}
           </span>
-          <span className="truncate">{participantsLabel}</span>
+          <span className="flex items-center gap-1 min-w-0">
+            <span className="truncate">{participantsLabel}</span>
+            <span className="shrink-0 text-gray-400 dark:text-gray-500">
+              {openParticipants ? (
+                <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )}
+            </span>
+          </span>
         </button>
         {openParticipants && (
           <div className="ml-6 mt-1 py-2 px-3 rounded-lg bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700">

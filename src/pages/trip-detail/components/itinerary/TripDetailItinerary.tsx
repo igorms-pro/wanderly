@@ -52,6 +52,7 @@ interface TripDetailItineraryProps {
   ) => Promise<void>;
   onEditActivity?: (activity: Activity, date: string) => void;
   onDeleteActivity?: (activity: Activity) => void;
+  lastEditedActivityId?: string | null;
 }
 
 export function TripDetailItinerary({
@@ -87,6 +88,7 @@ export function TripDetailItinerary({
   onAddScenarioActivityToItinerary,
   onEditActivity,
   onDeleteActivity,
+  lastEditedActivityId = null,
 }: TripDetailItineraryProps) {
   const {
     viewMode,
@@ -130,6 +132,7 @@ export function TripDetailItinerary({
           canEdit={canEdit}
           canReorder={canReorder}
           canVote={canVote}
+          lastEditedActivityId={lastEditedActivityId}
           votingActivityId={votingActivityId}
           getVoteCounts={getVoteCounts}
           getUserVote={getUserVote}

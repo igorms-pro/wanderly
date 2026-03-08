@@ -5,7 +5,7 @@ import { useStore } from '@/lib/store';
 import { useToast } from '@/contexts/ToastContext';
 import { TripMember } from '@/lib/types/database.types';
 import { useTripDetailRealtime } from './useTripDetailRealtime';
-import { loadTripDataForDetail } from './loadTripDataForDetail';
+import { loadTripDataForDetail, fetchActivityParticipants } from './loadTripDataForDetail';
 import { updateTripHandler, deleteTripHandler } from './tripDetailHandlers';
 import type { EditFormState } from '../components/layout/TripDetailHero';
 import { useTripScenarios } from './useTripScenarios';
@@ -91,6 +91,11 @@ function useTripDetailData() {
     });
   }, [tripId, user, navigate, setCurrentTrip, t, setActiveTabState]);
 
+  const refreshActivityParticipants = useCallback(async () => {
+    const activityIds = useStore.getState().activities.map((a) => a.id);
+    await fetchActivityParticipants(activityIds, setActivityParticipantsMap);
+  }, []);
+
   const handleUpdateTrip = useCallback(async () => {
     await updateTripHandler({
       tripId,
@@ -145,6 +150,7 @@ function useTripDetailData() {
     activityParticipantsMap,
     memberProfiles,
     loadTripData,
+    refreshActivityParticipants,
     handleUpdateTrip,
     handleDeleteTrip,
     activeTab,

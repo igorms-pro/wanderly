@@ -16,10 +16,23 @@ export function ActivityFormAdvancedSection({
 
   return (
     <>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <MapPin className="w-4 h-4 inline mr-1" />
+          {t('activityModal.placeName')}
+        </label>
+        <input
+          type="text"
+          value={formData.placeName}
+          onChange={(e) => onChange({ placeName: e.target.value })}
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          placeholder={t('activityModal.placeNamePlaceholder')}
+          aria-label={t('activityModal.placeName')}
+        />
+      </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            <MapPin className="w-4 h-4 inline mr-1" />
             {t('activityModal.latitude')}
           </label>
           <input

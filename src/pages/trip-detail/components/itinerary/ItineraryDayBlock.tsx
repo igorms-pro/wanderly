@@ -27,6 +27,7 @@ interface ItineraryDayBlockProps {
   canEditActivities?: boolean;
   onEditActivity?: (activity: Activity, date: string) => void;
   onDeleteActivity?: (activity: Activity) => void;
+  lastEditedActivityId?: string | null;
 }
 
 export function ItineraryDayBlock({
@@ -52,6 +53,7 @@ export function ItineraryDayBlock({
   canEditActivities = false,
   onEditActivity,
   onDeleteActivity,
+  lastEditedActivityId = null,
 }: ItineraryDayBlockProps) {
   const sorted = [...activities].sort((a, b) =>
     (a.start_time || '').localeCompare(b.start_time || ''),
@@ -116,6 +118,7 @@ export function ItineraryDayBlock({
             canEditActivity={canEditActivities}
             onEditActivity={onEditActivity}
             onDeleteActivity={onDeleteActivity}
+            isJustEdited={activity.id === lastEditedActivityId}
           />
         ))}
       </div>

@@ -346,7 +346,18 @@
     "createActivity": "Créer l'activité",
     "editActivity": "Modifier l'activité",
     "saving": "Enregistrement...",
-    "saveChanges": "Enregistrer les modifications"
+    "saveChanges": "Enregistrer les modifications",
+    "transportLabel": "Comment s'y rendre",
+    "transportType": "Type de transport",
+    "transportNotes": "Notes (ligne, station...)",
+    "transportNotesPlaceholder": "ex. JR ou métro Ueno",
+    "transportDurationMinutes": "Durée (minutes)",
+    "transportDurationPlaceholder": "ex. 20",
+    "placeName": "Lieu / adresse",
+    "placeNamePlaceholder": "ex. Parc Ueno, Tokyo",
+    "participantsSectionTitle": "Participants",
+    "addMe": "M'ajouter",
+    "removeMe": "Me retirer"
   },
   "activities": {
     "actions": {

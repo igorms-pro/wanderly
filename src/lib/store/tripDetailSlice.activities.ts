@@ -67,6 +67,10 @@ export function createTripDetailActivitiesSlice(set: SetState, get: GetState): P
             currency: activityData.currency || 'USD',
             lat: activityData.lat ?? null,
             lon: activityData.lon ?? null,
+            place_name: activityData.place_name ?? null,
+            transport_type: activityData.transport_type ?? null,
+            transport_notes: activityData.transport_notes ?? null,
+            transport_duration_minutes: activityData.transport_duration_minutes ?? null,
             status: activityData.status || 'proposed',
             source: activityData.source || 'manual',
           } as any)

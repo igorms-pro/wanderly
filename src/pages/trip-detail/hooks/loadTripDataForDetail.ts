@@ -2,6 +2,28 @@ import { supabase } from '@/lib/supabase';
 import type { Trip, TripConstraints } from '@/lib/types/database.types';
 import type { GetState } from '@/lib/store/types';
 
+/** Fetches activity_participants for the given activity ids and updates the map via setMap. */
+export async function fetchActivityParticipants(
+  activityIds: string[],
+  setMap: (m: Record<string, string[]>) => void,
+): Promise<void> {
+  if (activityIds.length === 0) {
+    setMap({});
+    return;
+  }
+  const { data: participantsRows } = await supabase
+    .from('activity_participants')
+    .select('activity_id, user_id')
+    .in('activity_id', activityIds);
+  const map: Record<string, string[]> = {};
+  for (const row of participantsRows || []) {
+    const aid = (row as { activity_id: string; user_id: string }).activity_id;
+    if (!map[aid]) map[aid] = [];
+    map[aid].push((row as { activity_id: string; user_id: string }).user_id);
+  }
+  setMap(map);
+}
+
 type Tab = 'itinerary' | 'chat' | 'weather' | 'explore';
 
 export interface LoadTripDataParams {
@@ -142,17 +164,7 @@ export async function loadTripDataForDetail(params: LoadTripDataParams): Promise
     if (activities.length > 0) {
       await loadVotes(activities.map((a) => a.id));
       const activityIds = activities.map((a) => a.id);
-      const { data: participantsRows } = await supabase
-        .from('activity_participants')
-        .select('activity_id, user_id')
-        .in('activity_id', activityIds);
-      const map: Record<string, string[]> = {};
-      for (const row of participantsRows || []) {
-        const aid = (row as { activity_id: string; user_id: string }).activity_id;
-        if (!map[aid]) map[aid] = [];
-        map[aid].push((row as { activity_id: string; user_id: string }).user_id);
-      }
-      setActivityParticipantsMap(map);
+      await fetchActivityParticipants(activityIds, setActivityParticipantsMap);
     } else {
       setActivityParticipantsMap({});
     }
