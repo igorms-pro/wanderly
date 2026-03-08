@@ -3,12 +3,7 @@ import { useCallback, useState } from 'react';
 import { useStore } from '@/lib/store';
 import type { Activity } from '@/lib/types/database.types';
 
-import {
-  commitDrop,
-  moveActivityToOtherDay,
-  moveActivityWithinDay,
-  patchMovedActivityDayId,
-} from './itinerary-reorder-utils';
+import { commitDrop, computeNextByDateForDrop } from './itinerary-reorder-utils';
 
 interface UseItineraryDragAndDropArgs {
   activitiesByDate: Record<string, Activity[]>;
@@ -17,7 +12,7 @@ interface UseItineraryDragAndDropArgs {
   canEdit: boolean;
 }
 
-interface UseItineraryDragAndDropResult {
+export interface UseItineraryDragAndDropResult {
   draggingActivityId: string | null;
   draggingDate: string | null;
   handleDragStart: (activityId: string, date: string) => void;
@@ -59,43 +54,42 @@ export function useItineraryDragAndDrop({
     [canEdit],
   );
 
-  const handleDropOnActivity = useCallback(
-    async (_targetActivityId: string, targetDate: string, targetIndex: number) => {
-      if (!canEdit || !draggingActivityId || !draggingDate) return;
-
-      const sameDay = draggingDate === targetDate;
-      let nextByDate = sameDay
-        ? moveActivityWithinDay(activitiesByDate, targetDate, draggingActivityId, targetIndex)
-        : moveActivityToOtherDay(
-            activitiesByDate,
-            draggingDate,
-            targetDate,
-            draggingActivityId,
-            targetIndex,
-          );
-
-      if (!sameDay) {
-        nextByDate = patchMovedActivityDayId(
-          nextByDate,
-          targetDate,
-          draggingActivityId,
-          itineraryDayIdByDate,
-        );
-      }
-
+  const performDrop = useCallback(
+    async (
+      nextByDate: Record<string, Activity[]>,
+      activityId: string,
+      targetDate: string,
+      isSameDay: boolean,
+    ) => {
       await commitDrop(
         nextByDate,
-        draggingActivityId,
+        activityId,
         targetDate,
         sortedDates,
         activitiesByDate,
         itineraryDayIdByDate,
-        sameDay,
+        isSameDay,
         setActivities,
         updateActivity,
       );
       setDraggingActivityId(null);
       setDraggingDate(null);
+    },
+    [activitiesByDate, itineraryDayIdByDate, setActivities, sortedDates, updateActivity],
+  );
+
+  const handleDropOnActivity = useCallback(
+    async (_targetActivityId: string, targetDate: string, targetIndex: number) => {
+      if (!canEdit || !draggingActivityId || !draggingDate) return;
+      const { nextByDate, sameDay } = computeNextByDateForDrop(
+        activitiesByDate,
+        draggingDate,
+        targetDate,
+        draggingActivityId,
+        targetIndex,
+        itineraryDayIdByDate,
+      );
+      await performDrop(nextByDate, draggingActivityId, targetDate, sameDay);
     },
     [
       activitiesByDate,
@@ -103,36 +97,22 @@ export function useItineraryDragAndDrop({
       draggingActivityId,
       draggingDate,
       itineraryDayIdByDate,
-      setActivities,
-      sortedDates,
-      updateActivity,
+      performDrop,
     ],
   );
 
   const handleDropOnEmptyDay = useCallback(
     async (targetDate: string) => {
       if (!canEdit || !draggingActivityId || !draggingDate) return;
-
-      const nextByDate = patchMovedActivityDayId(
-        moveActivityToOtherDay(activitiesByDate, draggingDate, targetDate, draggingActivityId, 0),
-        targetDate,
-        draggingActivityId,
-        itineraryDayIdByDate,
-      );
-
-      await commitDrop(
-        nextByDate,
-        draggingActivityId,
-        targetDate,
-        sortedDates,
+      const { nextByDate } = computeNextByDateForDrop(
         activitiesByDate,
+        draggingDate,
+        targetDate,
+        draggingActivityId,
+        0,
         itineraryDayIdByDate,
-        false,
-        setActivities,
-        updateActivity,
       );
-      setDraggingActivityId(null);
-      setDraggingDate(null);
+      await performDrop(nextByDate, draggingActivityId, targetDate, false);
     },
     [
       activitiesByDate,
@@ -140,9 +120,7 @@ export function useItineraryDragAndDrop({
       draggingActivityId,
       draggingDate,
       itineraryDayIdByDate,
-      setActivities,
-      sortedDates,
-      updateActivity,
+      performDrop,
     ],
   );
 

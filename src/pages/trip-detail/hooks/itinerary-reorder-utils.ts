@@ -62,6 +62,28 @@ export function moveActivityToOtherDay(
 }
 
 /**
+ * Computes the updated `activitiesByDate` after a drop, handling both
+ * same-day reordering and cross-day moves (including the optimistic day-id patch).
+ */
+export function computeNextByDateForDrop(
+  activitiesByDate: Record<string, Activity[]>,
+  sourceDate: string,
+  targetDate: string,
+  activityId: string,
+  targetIndex: number,
+  itineraryDayIdByDate: Record<string, string>,
+): { nextByDate: Record<string, Activity[]>; sameDay: boolean } {
+  const sameDay = sourceDate === targetDate;
+  let nextByDate = sameDay
+    ? moveActivityWithinDay(activitiesByDate, targetDate, activityId, targetIndex)
+    : moveActivityToOtherDay(activitiesByDate, sourceDate, targetDate, activityId, targetIndex);
+  if (!sameDay) {
+    nextByDate = patchMovedActivityDayId(nextByDate, targetDate, activityId, itineraryDayIdByDate);
+  }
+  return { nextByDate, sameDay };
+}
+
+/**
  * Patches the moved activity's `itinerary_day_id` in the optimistic state
  * when moving across days, so the local state matches what will be persisted.
  */

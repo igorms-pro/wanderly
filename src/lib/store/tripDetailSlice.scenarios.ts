@@ -2,6 +2,7 @@ import type { Database } from '../types/database.types';
 import { supabase } from '../supabase';
 import type { AppState, SetState, GetState } from './types';
 import { fetchScenariosData } from './tripDetailSlice.utils';
+import type { Activity } from '../types/database.types';
 
 type ItineraryRow = Database['public']['Tables']['itineraries']['Row'];
 type ItineraryDayRow = Database['public']['Tables']['itinerary_days']['Row'];
@@ -77,69 +78,15 @@ export function createTripDetailScenariosSlice(
 
     loadScenarios: async (tripId) => {
       try {
-        const { data: itineraries, error: itError } = await supabase
-          .from('itineraries')
-          .select('*')
-          .eq('trip_id', tripId)
-          .is('deleted_at', null);
-
-        if (itError) {
-          console.error('Error loading itineraries:', itError);
-          throw itError;
-        }
-
-        if (!itineraries || itineraries.length === 0) {
+        const data = await fetchScenariosData(tripId);
+        if (!data) {
           set({ scenarios: [] });
           return;
         }
-
-        const ids = itineraries.map((it) => (it as ItineraryRow).id);
-
-        const { data: days, error: daysError } = await supabase
-          .from('itinerary_days')
-          .select('*')
-          .in('itinerary_id', ids);
-
-        if (daysError) {
-          console.error('Error loading itinerary days:', daysError);
-          throw daysError;
-        }
-
-        const dayRows = (days || []) as ItineraryDayRow[];
-        const dayIds = dayRows.filter((d) => !d.deleted_at).map((d) => d.id);
-
-        let activitiesByDayId: Record<string, Activity[]> = {};
-        if (dayIds.length > 0) {
-          const { data: activities, error: actError } = await supabase
-            .from('activities')
-            .select('*')
-            .in('itinerary_day_id', dayIds)
-            .is('deleted_at', null)
-            .order('start_time', { ascending: true, nullsFirst: false })
-            .order('created_at', { ascending: true });
-
-          if (actError) {
-            console.error('Error loading scenario activities:', actError);
-            throw actError;
-          }
-
-          activitiesByDayId = ((activities || []) as unknown[]).reduce<Record<string, Activity[]>>(
-            (acc, row) => {
-              const activity = mapRowToActivity(row as Record<string, unknown>);
-              const dayId = activity.itinerary_day_id;
-              if (!dayId) return acc;
-              if (!acc[dayId]) acc[dayId] = [];
-              acc[dayId].push(activity);
-              return acc;
-            },
-            {},
-          );
-        }
-
-        const mapped = (itineraries as ItineraryRow[]).map((it) =>
+        const { itineraries, dayRows, activitiesByDayId } = data;
+        const mapped = itineraries.map((it) =>
           mapItineraryToScenario(it, dayRows, activitiesByDayId),
         );
-
         set({ scenarios: mapped });
       } catch (error) {
         console.error('Error loading scenarios:', error);
