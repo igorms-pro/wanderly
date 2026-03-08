@@ -56,9 +56,15 @@ export function ActivityEditParticipantsSection({
         className="flex w-full items-center gap-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/50"
       >
         <Users className="w-4 h-4 shrink-0" />
-        <span className="flex-1 min-w-0 truncate">{summaryLabel}</span>
-        <span className="shrink-0 text-gray-400 dark:text-gray-500" aria-hidden>
-          {isListExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        <span className="flex min-w-0 flex-1 items-center gap-1.5">
+          <span className="truncate">{summaryLabel}</span>
+          <span className="shrink-0 text-gray-400 dark:text-gray-500" aria-hidden>
+            {isListExpanded ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
+          </span>
         </span>
       </button>
       <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 px-4 py-3">
