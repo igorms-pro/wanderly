@@ -30,6 +30,7 @@ vi.mock('../../lib/realtime-service', () => ({
   subscribeToMessages: vi.fn(() => ({})),
   subscribeToActivities: vi.fn(() => ({})),
   subscribeToVotes: vi.fn(() => ({})),
+  subscribeToItineraryVotes: vi.fn(() => ({})),
   unsubscribeFromChannel: vi.fn(),
 }));
 

@@ -12,6 +12,8 @@ import { useItineraryDragAndDrop } from '../../hooks/useItineraryDragAndDrop';
 
 export type ItineraryViewMode = 'list' | 'calendar' | 'timeline' | 'decision';
 
+const EMPTY_SCENARIO_VOTE_COUNTS = { upvotes: 0, downvotes: 0 };
+
 export interface ConstraintsSummary {
   pace?: 'relaxed' | 'balanced' | 'packed';
   has_children?: boolean;
@@ -44,6 +46,12 @@ interface TripDetailItineraryProps {
   scenarios?: import('@/lib/store/tripDetailSlice.scenarios').TripScenario[];
   canCreateScenarios?: boolean;
   canManageScenarios?: boolean;
+  canVoteScenario?: boolean;
+  votingScenarioId?: string | null;
+  winningScenarioIds?: string[];
+  getScenarioVoteCounts?: (itineraryId: string) => { upvotes: number; downvotes: number };
+  getUserScenarioVote?: (itineraryId: string) => 'up' | 'down' | null;
+  onScenarioVote?: (itineraryId: string, choice: 'up' | 'down') => void;
   onGenerateAiScenario?: () => Promise<void>;
   onCreateScenario?: (title: string | null, days: { date: string; dayIndex?: number }[]) => void;
   onDeleteScenario?: (scenarioId: string) => void;
@@ -83,6 +91,12 @@ export function TripDetailItinerary({
   scenarios = [],
   canCreateScenarios = false,
   canManageScenarios = false,
+  canVoteScenario = false,
+  votingScenarioId = null,
+  winningScenarioIds = [],
+  getScenarioVoteCounts = () => EMPTY_SCENARIO_VOTE_COUNTS,
+  getUserScenarioVote = () => null,
+  onScenarioVote = () => {},
   onGenerateAiScenario,
   onCreateScenario,
   onDeleteScenario,
@@ -234,6 +248,12 @@ export function TripDetailItinerary({
             sortedDates={sortedDates}
             canCreate={canCreateScenarios}
             canManage={canManageScenarios}
+            canVoteScenario={canVoteScenario}
+            votingScenarioId={votingScenarioId}
+            winningScenarioIds={winningScenarioIds}
+            getScenarioVoteCounts={getScenarioVoteCounts}
+            getUserScenarioVote={getUserScenarioVote}
+            onScenarioVote={onScenarioVote}
             onGenerateAiScenario={onGenerateAiScenario}
             onCreateScenario={onCreateScenario}
             onDeleteScenario={onDeleteScenario}

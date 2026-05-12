@@ -214,6 +214,7 @@
     "failedToCreateActivity": "Échec de la création de l'activité. Veuillez réessayer.",
     "failedToUpdateActivity": "Échec de la mise à jour de l'activité. Veuillez réessayer.",
     "failedToVote": "Échec du vote. Veuillez réessayer.",
+    "mustBeLoggedIn": "Vous devez être connecté pour voter.",
     "failedToUpdateMessage": "Échec de la mise à jour du message. Veuillez réessayer.",
     "invalidDates": "La date de fin doit être égale ou postérieure à la date de début.",
     "failedToDeleteMessage": "Échec de la suppression du message. Veuillez réessayer."
@@ -285,6 +286,7 @@
     "scenarioDays_plural": "{{count}} jours",
     "scenarioAiBadge": "IA",
     "scenarioHumanBadge": "Manuel",
+    "scenarioLeadingBadge": "En tête",
     "previewScenario": "Aperçu",
     "useScenarioAsBase": "Utiliser comme base",
     "addActivityToItinerary": "Ajouter à l’itinéraire",

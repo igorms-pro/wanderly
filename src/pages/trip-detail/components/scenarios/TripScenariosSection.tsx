@@ -11,6 +11,12 @@ interface TripScenariosSectionProps {
   sortedDates: string[];
   canCreate: boolean;
   canManage: boolean;
+  canVoteScenario: boolean;
+  votingScenarioId: string | null;
+  winningScenarioIds: string[];
+  getScenarioVoteCounts: (itineraryId: string) => { upvotes: number; downvotes: number };
+  getUserScenarioVote: (itineraryId: string) => 'up' | 'down' | null;
+  onScenarioVote: (itineraryId: string, choice: 'up' | 'down') => void;
   onGenerateAiScenario: () => Promise<void>;
   onCreateScenario: (title: string | null, days: { date: string; dayIndex?: number }[]) => void;
   onDeleteScenario: (scenarioId: string) => void;
@@ -24,6 +30,12 @@ export function TripScenariosSection({
   sortedDates,
   canCreate,
   canManage,
+  canVoteScenario,
+  votingScenarioId,
+  winningScenarioIds,
+  getScenarioVoteCounts,
+  getUserScenarioVote,
+  onScenarioVote,
   onGenerateAiScenario,
   onCreateScenario,
   onDeleteScenario,
@@ -80,6 +92,12 @@ export function TripScenariosSection({
       <TripScenarioList
         scenarios={scenarios}
         canManage={canManage}
+        canVoteScenario={canVoteScenario}
+        votingScenarioId={votingScenarioId}
+        winningScenarioIds={winningScenarioIds}
+        getScenarioVoteCounts={getScenarioVoteCounts}
+        getUserScenarioVote={getUserScenarioVote}
+        onScenarioVote={onScenarioVote}
         onDelete={onDeleteScenario}
         onPreview={(scenarioId) => setPreviewScenarioId(scenarioId)}
         t={t}

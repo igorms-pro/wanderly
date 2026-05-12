@@ -11,6 +11,7 @@ import type { EditFormState } from '../components/layout/TripDetailHero';
 import { useTripScenarios } from './useTripScenarios';
 import { useTripDetailPermissions } from './useTripDetailPermissions';
 import { useTripDetailActivities } from './useTripDetailActivities';
+import { useTripDetailScenarioVotes } from './useTripDetailScenarioVotes';
 
 type TripDetailTab = 'itinerary' | 'chat' | 'weather' | 'explore';
 
@@ -198,6 +199,8 @@ export function useTripDetail() {
     ? scenariosState.scenarios.filter((s) => s.id !== data.currentTrip?.active_itinerary_id)
     : scenariosState.scenarios;
 
+  const scenarioVotes = useTripDetailScenarioVotes(data.t, scenarios, data.tripId);
+
   return {
     ...data,
     ...activities,
@@ -210,5 +213,6 @@ export function useTripDetail() {
     generateAiScenario,
     applyScenarioAsBase,
     importScenarioActivityToItinerary,
+    ...scenarioVotes,
   };
 }

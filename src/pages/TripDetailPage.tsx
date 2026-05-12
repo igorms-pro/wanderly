@@ -96,6 +96,11 @@ export default function TripDetailPage() {
     setEditForm,
     isDeleting,
     votingActivityId,
+    votingScenarioId,
+    winningScenarioIds,
+    getScenarioVoteCounts,
+    getUserScenarioVote,
+    handleScenarioVote,
     loadTripData,
     handleUpdateTrip,
     handleDeleteTrip,
@@ -271,6 +276,12 @@ export default function TripDetailPage() {
             canEdit={canEditActivities()}
             canReorder={canReorderActivities()}
             canVote={!!user}
+            canVoteScenario={!!user}
+            votingScenarioId={votingScenarioId}
+            winningScenarioIds={winningScenarioIds}
+            getScenarioVoteCounts={getScenarioVoteCounts}
+            getUserScenarioVote={getUserScenarioVote}
+            onScenarioVote={handleScenarioVote}
             lastEditedActivityId={lastEditedActivityId}
             activitiesByDate={activitiesByDate}
             sortedDates={sortedDates}

@@ -304,6 +304,32 @@ export interface Database {
           created_at?: string;
         };
       };
+      itinerary_votes: {
+        Row: {
+          id: string;
+          trip_id: string;
+          itinerary_id: string;
+          user_id: string;
+          choice: 'up' | 'down';
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          trip_id: string;
+          itinerary_id: string;
+          user_id: string;
+          choice: 'up' | 'down';
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          trip_id?: string;
+          itinerary_id?: string;
+          user_id?: string;
+          choice?: 'up' | 'down';
+          created_at?: string;
+        };
+      };
       messages: {
         Row: {
           id: string; // UUID
@@ -494,6 +520,7 @@ export type Itinerary = Database['public']['Tables']['itineraries']['Row'];
 export type ItineraryDay = Database['public']['Tables']['itinerary_days']['Row'];
 export type Activity = Database['public']['Tables']['activities']['Row'];
 export type Vote = Database['public']['Tables']['votes']['Row'];
+export type ItineraryVote = Database['public']['Tables']['itinerary_votes']['Row'];
 export type Message = Database['public']['Tables']['messages']['Row'];
 export type Invitation = Database['public']['Tables']['invitations']['Row'];
 export type AuditLog = Database['public']['Tables']['audit_logs']['Row'];

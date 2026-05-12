@@ -214,6 +214,7 @@
     "failedToCreateActivity": "Failed to create activity. Please try again.",
     "failedToUpdateActivity": "Failed to update activity. Please try again.",
     "failedToVote": "Failed to vote. Please try again.",
+    "mustBeLoggedIn": "You must be logged in to vote.",
     "failedToUpdateMessage": "Failed to update message. Please try again.",
     "failedToDeleteMessage": "Failed to delete message. Please try again.",
     "invalidDates": "End date must be on or after start date."
@@ -285,6 +286,7 @@
     "scenarioDays_plural": "{{count}} days",
     "scenarioAiBadge": "AI",
     "scenarioHumanBadge": "Manual",
+    "scenarioLeadingBadge": "Leading",
     "previewScenario": "Preview",
     "useScenarioAsBase": "Use as base",
     "addActivityToItinerary": "Add to itinerary",

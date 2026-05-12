@@ -954,13 +954,18 @@ Implement voting system for activities and scenarios. Everyone can vote.
 - [x] **Targeted tests**: cover decision classification and keep the existing activity voting flow stable.
 - [x] **Out of 10A**: scenario voting, finalize itinerary, notifications (remain in Issue #10 follow-ups).
 
+### Scope 10B — Scenario votes + finalize (same branch / PR #37)
+
+- [x] **Finalize itinerary** : owner, trip `planned` → `locked` (modal + toast + reload).
+- [x] **Vote sur scénarios** : table `itinerary_votes`, UI liste scénarios, realtime, badge « Leading », EN/FR.
+
 ### État code (mai 2026)
 
 - **Activités** : boutons pour / contre, compteurs, vote utilisateur, **toggle** (re-clic retire le vote), optimistic update + persistance Supabase (`votes`), recharge via `loadVotes`, **realtime** sur la table `votes` (`useTripDetailRealtime` → `subscribeToVotes`).
 - **Vues** : même flux dans les vues **liste, calendrier, timeline** (composants sous `pages/trip-detail/components/itinerary/`).
 - **Module `@/features/voting`** : encore vide (placeholder) — la logique vit aujourd’hui dans trip-detail + store.
 - **10A livré** : onglet **Decision** dans l’itinéraire, classement accepté / rejeté / indécis, i18n EN/FR, aria-labels vote timeline, tests unitaires de classification.
-- **À faire après 10A** : vote sur **scénarios**, **finaliser l’itinéraire** (flux UI owner → statut `locked`), notifications, tests E2E dédiés.
+- **Après 10A** : ~~vote sur **scénarios**~~ (voir **10B** ci‑dessous), ~~finaliser l’itinéraire~~ (**livré** : bouton owner → `locked`), **reste** : notifications, tests E2E dédiés.
 
 ### Tasks
 
@@ -983,14 +988,13 @@ Implement voting system for activities and scenarios. Everyone can vote.
   - [x] Vote on human-created activities
   - [x] Vote on AI-generated activities
 
-#### Scenario Voting
+#### Scenario Voting (10B)
 
-- [ ] 🔴 **Implement scenario voting**:
-  - [ ] Display scenarios side-by-side
-  - [ ] Vote on complete scenarios
-  - [ ] Show vote counts per scenario
-  - [ ] Highlight winning scenario
-  - [ ] Real-time vote updates
+- [x] 🟢 **Implement scenario voting**:
+  - [x] Liste des scénarios (alternatives à l’itinéraire actif) avec contrôles pouce haut / bas
+  - [x] Vote par scénario (`itinerary_votes` — migration **016**, `trip_id` + realtime filtré)
+  - [x] Score net affiché par scénario + badge **Leading** en cas d’égalité du meilleur score (après au moins un vote)
+  - [x] Mises à jour temps réel (`subscribeToItineraryVotes`)
 
 #### Decision View
 
