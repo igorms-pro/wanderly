@@ -18,16 +18,17 @@
 ### État repo / code (référence)
 
 - **`origin/main`** : fondations **#0–#7** ; trip detail **#8–#10** (dont voting PR [#38](https://github.com/igorms-pro/voyagely/pull/38) / [#39](https://github.com/igorms-pro/voyagely/pull/39), GitHub [#37](https://github.com/igorms-pro/voyagely/issues/37) fermée) ; activités/scénarios **PR #34** ; refactors optionnels **PR #36** (non bloquant).
-- **#11 Chat** : code sur branche **`feature/issue-11-chat-unread-tab`** — ouvrir / merger la PR → `main`.
-- **Suite MVP doc** : **#12** (IA durcie), **#13** (contexte / enrichissement).
+- **#11 Chat** : 🟢 **MVP terminé** sur la branche **`feature/issue-11-chat-unread-tab`** — merger la PR → `main`.
+- **#12 IA** : 🟡 **en cours** — durcissement service (retry, prompts, Sentry) ; reste UX / coûts / E2E ciblés.
+- **Suite** : **#13** (contexte / enrichissement).
 
 ---
 
 ## 🚀 IMMEDIATE NEXT ACTION (For AI Agent)
 
-1. **Merger la PR Issue #11** (chat : non-lus, réactions `017`, mentions, typings) depuis `feature/issue-11-chat-unread-tab` → `main`.
-2. **Enchaîner Issue #12** (service IA, UX, observabilité) puis **#13**.
-3. **PR #36** : traiter ou fermer quand prêt (refactors seuls).
+1. **Merger la PR Issue #11** (`feature/issue-11-chat-unread-tab`) → `main` si pas encore fait.
+2. **Poursuivre Issue #12** : coûts / quotas utilisateur, UX génération (loading / erreurs), E2E smoke génération si pertinent.
+3. **PR #36** : optionnel — traiter ou fermer.
 
 ---
 
@@ -56,7 +57,7 @@ Les sections détaillées **#0 à #10** ont été retirées pour limiter la main
 
 ## 🎯 Issue #11: Trip Detail Screen - Chat & Collaboration
 
-**Status:** 🟢 **MVP (code sur branche `feature/issue-11-chat-unread-tab`)** — badge **non-lus** onglet Chat, **réactions** (`017_message_reactions.sql`), **@mentions**, typings Postgrest (`Relationships` + table `activity_participants`) ; chat de base + présence / frappe déjà sur `main` (GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40) / PR [#41](https://github.com/igorms-pro/voyagely/pull/41) si applicable). **Suite :** ouvrir / merger la PR Issue #11 → `main`. **Hors MVP / optionnel :** `last_seen` SQL, **reply** threads, non-lus multi-device (`last_read`).  
+**Status:** 🟢 **COMPLETED (MVP)** — non-lus onglet, réactions (`017`), mentions, typings Postgrest ; présence / frappe sur `main` (GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40) / PR [#41](https://github.com/igorms-pro/voyagely/pull/41) si applicable). **Branche** `feature/issue-11-chat-unread-tab` : merger la PR pour intégrer le tout dans `main`. **Hors MVP :** `last_seen` SQL, reply threads, non-lus multi-device.  
 **Priority:** HIGH  
 **Phase:** Screen 4d  
 **Dependencies:** Issues #0–#10 (archivées — `main`)
@@ -123,90 +124,77 @@ Complete chat with presence, typing indicators, and collaboration features.
 
 ## 🎯 Issue #12: Trip Detail Screen - AI Itinerary Generation
 
-**Status:** 🟡 **PARTIALLY DONE** — génération IA **déjà utilisée** pour scénarios / suggestions dans le trip detail ; reste **durcissement** service & UX “Issue #12 complète”  
+**Status:** 🟡 **EN COURS (MVP+)** — socle produit déjà en place ; durcissement **2026-05** : retry API, prompts enrichis (enfants, must-do, no-go), version de prompt dans analytics, erreurs scénario → Sentry. Reste : **budget coûts / quotas**, UX erreurs & progression, E2E ciblé.  
 **Priority:** HIGH  
 **Phase:** Screen 4e  
-**Dependencies:** Issue #1 (constraints), Issue #9 (activities), Issue #10 (voting)
+**Dependencies:** Issues #0–#10 (archivées — `main`)
+
+### Pourquoi c’est pertinent (business / produit)
+
+- **Temps de cadrage** : un groupe part rarement d’une page blanche efficace. Des scénarios IA comparables réduisent le « blanc » et donnent un **premier langage commun** (jours, ordre de grandeur budget, rythme).
+- **Décision collective** : Voyagely n’est pas un planner solo — l’IA alimente des **options** que le groupe vote / finalise (#10). La valeur vendable est la **convergence** (moins de allers-retours WhatsApp).
+- **Contrôle des coûts & confiance** : sans observabilité (tokens, taux d’échec) et sans UX d’erreur claire, l’IA devient un risque **support + facture**. La #12 technique sécurise une future **monétisation** (crédits de génération, plans payants).
+- **Positionnement** : « humains décident, l’IA accélère » — différenciation vs outils purement génératifs où personne ne vote.
 
 ### Description
 
-Implement AI-powered itinerary generation. AI proposes scenarios, humans vote.
+Génération IA d’**itinéraires scénarisés** (copie possible vers l’itinéraire actif), suggestions d’activités, prompts alignés sur les **contraintes** du trip, robustesse réseau/API.
 
 ### État code (mai 2026)
 
-- **Existe** : `src/lib/ai/openai-itinerary-service.ts` (+ client, prompts, types Zod, mock), appels depuis le store trip-detail (`tripDetailSlice.aiScenarioOps` etc.), scénarios marqués IA dans l’UI.
-- **À faire** (cette issue telle que rédigée) : observabilité / coûts tokens, versioning prompts, retry exponentiel robuste, parcours UI “Generate with AI” si encore à clarifier, et votes agrégés sur scénarios une fois #10 avancé.
+- **Livré** : `openai-itinerary-service.ts` (Zod, mock si pas de clé), `openai-client.ts` (retry exponentiel 429/5xx), `openai-prompts.ts` (`ITINERARY_PROMPT_VERSION`, enfants / must_dos / no_gos), bouton **Generate with AI** (`TripScenariosSection` + i18n), persistance scénarios IA (`tripDetailSlice.aiScenarioOps`), votes scénarios (#10).
+- **Suite #12** : plafonds / quotas par trip ou par org, toasts UX sur échec (sans mock silencieux en prod si clé invalide), suivi coûts agrégé (PostHog/Sentry), E2E « génère un scénario » si env stable.
 
 ### Tasks
 
 #### AI Service
 
-- [ ] 🔴 **Enhance OpenAI service**:
-  - [ ] Structured JSON output with Zod validation
-  - [ ] Constraint-aware prompts
-  - [ ] Prompt versioning system
-  - [ ] Retry logic with exponential backoff
-  - [ ] Token usage tracking
-  - [ ] Cost monitoring
-  - [ ] Error handling
+- [x] 🟢 Structured JSON + **Zod** (`openai-itinerary-service.ts`)
+- [x] 🟢 **Constraint-aware** prompts (rythme, budget, préférences + **enfants**, **must_dos**, **no_gos**)
+- [x] 🟢 **Prompt version** (`ITINERARY_PROMPT_VERSION` → événement analytics)
+- [x] 🟢 **Retry** exponentiel sur erreurs transitoires (`openai-client` + `openaiRetry.ts`)
+- [x] 🟢 **Token usage** dans events PostHog (itinéraire + suggestions)
+- [ ] 🔴 **Cost / quotas** métier (plafond par trip, message utilisateur)
+- [x] 🟢 **Erreurs** génération scénario → **Sentry** (`captureFeatureError` dans `tripDetailSlice.aiScenarioOps`)
 
 #### AI Generation UI
 
-- [ ] 🔴 **Add AI generation button**:
-  - [ ] "Generate with AI" button in itinerary tab
-  - [ ] Generation progress indicator
-  - [ ] Loading state
-  - [ ] Success feedback
+- [x] 🟢 Bouton **Generate with AI** (itinéraire / scénarios)
+- [ ] 🟡 Indicateur de progression dédié (au-delà du loading bouton existant)
+- [x] 🟢 Loading sur l’action de génération (composant scénarios)
+- [ ] 🟡 Toasts **succès / échec** explicites (échec réseau vs validation)
 
 #### Constraint Collection
 
-- [ ] 🔴 **Use constraints for AI**:
-  - [ ] If constraints exist, use them in prompt
-  - [ ] If no constraints, ask user to add them
-  - [ ] Display "better results with constraints" message
+- [x] 🟢 Contraintes du trip injectées dans le prompt quand présentes
+- [ ] 🔴 Parcours « améliore tes contraintes avant de régénérer » (empty state intelligent)
+- [ ] 🔴 Message **« meilleurs résultats avec contraintes »** (copy + i18n)
 
 #### AI Scenario Generation
 
-- [ ] 🔴 **Generate scenarios**:
-  - [ ] AI generates 2-3 complete scenarios
-  - [ ] Each scenario is a day-by-day plan
-  - [ ] Mark scenarios as AI-generated
-  - [ ] Display AI scenarios alongside human scenarios
-  - [ ] Group votes on all scenarios (AI + human)
+- [x] 🟢 Scénario IA jour par jour persisté (`itineraries` + `itinerary_days` + `activities` source `ai`)
+- [x] 🟢 Affichage aux côtés des scénarios humains + votes (#10)
 
 #### AI Activity Suggestions
 
-- [ ] 🔴 **Generate activity suggestions**:
-  - [ ] AI suggests individual activities
-  - [ ] Mark activities as AI-generated
-  - [ ] Display AI activities alongside human activities
-  - [ ] Group votes on all activities (AI + human)
+- [ ] 🟡 Service `generateActivitySuggestions` — brancher partout où l’UI le prévoit (si partiel, documenter)
 
 #### AI Workflow
 
-- [ ] 🔴 **Complete AI workflow**:
-  - [ ] Humans create activities/scenarios
-  - [ ] AI proposes activities/scenarios
-  - [ ] Group votes on everything
-  - [ ] Decision made based on votes
+- [x] 🟢 Humains + IA + votes + finalisation (parcours global #9–#10–#11)
 
 #### i18n
 
-- [ ] 🔴 **Verify all AI text is internationalized**:
-  - [ ] Generate button
-  - [ ] Loading messages
-  - [ ] Success messages
-  - [ ] Error messages
-  - [ ] AI badges
+- [x] 🟢 Libellés bouton / section scénarios (clés `tripDetail.*`)
+- [ ] 🟡 Messages d’erreur / quota / retry côté UI (clés dédiées)
 
 ### Acceptance Criteria
 
-- [ ] AI generates scenarios based on constraints
-- [ ] AI scenarios appear alongside human ones
-- [ ] Group can vote on all scenarios
-- [ ] Error handling works gracefully
-- [ ] All text is internationalized
-- [ ] Tests pass (unit + E2E)
+- [x] L’IA produit un scénario cohérent avec les dates et la destination
+- [x] Les scénarios IA apparaissent avec les autres ; le groupe peut voter
+- [x] Erreurs API gérées sans crash (retry + fallback mock si pas de clé — à affiner prod)
+- [ ] Tous les messages utilisateur liés à l’IA passent par i18n (reste erreurs/quotas)
+- [ ] Tests : unitaires retry + E2E génération (si CI env)
 
 ---
 
@@ -351,8 +339,9 @@ Add trip templates and sharing capabilities.
 ### En cours / décisions
 
 - [ ] **PR #36** : merger les refactors branche `35-trip-detail-screen---activities-scenarios-v2` dans `main` (ou fermer / rebaser si obsolète).
-- [x] 🟡 **Issue #11 (chat)** : **PR à ouvrir** depuis `feature/issue-11-chat-unread-tab` — merger sur `main`.
+- [x] 🟢 **Issue #11 (chat)** : **MVP COMPLETED** — merger la PR `feature/issue-11-chat-unread-tab` → `main` pour alignement prod.
 - [x] 🟢 **Issues #0–#10** : terminées sur `main` (voir tableau archive ci-dessus).
+- [ ] 🟡 **Issue #12 (IA)** : durcissement en cours (voir section #12).
 
 ---
 
@@ -412,8 +401,8 @@ _Will be tracked here as discovered_
 
 ### Trip detail — suite MVP
 
-- **Issue #11 (Chat)**: 🟡 **PR en attente** — code sur `feature/issue-11-chat-unread-tab` (non-lus + réactions + mentions + typings) ; merger → 🟢 MVP
-- **Issue #12 (AI Generation)**: 🟡 ~35% - Partially Done (service + génération dans l’app ; manque durcissement & scope doc entier)
+- **Issue #11 (Chat)**: 🟢 **COMPLETED (MVP)** — branche `feature/issue-11-chat-unread-tab` ; merger PR → `main`
+- **Issue #12 (AI Generation)**: 🟡 **~55%** — service + UI base + retry + prompts + Sentry ; reste quotas/UX erreurs/i18n fin + E2E
 - **Issue #13 (Context)**: 🔴 10% - Not Started
 
 ### Phase 2 (Post-MVP)
@@ -422,7 +411,7 @@ _Will be tracked here as discovered_
 - **Issue #15 (PWA/Offline)**: 🔴 0% - Phase 2
 - **Issue #16 (Templates)**: 🔴 0% - Phase 2
 
-**Overall MVP Completion: ~68%** (#8–#11 code livré ; **#11** en attente merge PR ; suite : **#12** IA durcie / UX, puis **#13**)
+**Overall MVP Completion: ~72%** (#11 MVP doc OK + code sur branche ; merger PR ; **#12** avancée ; suite **#13**)
 
 ---
 
@@ -430,8 +419,8 @@ _Will be tracked here as discovered_
 
 **CRITICAL PATH**:
 
-1. **#11** : merger la PR chat (`feature/issue-11-chat-unread-tab`) → `main`.
-2. **#12** puis **#13** : IA durcie / UX, puis contexte & enrichissement.
+1. **Merger PR #11** (`feature/issue-11-chat-unread-tab`) → `main` si besoin.
+2. **#12** : quotas / UX erreurs / i18n messages IA + E2E ; puis **#13** (contexte).
 3. **PR #36** : optionnel — traiter ou fermer.
 
-**BLOCKER** : **#11** — merger la PR chat. **PR #36** — non bloquant.
+**BLOCKER** : aucun bloquant produit — **#12** est le focus technique ; **PR #36** non bloquant.

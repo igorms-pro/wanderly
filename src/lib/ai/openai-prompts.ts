@@ -1,5 +1,8 @@
 import type { ItineraryRequest } from './openai-itinerary-service';
 
+/** Bump when prompt shape / instructions change materially (observability). */
+export const ITINERARY_PROMPT_VERSION = '1';
+
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 const DEFAULT_LOCALE = 'en';
@@ -33,6 +36,9 @@ export const buildItineraryPrompt = (context: ItineraryPromptContext): string =>
     budget,
     currency,
     interests = [],
+    has_children,
+    must_dos = [],
+    no_gos = [],
   } = request;
 
   const days = calculateTripLengthDays(startDate, endDate);
@@ -42,6 +48,18 @@ export const buildItineraryPrompt = (context: ItineraryPromptContext): string =>
 
   const interestsLine = interests.length > 0 ? `- Interests: ${interests.join(', ')}` : '';
 
+  const childrenLine =
+    has_children === true
+      ? '- Traveling with children: prioritize family-friendly pacing, shorter blocks, and safe activities.'
+      : has_children === false
+        ? '- Adults-only trip (no special child constraints).'
+        : '';
+
+  const mustDosLine =
+    must_dos.length > 0 ? `- Must-do / strong preferences: ${must_dos.join('; ')}` : '';
+
+  const noGosLine = no_gos.length > 0 ? `- Avoid / no-go topics: ${no_gos.join('; ')}` : '';
+
   return `Create a detailed ${days}-day travel itinerary for ${destination}.
 
 Trip Details:
@@ -50,6 +68,9 @@ Trip Details:
 - Pace: ${pace}
 ${budgetLine}
 ${interestsLine}
+${childrenLine}
+${mustDosLine}
+${noGosLine}
 
 Please provide a day-by-day itinerary with 3-5 activities per day. For each activity include:
 - Activity title

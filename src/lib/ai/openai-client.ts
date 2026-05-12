@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 import { z } from 'zod';
 
 import { Analytics } from '../analytics';
+import { shouldRetryAfterOpenAIChatFailure, sleep } from './openaiRetry';
 
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
@@ -28,6 +29,9 @@ const openaiClient = OPENAI_API_KEY
 
 export type OpenAIChatMessage = OpenAI.Chat.ChatCompletionMessageParam;
 
+const OPENAI_CHAT_MAX_ATTEMPTS = 3;
+const OPENAI_CHAT_BASE_DELAY_MS = 500;
+
 export interface CallOpenAIChatOptions {
   temperature?: number;
   maxTokens?: number;
@@ -46,10 +50,10 @@ export interface OpenAIChatResult {
   usage?: OpenAIChatUsage;
 }
 
-export async function callOpenAIChat(
+async function runOpenAIChatCompletion(
   model: string,
   messages: OpenAIChatMessage[],
-  options: CallOpenAIChatOptions = {},
+  options: CallOpenAIChatOptions,
 ): Promise<OpenAIChatResult> {
   if (!openaiClient) {
     throw new OpenAIError('OpenAI API key is missing or invalid', { code: 'config_missing' });
@@ -84,18 +88,6 @@ export async function callOpenAIChat(
       },
     };
   } catch (error) {
-    const end = performance.now();
-    const durationMs = end - start;
-
-    Analytics.trackError(
-      error instanceof Error ? error.message : 'Unknown OpenAI error',
-      'openai_chat',
-      {
-        duration_ms: Math.round(durationMs),
-        model,
-      },
-    );
-
     if (import.meta.env.DEV) {
       console.error('[OpenAI] chat error:', error);
     }
@@ -107,6 +99,51 @@ export async function callOpenAIChat(
       cause: error,
     });
   }
+}
+
+export async function callOpenAIChat(
+  model: string,
+  messages: OpenAIChatMessage[],
+  options: CallOpenAIChatOptions = {},
+): Promise<OpenAIChatResult> {
+  let lastError: OpenAIError | undefined;
+
+  for (let attempt = 0; attempt < OPENAI_CHAT_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      return await runOpenAIChatCompletion(model, messages, options);
+    } catch (error) {
+      const normalized =
+        error instanceof OpenAIError
+          ? error
+          : new OpenAIError('Failed to call OpenAI chat API', {
+              code: 'request_failed',
+              cause: error,
+            });
+      lastError = normalized;
+
+      const canRetry =
+        attempt < OPENAI_CHAT_MAX_ATTEMPTS - 1 &&
+        shouldRetryAfterOpenAIChatFailure({ code: normalized.code, cause: normalized.cause });
+
+      if (!canRetry) {
+        Analytics.trackError(normalized.message, 'openai_chat', {
+          duration_ms: 0,
+          model,
+          final_attempt: attempt + 1,
+        });
+        throw normalized;
+      }
+
+      await sleep(OPENAI_CHAT_BASE_DELAY_MS * 2 ** attempt);
+    }
+  }
+
+  if (lastError) {
+    Analytics.trackError(lastError.message, 'openai_chat', { model, final_attempt: 'exhausted' });
+    throw lastError;
+  }
+
+  throw new OpenAIError('OpenAI chat failed after retries', { code: 'request_failed' });
 }
 
 export function parseJSONResponse<T>(content: string, schema: z.ZodSchema<T>): T {

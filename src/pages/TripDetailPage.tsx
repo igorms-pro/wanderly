@@ -83,6 +83,7 @@ export default function TripDetailPage() {
 
   const {
     t,
+    locale,
     user,
     tripId,
     loading,
@@ -315,7 +316,7 @@ export default function TripDetailPage() {
             canManageScenarios={canManageScenarios()}
             onGenerateAiScenario={async () => {
               if (!currentTrip) return;
-              await generateAiScenario(currentTrip, tripMembers.length);
+              await generateAiScenario(currentTrip, tripMembers.length, locale);
             }}
             onCreateScenario={createScenario}
             onDeleteScenario={deleteScenario}

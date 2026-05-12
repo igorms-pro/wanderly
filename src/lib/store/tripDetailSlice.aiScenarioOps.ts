@@ -1,5 +1,6 @@
 import type { Database, Trip, TripConstraints } from '../types/database.types';
 import { supabase } from '../supabase';
+import { captureFeatureError } from '../errorHandling';
 import type { AppState, SetState, GetState } from './types';
 import { generateItineraryFromConstraints } from '../ai/openai-itinerary-service';
 import type { TripScenario } from './tripDetailSlice.scenarios';
@@ -28,6 +29,11 @@ export function createTripDetailAiScenarioOpsSlice(
       try {
         const constraints = parseTripConstraints(trip.constraints);
 
+        const interests =
+          constraints?.preferences && constraints.preferences.trim().length > 0
+            ? [constraints.preferences.trim()]
+            : undefined;
+
         const result = await generateItineraryFromConstraints({
           request: {
             destination: trip.destination_text,
@@ -40,7 +46,10 @@ export function createTripDetailAiScenarioOpsSlice(
                 ? Math.round(constraints.budget_per_person_cents / 100)
                 : undefined,
             currency: trip.currency ?? undefined,
-            interests: constraints?.preferences ? [constraints.preferences] : undefined,
+            interests,
+            has_children: constraints?.has_children,
+            must_dos: constraints?.must_dos?.length ? constraints.must_dos : undefined,
+            no_gos: constraints?.no_gos?.length ? constraints.no_gos : undefined,
           },
           locale,
         });
@@ -107,7 +116,9 @@ export function createTripDetailAiScenarioOpsSlice(
 
         await get().loadScenarios(trip.id);
       } catch (err) {
-        console.error('Error generating AI scenario:', err);
+        captureFeatureError(err, 'ai_scenario_generate', {
+          trip_id: trip.id,
+        });
         throw err;
       }
     },
@@ -191,7 +202,7 @@ export function createTripDetailAiScenarioOpsSlice(
         await get().loadActiveItineraryDays(newItineraryId);
         await get().loadActivities(tripId);
       } catch (err) {
-        console.error('Error using scenario as base:', err);
+        captureFeatureError(err, 'ai_scenario_apply_base', { trip_id: tripId });
         throw err;
       }
     },
@@ -238,7 +249,7 @@ export function createTripDetailAiScenarioOpsSlice(
         if (error) throw error;
         await get().loadActivities(tripId);
       } catch (err) {
-        console.error('Error importing activity to itinerary:', err);
+        captureFeatureError(err, 'ai_scenario_import_activity', { trip_id: tripId, date });
         throw err;
       }
     },

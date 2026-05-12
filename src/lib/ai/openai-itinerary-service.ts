@@ -2,7 +2,11 @@ import { z } from 'zod';
 
 import { Analytics } from '../analytics';
 import { callOpenAIChat, OpenAIError, parseJSONResponse } from './openai-client';
-import { buildItineraryPrompt, buildActivitySuggestionsPrompt } from './openai-prompts';
+import {
+  buildItineraryPrompt,
+  buildActivitySuggestionsPrompt,
+  ITINERARY_PROMPT_VERSION,
+} from './openai-prompts';
 
 export interface ItineraryRequest {
   destination: string;
@@ -15,6 +19,9 @@ export interface ItineraryRequest {
   interests?: string[];
   dietaryRestrictions?: string[];
   accessibility?: string[];
+  has_children?: boolean;
+  must_dos?: string[];
+  no_gos?: string[];
 }
 
 const dayActivitySchema = z.object({
@@ -116,6 +123,7 @@ export async function generateItineraryFromConstraints(
       duration_ms: Math.round(result.durationMs),
       model: 'gpt-4.1-mini',
       total_tokens: result.usage?.totalTokens,
+      prompt_version: ITINERARY_PROMPT_VERSION,
     });
 
     return itinerary;

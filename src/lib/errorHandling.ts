@@ -148,3 +148,16 @@ export const addBreadcrumb = (
     level: 'info',
   });
 };
+
+export function captureFeatureError(
+  error: unknown,
+  feature: string,
+  extra?: Record<string, string | number | boolean | null | undefined>,
+): void {
+  if (!isSentryInitialized()) return;
+  const err = error instanceof Error ? error : new Error(String(error));
+  Sentry.captureException(err, {
+    tags: { errorType: 'feature', feature },
+    extra: extra as Record<string, unknown>,
+  });
+}

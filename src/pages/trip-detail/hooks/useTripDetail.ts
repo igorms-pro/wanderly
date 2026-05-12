@@ -37,7 +37,7 @@ function useTripDetailUiState(tripId: string | undefined) {
 }
 
 function useTripDetailData() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -153,6 +153,7 @@ function useTripDetailData() {
 
   return {
     t,
+    locale: i18n.language,
     user,
     tripId,
     navigate,
