@@ -1,4 +1,5 @@
 import type { Activity, Database } from '../types/database.types';
+import { maybePostLockedTripActivityChatMessage } from '@/lib/trip-system-chat';
 import { supabase } from '../supabase';
 import type { AppState, CreateActivityData, SetState, GetState } from './types';
 import { mapRowToActivity } from './activityMapping';
@@ -89,6 +90,10 @@ export function createTripDetailActivitiesSlice(set: SetState, get: GetState): P
 
         const mappedActivity = mapRowToActivity(activity as Record<string, unknown>);
         set((state) => ({ activities: [...state.activities, mappedActivity] }));
+        maybePostLockedTripActivityChatMessage(() => get().currentTrip, mappedActivity.trip_id, {
+          title: mappedActivity.title,
+          change: 'created',
+        });
         return mappedActivity;
       } catch (error) {
         console.error('Error creating activity:', error);
@@ -142,10 +147,16 @@ export function createTripDetailActivitiesSlice(set: SetState, get: GetState): P
         }
         if (!activity) throw new Error('Activity not found');
 
-        get().updateActivityInState(
-          activityId,
-          mapRowToActivity(activity as Record<string, unknown>),
-        );
+        const mapped = mapRowToActivity(activity as Record<string, unknown>);
+        get().updateActivityInState(activityId, mapped);
+        const changedKeys = Object.entries(updates).filter(([, v]) => v !== undefined);
+        const onlyReorder = changedKeys.length === 1 && changedKeys[0]?.[0] === 'order_index';
+        if (!onlyReorder) {
+          maybePostLockedTripActivityChatMessage(() => get().currentTrip, mapped.trip_id, {
+            title: mapped.title,
+            change: 'updated',
+          });
+        }
       } catch (error) {
         console.error('Error updating activity:', error);
         throw error;
@@ -154,6 +165,7 @@ export function createTripDetailActivitiesSlice(set: SetState, get: GetState): P
 
     deleteActivity: async (activityId) => {
       try {
+        const existing = get().activities.find((a) => a.id === activityId);
         const { error } = await (supabase.from('activities') as any)
           .update({ deleted_at: new Date().toISOString() } as ActivitiesUpdate)
           .eq('id', activityId);
@@ -166,6 +178,12 @@ export function createTripDetailActivitiesSlice(set: SetState, get: GetState): P
         set((state) => ({
           activities: state.activities.filter((a) => a.id !== activityId),
         }));
+        if (existing) {
+          maybePostLockedTripActivityChatMessage(() => get().currentTrip, existing.trip_id, {
+            title: existing.title,
+            change: 'removed',
+          });
+        }
       } catch (error) {
         console.error('Error deleting activity:', error);
         throw error;

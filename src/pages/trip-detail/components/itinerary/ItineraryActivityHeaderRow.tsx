@@ -1,7 +1,9 @@
 import { useCallback, KeyboardEvent } from 'react';
 import { Clock, ChevronDown, ChevronUp, Pencil, Trash2 } from 'lucide-react';
+import { useStore } from '@/lib/store';
 import type { Activity } from '../../../../lib/types/database.types';
 import { formatTimeDisplay } from '../../ItineraryActivityTypes';
+import { ProposedChangeBadge } from './ProposedChangeBadge';
 
 interface ItineraryActivityHeaderRowProps {
   activity: Activity;
@@ -26,6 +28,8 @@ export function ItineraryActivityHeaderRow({
   onEdit,
   onDelete,
 }: ItineraryActivityHeaderRowProps) {
+  const tripLocked = useStore((s) => s.currentTrip?.status === 'locked');
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -45,9 +49,12 @@ export function ItineraryActivityHeaderRow({
       className="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 cursor-pointer"
     >
       <div className="flex-1 min-w-0">
-        <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
-          {activity.title}
-        </h4>
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
+          <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
+            {activity.title}
+          </h4>
+          <ProposedChangeBadge visible={!!tripLocked && activity.status === 'proposed'} t={t} />
+        </div>
         <div className="flex items-center gap-2 mt-1 text-sm text-gray-500 dark:text-gray-400 flex-wrap">
           {activity.start_time && (
             <span className="flex items-center gap-1">

@@ -339,7 +339,12 @@
     "finalizeConfirm": "Finalize",
     "finalizing": "Finalizing...",
     "finalizeSuccess": "Itinerary finalized. The trip is now locked.",
-    "finalizeError": "Could not finalize the itinerary. Please try again."
+    "finalizeError": "Could not finalize the itinerary. Please try again.",
+    "proposedChangeBadge": "Proposed change",
+    "chatSystemTripFinalized": "The itinerary was finalized. The trip is now locked.",
+    "chatSystemActivityCreated": "A new activity was proposed: \"{{title}}\".",
+    "chatSystemActivityUpdated": "An activity was updated: \"{{title}}\".",
+    "chatSystemActivityRemoved": "An activity was removed: \"{{title}}\"."
   },
   "activityModal": {
     "addActivity": "Add Activity",

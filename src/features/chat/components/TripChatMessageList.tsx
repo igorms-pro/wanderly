@@ -1,7 +1,11 @@
 import { format } from 'date-fns';
 import { Edit2, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
+import { parseTripSystemPayload } from '@/lib/trip-system-chat';
+
 import type { MessageWithProfile } from '../hooks/useTripChat';
+import { SystemChatNotice } from './SystemChatNotice';
 
 interface TripChatMessageListProps {
   messages: MessageWithProfile[];
@@ -48,6 +52,25 @@ export function TripChatMessageList({
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-4">
       {messages.map((message) => {
+        if (message.message_type === 'system') {
+          const payload = parseTripSystemPayload(message.content);
+          if (payload) {
+            return (
+              <div key={message.id} className="w-full">
+                <SystemChatNotice payload={payload} />
+                <p className="text-center text-xs text-gray-400 mt-1">
+                  {format(new Date(message.created_at), 'h:mm a')}
+                </p>
+              </div>
+            );
+          }
+          return (
+            <div key={message.id} className="w-full text-center text-sm text-gray-500 py-2">
+              {message.content}
+            </div>
+          );
+        }
+
         const isOwnMessage = message.user_id === currentUserId;
         const isEditing = editingMessageId === message.id;
 

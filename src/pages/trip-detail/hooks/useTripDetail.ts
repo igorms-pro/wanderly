@@ -12,6 +12,7 @@ import { useTripScenarios } from './useTripScenarios';
 import { useTripDetailPermissions } from './useTripDetailPermissions';
 import { useTripDetailActivities } from './useTripDetailActivities';
 import { useTripDetailScenarioVotes } from './useTripDetailScenarioVotes';
+import { insertTripFinalizedChatMessage } from '@/lib/trip-system-chat';
 
 type TripDetailTab = 'itinerary' | 'chat' | 'weather' | 'explore';
 
@@ -128,6 +129,7 @@ function useTripDetailData() {
     try {
       setIsFinalizing(true);
       await updateTrip(tripId, { status: 'locked' });
+      await insertTripFinalizedChatMessage(tripId);
       addToast({ variant: 'success', message: t('tripDetail.finalizeSuccess') });
       await loadTripData();
     } catch {

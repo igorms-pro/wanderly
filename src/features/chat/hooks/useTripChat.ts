@@ -248,11 +248,13 @@ export function useTripChat({ tripId, userRole }: UseTripChatOptions) {
 
   const canEditMessage = (message: MessageWithProfile): boolean => {
     if (!user) return false;
+    if (message.message_type === 'system') return false;
     return message.user_id === user.id;
   };
 
   const canDeleteMessage = (message: MessageWithProfile): boolean => {
     if (!user) return false;
+    if (message.message_type === 'system') return false;
     return message.user_id === user.id || userRole === 'moderator' || userRole === 'owner';
   };
 

@@ -1,11 +1,13 @@
 import { CheckCircle2, CircleHelp, ThumbsDown, ThumbsUp, XCircle } from 'lucide-react';
 
+import { useStore } from '@/lib/store';
 import type { Activity } from '@/lib/types/database.types';
 import {
   buildActivityDecisionSections,
   type ActivityDecision,
   type DecisionStatus,
 } from './itinerary-decision-utils';
+import { ProposedChangeBadge } from './ProposedChangeBadge';
 
 const DECISION_ORDER: DecisionStatus[] = ['accepted', 'undecided', 'rejected'];
 
@@ -113,11 +115,19 @@ function DecisionSection({
 }
 
 function DecisionCard({ decision, t }: { decision: ActivityDecision; t: (key: string) => string }) {
+  const tripLocked = useStore((s) => s.currentTrip?.status === 'locked');
+
   return (
     <li className="rounded-xl bg-white/80 p-3 shadow-sm dark:bg-gray-900/40">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">{decision.activity.title}</p>
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
+            <p className="truncate text-sm font-semibold">{decision.activity.title}</p>
+            <ProposedChangeBadge
+              visible={!!tripLocked && decision.activity.status === 'proposed'}
+              t={t}
+            />
+          </div>
           <p className="mt-1 text-xs opacity-75">{formatDecisionDate(decision.date)}</p>
         </div>
         <span className="rounded-lg bg-white px-2 py-1 text-xs font-semibold dark:bg-gray-800">
