@@ -1060,7 +1060,7 @@ Objectif : fermer les cases restantes de l’AC **#37** sans rouvrir un nouveau 
 - [x] All text is internationalized (incl. notifications 10C)
 - [x] Tests pass (unit + `trip-system-chat.test.ts` ; E2E smoke `trip-itinerary-tabs` si env seed / auth)
 
-**Note** : Fermer **GitHub #37** côté repo si ce n’est pas fait automatiquement au merge.
+**Note** : **GitHub #37** fermée après merge PR #39.
 
 ---
 
