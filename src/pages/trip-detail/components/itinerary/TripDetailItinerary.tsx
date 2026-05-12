@@ -5,11 +5,12 @@ import { TripItineraryEmptyState } from './TripItineraryEmptyState';
 import { TripItineraryListView } from './TripItineraryListView';
 import { TripItineraryCalendarView } from './TripItineraryCalendarView';
 import { TripItineraryTimelineView } from './TripItineraryTimelineView';
+import { TripItineraryDecisionView } from './TripItineraryDecisionView';
 import { TripScenariosSection } from '../scenarios/TripScenariosSection';
 import { useItineraryViewState } from './useItineraryViewState';
 import { useItineraryDragAndDrop } from '../../hooks/useItineraryDragAndDrop';
 
-export type ItineraryViewMode = 'list' | 'calendar' | 'timeline';
+export type ItineraryViewMode = 'list' | 'calendar' | 'timeline' | 'decision';
 
 export interface ConstraintsSummary {
   pace?: 'relaxed' | 'balanced' | 'packed';
@@ -132,6 +133,14 @@ export function TripDetailItinerary({
 
       {sortedDates.length === 0 ? (
         <TripItineraryEmptyState t={t} canEdit={canEdit} onAddActivity={onAddActivity} />
+      ) : viewMode === 'decision' ? (
+        <TripItineraryDecisionView
+          sortedDates={sortedDatesForView}
+          activitiesByDate={activitiesByDateForView}
+          getVoteCounts={getVoteCounts}
+          t={t}
+          searchQuery={searchQuery}
+        />
       ) : viewMode === 'list' ? (
         <TripItineraryListView
           sortedDates={sortedDatesForView}

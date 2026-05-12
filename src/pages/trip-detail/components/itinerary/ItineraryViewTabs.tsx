@@ -1,14 +1,23 @@
-import { Plus, List, Calendar, Map, Search } from 'lucide-react';
+import { Plus, List, Calendar, Map, Search, ClipboardCheck } from 'lucide-react';
+
+import type { ItineraryViewMode } from './TripDetailItinerary';
 
 interface ItineraryViewTabsProps {
   t: (key: string) => string;
   canEdit: boolean;
-  viewMode: 'list' | 'calendar' | 'timeline';
-  onChangeViewMode: (mode: 'list' | 'calendar' | 'timeline') => void;
+  viewMode: ItineraryViewMode;
+  onChangeViewMode: (mode: ItineraryViewMode) => void;
   onAddActivity: () => void;
   searchQuery: string;
   onSearchChange: (value: string) => void;
 }
+
+const VIEW_TAB_DEFS: { id: ItineraryViewMode; key: string; icon: typeof List }[] = [
+  { id: 'list', key: 'tripDetail.itineraryViewList', icon: List },
+  { id: 'calendar', key: 'tripDetail.itineraryViewCalendar', icon: Calendar },
+  { id: 'timeline', key: 'tripDetail.itineraryViewVoyage', icon: Map },
+  { id: 'decision', key: 'tripDetail.itineraryViewDecision', icon: ClipboardCheck },
+];
 
 export function ItineraryViewTabs({
   t,
@@ -19,12 +28,6 @@ export function ItineraryViewTabs({
   searchQuery,
   onSearchChange,
 }: ItineraryViewTabsProps) {
-  const viewTabs: { id: 'list' | 'calendar' | 'timeline'; label: string; icon: typeof List }[] = [
-    { id: 'list', label: t('tripDetail.itineraryViewList'), icon: List },
-    { id: 'calendar', label: t('tripDetail.itineraryViewCalendar'), icon: Calendar },
-    { id: 'timeline', label: t('tripDetail.itineraryViewVoyage'), icon: Map },
-  ];
-
   return (
     <div className="flex flex-col gap-3 sticky top-[10rem] sm:top-[11rem] z-10 py-2 -mx-4 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -33,7 +36,7 @@ export function ItineraryViewTabs({
           role="tablist"
           aria-label={t('tripDetail.itinerary')}
         >
-          {viewTabs.map(({ id, label, icon: Icon }) => (
+          {VIEW_TAB_DEFS.map(({ id, key, icon: Icon }) => (
             <button
               key={id}
               type="button"
@@ -47,7 +50,7 @@ export function ItineraryViewTabs({
               }`}
             >
               <Icon className="w-4 h-4" />
-              {label}
+              {t(key)}
             </button>
           ))}
         </div>

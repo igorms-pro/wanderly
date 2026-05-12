@@ -947,12 +947,20 @@ Implement activities CRUD (truth = itinerary actif) + AI scenario proposals (bas
 
 Implement voting system for activities and scenarios. Everyone can vote.
 
+### Scope 10A — Current PR
+
+- [x] **Decision view for activity votes**: surface accepted / rejected / undecided activities from existing activity votes.
+- [x] **Activity vote polish**: i18n + accessible labels for vote controls.
+- [x] **Targeted tests**: cover decision classification and keep the existing activity voting flow stable.
+- [x] **Out of 10A**: scenario voting, finalize itinerary, notifications (remain in Issue #10 follow-ups).
+
 ### État code (mai 2026)
 
 - **Activités** : boutons pour / contre, compteurs, vote utilisateur, **toggle** (re-clic retire le vote), optimistic update + persistance Supabase (`votes`), recharge via `loadVotes`, **realtime** sur la table `votes` (`useTripDetailRealtime` → `subscribeToVotes`).
 - **Vues** : même flux dans les vues **liste, calendrier, timeline** (composants sous `pages/trip-detail/components/itinerary/`).
 - **Module `@/features/voting`** : encore vide (placeholder) — la logique vit aujourd’hui dans trip-detail + store.
-- **À faire** : vote sur **scénarios**, **vue décision** agrégée, **finaliser l’itinéraire** (flux UI owner → statut `locked`), notifications, tests E2E dédiés, i18n **aria-labels** vote (ex. anglais en dur dans `TimelineActivityVotes.tsx`).
+- **10A livré** : onglet **Decision** dans l’itinéraire, classement accepté / rejeté / indécis, i18n EN/FR, aria-labels vote timeline, tests unitaires de classification.
+- **À faire après 10A** : vote sur **scénarios**, **finaliser l’itinéraire** (flux UI owner → statut `locked`), notifications, tests E2E dédiés.
 
 ### Tasks
 
@@ -986,11 +994,11 @@ Implement voting system for activities and scenarios. Everyone can vote.
 
 #### Decision View
 
-- [ ] 🔴 **Create decision view**:
-  - [ ] Filter: Show validated activities (positive votes)
-  - [ ] Filter: Show rejected activities (negative votes)
-  - [ ] Filter: Show undecided activities (no votes or tie)
-  - [ ] Visual indicators (green/red/yellow)
+- [x] 🟢 **Create decision view**:
+  - [x] Filter: Show validated / accepted activities (positive votes or confirmed)
+  - [x] Filter: Show rejected activities (negative votes or rejected)
+  - [x] Filter: Show undecided activities (no votes or tie)
+  - [x] Visual indicators (green/red/yellow)
 
 #### Finalize Itinerary
 
@@ -1019,9 +1027,9 @@ Implement voting system for activities and scenarios. Everyone can vote.
 #### i18n
 
 - [ ] 🟡 **Verify all voting text is internationalized**:
-  - [ ] Vote buttons (aria / tooltips)
+  - [x] Vote buttons (aria / tooltips for existing activity vote controls)
   - [x] Vote counts (affichage numérique)
-  - [ ] Decision view
+  - [x] Decision view
   - [ ] Finalize modal
   - [ ] Notifications
 
@@ -1031,11 +1039,11 @@ Implement voting system for activities and scenarios. Everyone can vote.
 - [ ] Voting works on scenarios
 - [x] Real-time vote updates work
 - [x] Everyone can vote (activités proposées)
-- [ ] Decision view works
+- [x] Decision view works
 - [ ] Finalize itinerary works
 - [ ] Post-finalization voting works (badges / notifs)
-- [ ] All text is internationalized
-- [ ] Tests pass (unit + E2E)
+- [ ] All text is internationalized (remaining: finalize / notifications follow-ups)
+- [ ] Tests pass (unit targeted ✅ ; E2E still open)
 
 **Note** : Issue #9 est livré sur `main` — la suite #10 est les **lignes non cochées** ci-dessus.
 
