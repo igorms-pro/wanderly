@@ -3,7 +3,7 @@ import type { RealtimeChannel } from '@supabase/supabase-js';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/lib/supabase';
 import { useStore } from '@/lib/store';
-import type { Message } from '@/lib/types/database.types';
+import type { Message, Profile } from '@/lib/types/database.types';
 
 export interface MessageWithProfile extends Message {
   sender_name?: string;
@@ -70,7 +70,8 @@ export function useTripChat({ tripId, userRole }: UseTripChatOptions) {
 
         if (!profilesError && profiles) {
           const profilesMap: Record<string, { name: string; avatar: string }> = {};
-          ((profiles || []) as any[]).forEach((profile: any) => {
+          const rows = profiles as Pick<Profile, 'id' | 'display_name' | 'avatar_url'>[];
+          rows.forEach((profile) => {
             profilesMap[profile.id] = {
               name: profile.display_name || profile.id.substring(0, 8),
               avatar:
@@ -155,7 +156,7 @@ export function useTripChat({ tripId, userRole }: UseTripChatOptions) {
           user_id: user.id,
           content: text,
           message_type: 'text',
-        } as any)
+        })
         .select()
         .single();
 
@@ -164,14 +165,13 @@ export function useTripChat({ tripId, userRole }: UseTripChatOptions) {
       }
 
       if (message) {
-        const messageData = message as any;
         const mappedMessage: Message = {
-          id: messageData.id,
-          trip_id: messageData.trip_id,
-          user_id: messageData.user_id || '',
-          content: messageData.content,
-          message_type: messageData.message_type,
-          created_at: messageData.created_at,
+          id: message.id,
+          trip_id: message.trip_id,
+          user_id: message.user_id || '',
+          content: message.content,
+          message_type: message.message_type,
+          created_at: message.created_at,
         };
         addMessage(mappedMessage);
       }
@@ -199,8 +199,10 @@ export function useTripChat({ tripId, userRole }: UseTripChatOptions) {
     try {
       const { error } = await supabase
         .from('messages')
-        // @ts-expect-error - Supabase type inference issue
-        .update({ content: editText, updated_at: new Date().toISOString() } as any)
+        .update({
+          content: editText,
+          updated_at: new Date().toISOString(),
+        })
         .eq('id', messageId)
         .eq('user_id', user.id);
 
@@ -230,8 +232,7 @@ export function useTripChat({ tripId, userRole }: UseTripChatOptions) {
 
       const { error } = await supabase
         .from('messages')
-        // @ts-expect-error - Supabase type inference issue
-        .update({ deleted_at: new Date().toISOString() } as any)
+        .update({ deleted_at: new Date().toISOString() })
         .eq('id', messageId)
         .eq(canDeleteAny ? 'trip_id' : 'user_id', canDeleteAny ? tripId : user.id);
 

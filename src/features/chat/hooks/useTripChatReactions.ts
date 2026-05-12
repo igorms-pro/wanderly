@@ -3,18 +3,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 import { supabase } from '@/lib/supabase';
+import type { MessageReaction } from '@/lib/types/database.types';
 
 export const CHAT_REACTION_EMOJIS = ['👍', '👎', '❤️', '😂'] as const;
 export type ChatReactionEmoji = (typeof CHAT_REACTION_EMOJIS)[number];
-
-export type MessageReactionRow = {
-  id: string;
-  trip_id: string;
-  message_id: string;
-  user_id: string;
-  emoji: string;
-  created_at: string;
-};
 
 export type ReactionSummary = {
   emoji: string;
@@ -27,7 +19,7 @@ function isAllowedEmoji(emoji: string): emoji is ChatReactionEmoji {
 }
 
 export function useTripChatReactions(tripId: string, currentUserId: string | undefined) {
-  const [rows, setRows] = useState<MessageReactionRow[]>([]);
+  const [rows, setRows] = useState<MessageReaction[]>([]);
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   const loadReactions = useCallback(async (): Promise<void> => {
@@ -41,7 +33,7 @@ export function useTripChatReactions(tripId: string, currentUserId: string | und
       setRows([]);
       return;
     }
-    setRows((data as MessageReactionRow[]) ?? []);
+    setRows(data ?? []);
   }, [tripId]);
 
   useEffect(() => {
@@ -125,11 +117,8 @@ export function useTripChatReactions(tripId: string, currentUserId: string | und
         return;
       }
 
-      if (found && typeof (found as { id: string }).id === 'string') {
-        const { error } = await supabase
-          .from('message_reactions')
-          .delete()
-          .eq('id', (found as { id: string }).id);
+      if (found?.id) {
+        const { error } = await supabase.from('message_reactions').delete().eq('id', found.id);
         if (error) {
           Sentry.captureException(error, {
             tags: { feature: 'chat-reactions' },
@@ -144,7 +133,7 @@ export function useTripChatReactions(tripId: string, currentUserId: string | und
         message_id: messageId,
         user_id: currentUserId,
         emoji,
-      } as any);
+      });
 
       if (error) {
         Sentry.captureException(error, { tags: { feature: 'chat-reactions' }, extra: { tripId } });

@@ -9,6 +9,9 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export interface Database {
+  __InternalSupabase?: {
+    PostgrestVersion: '12';
+  };
   public: {
     Tables: {
       profiles: {
@@ -45,6 +48,7 @@ export interface Database {
           updated_at?: string;
           deleted_at?: string | null;
         };
+        Relationships: [];
       };
       trips: {
         Row: {
@@ -95,6 +99,7 @@ export interface Database {
           updated_at?: string;
           deleted_at?: string | null;
         };
+        Relationships: [];
       };
       trip_members: {
         Row: {
@@ -124,6 +129,7 @@ export interface Database {
           joined_at?: string;
           removed_at?: string | null;
         };
+        Relationships: [];
       };
       itineraries: {
         Row: {
@@ -156,6 +162,7 @@ export interface Database {
           updated_at?: string;
           deleted_at?: string | null;
         };
+        Relationships: [];
       };
       itinerary_days: {
         Row: {
@@ -185,6 +192,7 @@ export interface Database {
           updated_at?: string;
           deleted_at?: string | null;
         };
+        Relationships: [];
       };
       activities: {
         Row: {
@@ -277,6 +285,28 @@ export interface Database {
           updated_at?: string;
           deleted_at?: string | null;
         };
+        Relationships: [];
+      };
+      activity_participants: {
+        Row: {
+          id: string;
+          activity_id: string;
+          user_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          activity_id: string;
+          user_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          activity_id?: string;
+          user_id?: string;
+          created_at?: string;
+        };
+        Relationships: [];
       };
       votes: {
         Row: {
@@ -303,6 +333,7 @@ export interface Database {
           idempotency_key?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       itinerary_votes: {
         Row: {
@@ -329,6 +360,7 @@ export interface Database {
           choice?: 'up' | 'down';
           created_at?: string;
         };
+        Relationships: [];
       };
       message_reactions: {
         Row: {
@@ -355,6 +387,7 @@ export interface Database {
           emoji?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
       messages: {
         Row: {
@@ -393,6 +426,7 @@ export interface Database {
           updated_at?: string;
           deleted_at?: string | null;
         };
+        Relationships: [];
       };
       user_sessions: {
         Row: {
@@ -431,6 +465,7 @@ export interface Database {
           created_at?: string;
           revoked_at?: string | null;
         };
+        Relationships: [];
       };
       login_history: {
         Row: {
@@ -463,6 +498,7 @@ export interface Database {
           user_agent?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       invitations: {
         Row: {
@@ -495,6 +531,7 @@ export interface Database {
           used_count?: number;
           created_at?: string;
         };
+        Relationships: [];
       };
       audit_logs: {
         Row: {
@@ -524,6 +561,7 @@ export interface Database {
           metadata?: Json | null;
           created_at?: string;
         };
+        Relationships: [];
       };
     };
     Views: {
