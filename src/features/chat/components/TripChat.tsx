@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -6,6 +7,8 @@ import type { TripMember } from '@/lib/types/database.types';
 import { useTripChat } from '../hooks/useTripChat';
 import { useTripChatCollaboration } from '../hooks/useTripChatCollaboration';
 import type { MemberProfileLite } from '../hooks/useTripChatCollaboration';
+import { useTripChatReactions } from '../hooks/useTripChatReactions';
+import { buildMentionableMembers } from '../lib/mentionSlugs';
 import { TripChatHeader } from './TripChatHeader';
 import { TripChatMessageList } from './TripChatMessageList';
 import { TripChatInput } from './TripChatInput';
@@ -44,6 +47,21 @@ export default function TripChat({
     user,
   } = useTripChat({ tripId, userRole });
 
+  const mentionableMembers = useMemo(
+    () => buildMentionableMembers(tripMembers, memberProfiles),
+    [tripMembers, memberProfiles],
+  );
+
+  const mentionSlugToLabel = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const row of mentionableMembers) {
+      m.set(row.slug.toLowerCase(), row.label);
+    }
+    return m;
+  }, [mentionableMembers]);
+
+  const { reactionsByMessageId, toggleReaction } = useTripChatReactions(tripId, user?.id);
+
   const displayName = user?.display_name?.trim() || user?.email?.split('@')[0]?.trim() || 'Member';
 
   const { onlineUserIds, onlineCount, memberPresenceRows, typingText, notifyTyping } =
@@ -78,6 +96,9 @@ export default function TripChat({
         messages={messagesWithProfiles}
         onlineUserIds={onlineUserIds}
         currentUserId={user?.id}
+        mentionSlugToLabel={mentionSlugToLabel}
+        reactionsByMessageId={reactionsByMessageId}
+        onToggleReaction={toggleReaction}
         editingMessageId={editingMessageId}
         editText={editText}
         onChangeEditText={setEditText}
@@ -92,6 +113,7 @@ export default function TripChat({
       <TripChatInput
         messageText={messageText}
         sending={sending}
+        mentionableMembers={mentionableMembers}
         onChangeMessageText={setMessageText}
         onDraftActivity={notifyTyping}
         onSubmit={handleSubmit}

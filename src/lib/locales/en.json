@@ -181,7 +181,9 @@
     "onlineCount_other": "{{count}} members online",
     "userTyping": "{{name}} is typing…",
     "usersTyping": "{{names}} are typing…",
-    "memberPresenceListLabel": "Trip members and online status"
+    "memberPresenceListLabel": "Trip members and online status",
+    "reactionToggle": "Toggle {{emoji}} reaction",
+    "mentionSuggestions": "Mention a trip member"
   },
   "weather": {
     "current": "Current Weather",

@@ -1102,9 +1102,9 @@ Complete chat with presence, typing indicators, and collaboration features.
 
 #### Enhanced Chat Features
 
-- [ ] 🔴 **Add chat enhancements**:
-  - [ ] Message reactions (👍 👎 ❤️ 😂) - optional
-  - [ ] @mentions - optional
+- [x] 🟢 **Chat enhancements (MVP)** :
+  - [x] Message reactions (👍 👎 ❤️ 😂) — `message_reactions` + barre sous chaque bulle (`017_message_reactions.sql`)
+  - [x] @mentions — slugs stables + surbrillance + suggestions à la frappe (pas de notif / pas de threads)
   - [ ] Reply to message - optional
   - [x] Message timestamps (déjà affichés sur chaque bulle — `TripChatMessageList`)
   - [x] Unread message counter (badge onglet Chat — `localStorage` + Realtime INSERT, sans migration)
@@ -1117,6 +1117,7 @@ Complete chat with presence, typing indicators, and collaboration features.
   - [x] Empty state
   - [x] Presence indicators (compteur + liste membres + points en ligne)
   - [x] Typing indicators
+  - [x] Réactions + mentions (MVP léger) + libellés `chat.reactionToggle`, `chat.mentionSuggestions`
   - [x] Tab unread badge + `aria-label` / libellé navigation onglets (`tripDetail.chatTabAriaUnread` avec `{{display}}`, `tripDetail.tabsNavAria`)
 
 ### Acceptance Criteria
@@ -1125,7 +1126,7 @@ Complete chat with presence, typing indicators, and collaboration features.
 - [x] Presence tracking works (MVP Realtime — sans last_seen persistant)
 - [x] Typing indicators work
 - [x] Real-time updates work
-- [x] Texte chat couvert par i18n (y compris présence / frappe / badge non-lus onglet) — extensions futures : réactions, mentions
+- [x] Texte chat couvert par i18n (y compris présence / frappe / badge non-lus onglet / réactions / mentions) — extensions futures : reply threads, réactions custom
 - [x] Tests unitaires ciblés (presence helper) ; E2E chat optionnel
 
 ---

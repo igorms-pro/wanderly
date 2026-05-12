@@ -181,7 +181,9 @@
     "onlineCount_other": "{{count}} membres en ligne",
     "userTyping": "{{name}} est en train d’écrire…",
     "usersTyping": "{{names}} sont en train d’écrire…",
-    "memberPresenceListLabel": "Membres du voyage et statut en ligne"
+    "memberPresenceListLabel": "Membres du voyage et statut en ligne",
+    "reactionToggle": "Basculer la réaction {{emoji}}",
+    "mentionSuggestions": "Mentionner un membre du voyage"
   },
   "weather": {
     "current": "Météo actuelle",

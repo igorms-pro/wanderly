@@ -330,6 +330,32 @@ export interface Database {
           created_at?: string;
         };
       };
+      message_reactions: {
+        Row: {
+          id: string;
+          trip_id: string;
+          message_id: string;
+          user_id: string;
+          emoji: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          trip_id: string;
+          message_id: string;
+          user_id: string;
+          emoji: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          trip_id?: string;
+          message_id?: string;
+          user_id?: string;
+          emoji?: string;
+          created_at?: string;
+        };
+      };
       messages: {
         Row: {
           id: string; // UUID
@@ -522,6 +548,7 @@ export type Activity = Database['public']['Tables']['activities']['Row'];
 export type Vote = Database['public']['Tables']['votes']['Row'];
 export type ItineraryVote = Database['public']['Tables']['itinerary_votes']['Row'];
 export type Message = Database['public']['Tables']['messages']['Row'];
+export type MessageReaction = Database['public']['Tables']['message_reactions']['Row'];
 export type Invitation = Database['public']['Tables']['invitations']['Row'];
 export type AuditLog = Database['public']['Tables']['audit_logs']['Row'];
 
