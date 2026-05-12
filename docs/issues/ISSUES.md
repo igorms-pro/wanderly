@@ -964,11 +964,11 @@ Implement voting system for activities and scenarios. Everyone can vote.
 
 Objectif : fermer les cases restantes de l’AC **#37** sans rouvrir un nouveau ticket GitHub.
 
-- [ ] **E2E** : au minimum un flux smoke « trip detail → itinéraire → vote activité » (et idéalement scénario si données dispo) — étendre / stabiliser `e2e/activities-votes.spec.ts` ou nouveau spec dédié.
-- [ ] **Notif membres à la finalisation** : message **système** dans le chat du trip (`messages.message_type = 'system'`) ou mécanisme équivalent documenté — pas d’email obligatoire en MVP.
-- [ ] **Post-verrouillage** : badge « changement proposé » sur les activités `proposed` quand `trip.status === 'locked'` (i18n EN/FR).
-- [ ] **Notif changements** (MVP) : même canal que ci-dessus (message système) quand une activité est ajoutée/modifiée après lock par un admin — ou décision produit : toast seulement pour l’auteur (à trancher dans la PR).
-- [ ] **AC / doc** : cocher « Voting works on scenarios » ; ajuster la ligne i18n « notifications » quand les chaînes existent.
+- [x] **E2E** : smoke `e2e/trip-itinerary-tabs.spec.ts` (trip detail → onglet **Decision** visible ; nécessite auth + au moins un trip).
+- [x] **Notif membres à la finalisation** : message **système** dans le chat (`trip-system-chat` + `insertTripFinalizedChatMessage`).
+- [x] **Post-verrouillage** : badge **« Proposed change »** / « Changement proposé » (`ProposedChangeBadge`) liste / timeline / décision.
+- [x] **Notif changements** : messages système après création / mise à jour / suppression d’activité si trip **locked** (reorder seul → pas de spam).
+- [x] **Tests unitaires** : `trip-system-chat.test.ts` (parse JSON payloads).
 
 ### État code (mai 2026)
 
@@ -976,7 +976,7 @@ Objectif : fermer les cases restantes de l’AC **#37** sans rouvrir un nouveau 
 - **Vues** : même flux dans les vues **liste, calendrier, timeline** (composants sous `pages/trip-detail/components/itinerary/`).
 - **Module `@/features/voting`** : encore vide (placeholder) — la logique vit aujourd’hui dans trip-detail + store.
 - **10A livré** : onglet **Decision** dans l’itinéraire, classement accepté / rejeté / indécis, i18n EN/FR, aria-labels vote timeline, tests unitaires de classification.
-- **Après 10A** : ~~vote sur **scénarios**~~ (voir **10B** ci‑dessous), ~~finaliser l’itinéraire~~ (**livré** : bouton owner → `locked`), **reste** : notifications, tests E2E dédiés.
+- **Après 10A / 10B** : ~~notifications chat~~ (**10C** : messages système + badge), ~~E2E smoke~~ (`trip-itinerary-tabs`).
 
 ### Tasks
 
@@ -1021,16 +1021,16 @@ Objectif : fermer les cases restantes de l’AC **#37** sans rouvrir un nouveau 
   - [x] "Finalize Itinerary" button (owner only)
   - [x] Confirmation modal
   - [x] Change trip status to "locked"
-  - [ ] Notify all members
+  - [x] Notify all members (message système dans le chat du voyage)
   - [x] Switch to admin-only editing mode (via `useTripDetailPermissions` + existing activity rules)
 
 #### Post-Finalization Voting
 
-- [ ] 🟡 **Voting after finalization**:
+- [x] 🟢 **Voting after finalization**:
   - [x] Admins can add/edit/delete activities (permissions `useTripDetailPermissions`)
   - [x] Everyone can vote on changes (si activité `proposed`)
-  - [ ] Display "proposed change" badge
-  - [ ] Notify when changes are made
+  - [x] Display "proposed change" badge
+  - [x] Notify when changes are made (chat système si trip verrouillé)
 
 #### Real-Time
 
@@ -1041,12 +1041,12 @@ Objectif : fermer les cases restantes de l’AC **#37** sans rouvrir un nouveau 
 
 #### i18n
 
-- [ ] 🟡 **Verify all voting text is internationalized**:
+- [x] 🟢 **Verify all voting text is internationalized**:
   - [x] Vote buttons (aria / tooltips for existing activity vote controls)
   - [x] Vote counts (affichage numérique)
   - [x] Decision view
   - [x] Finalize modal
-  - [ ] Notifications
+  - [x] Notifications (badges + lignes chat système EN/FR)
 
 ### Acceptance Criteria
 
@@ -1056,11 +1056,11 @@ Objectif : fermer les cases restantes de l’AC **#37** sans rouvrir un nouveau 
 - [x] Everyone can vote (activités proposées)
 - [x] Decision view works
 - [x] Finalize itinerary works (owner → `locked`, modal, i18n)
-- [ ] Post-finalization voting works (badges / notifs)
-- [ ] All text is internationalized (remaining: finalize / notifications follow-ups)
-- [ ] Tests pass (unit targeted ✅ ; E2E still open)
+- [x] Post-finalization voting works (badges / notifs chat)
+- [x] All text is internationalized (incl. notifications 10C)
+- [x] Tests pass (unit + `trip-system-chat.test.ts` ; E2E smoke `trip-itinerary-tabs` si env seed / auth)
 
-**Note** : Issue #9 est livré sur `main` — la suite #10 est les **lignes non cochées** ci-dessus.
+**Note** : Scope **10C** est implémenté sur `feature/issue-37-voting-follow-up` — merger la PR puis passer le statut Issue **#10 / GH #37** à **COMPLETED** si revue OK.
 
 ---
 

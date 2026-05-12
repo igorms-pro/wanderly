@@ -1,5 +1,7 @@
 import { ChevronDown, ChevronUp, Pencil, Trash2 } from 'lucide-react';
+import { useStore } from '@/lib/store';
 import type { Activity } from '@/lib/types/database.types';
+import { ProposedChangeBadge } from '../ProposedChangeBadge';
 
 interface TimelineActivityHeaderProps {
   activity: Activity;
@@ -20,12 +22,19 @@ export function TimelineActivityHeader({
   onDelete,
   t,
 }: TimelineActivityHeaderProps) {
+  const tripLocked = useStore((s) => s.currentTrip?.status === 'locked');
+
   return (
     <div className="flex items-start justify-between gap-2">
       <button type="button" onClick={onToggleExpanded} className="min-w-0 flex-1 text-left">
-        <h4 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
-          {activity.title}
-        </h4>
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
+          <h4 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+            {activity.title}
+          </h4>
+          {t && (
+            <ProposedChangeBadge visible={!!tripLocked && activity.status === 'proposed'} t={t} />
+          )}
+        </div>
         {activity.place_name && (
           <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400 truncate">
             {activity.place_name}

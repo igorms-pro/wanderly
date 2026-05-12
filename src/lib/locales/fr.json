@@ -339,7 +339,12 @@
     "finalizeConfirm": "Finaliser",
     "finalizing": "Finalisation...",
     "finalizeSuccess": "Itinéraire finalisé. Le voyage est verrouillé.",
-    "finalizeError": "Impossible de finaliser l’itinéraire. Réessayez."
+    "finalizeError": "Impossible de finaliser l’itinéraire. Réessayez.",
+    "proposedChangeBadge": "Changement proposé",
+    "chatSystemTripFinalized": "L’itinéraire a été finalisé. Le voyage est verrouillé.",
+    "chatSystemActivityCreated": "Nouvelle activité proposée : « {{title}} ».",
+    "chatSystemActivityUpdated": "Une activité a été mise à jour : « {{title}} ».",
+    "chatSystemActivityRemoved": "Une activité a été retirée : « {{title}} »."
   },
   "activityModal": {
     "addActivity": "Ajouter une activité",
