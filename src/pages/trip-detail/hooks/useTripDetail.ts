@@ -60,6 +60,7 @@ function useTripDetailData() {
     has_children: false,
   }));
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isFinalizing, setIsFinalizing] = useState(false);
 
   useTripDetailRealtime(tripId ?? undefined);
   const { addToast } = useToast();
@@ -121,6 +122,20 @@ function useTripDetailData() {
     });
   }, [tripId, currentTrip, addToast, t, deleteTrip, navigate]);
 
+  const handleFinalizeItinerary = useCallback(async (): Promise<void> => {
+    if (!tripId || !currentTrip || currentTrip.status !== 'planned') return;
+    try {
+      setIsFinalizing(true);
+      await updateTrip(tripId, { status: 'locked' });
+      addToast({ variant: 'success', message: t('tripDetail.finalizeSuccess') });
+      await loadTripData();
+    } catch {
+      addToast({ variant: 'error', message: t('tripDetail.finalizeError') });
+    } finally {
+      setIsFinalizing(false);
+    }
+  }, [tripId, currentTrip, updateTrip, addToast, t, loadTripData]);
+
   useEffect(() => {
     if (!user) {
       navigate('/login');
@@ -153,6 +168,8 @@ function useTripDetailData() {
     refreshActivityParticipants,
     handleUpdateTrip,
     handleDeleteTrip,
+    handleFinalizeItinerary,
+    isFinalizing,
     activeTab,
     setActiveTab,
     showAddActivityModal,

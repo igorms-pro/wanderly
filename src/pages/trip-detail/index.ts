@@ -7,3 +7,4 @@ export { TripDetailItinerary } from './components/itinerary/TripDetailItinerary'
 export { TripDetailLoadingState } from './components/layout/TripDetailLoadingState';
 export { TripDetailErrorState } from './components/layout/TripDetailErrorState';
 export { TripDetailDeleteModal } from './components/layout/TripDetailDeleteModal';
+export { TripDetailFinalizeModal } from './components/layout/TripDetailFinalizeModal';

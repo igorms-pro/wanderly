@@ -81,6 +81,11 @@ export function useTripDetailPermissions({
     return role === 'owner' || role === 'editor' || role === 'moderator';
   }, [currentTrip, getUserRole, user]);
 
+  const canFinalizeItinerary = useCallback((): boolean => {
+    if (!user || !currentTrip) return false;
+    return user.id === currentTrip.owner_id && currentTrip.status === 'planned';
+  }, [currentTrip, user]);
+
   return {
     getUserRole,
     canEdit,
@@ -90,5 +95,6 @@ export function useTripDetailPermissions({
     canEditActivities,
     canDeleteActivities,
     canReorderActivities,
+    canFinalizeItinerary,
   };
 }

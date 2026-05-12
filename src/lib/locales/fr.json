@@ -330,7 +330,14 @@
     "searchPlaceholder": "Rechercher par nom, lieu ou description...",
     "searchNoResults": "Aucune activité ne correspond à votre recherche.",
     "reorderActivity": "Réordonner",
-    "dropActivityHere": "Déposer l'activité ici"
+    "dropActivityHere": "Déposer l'activité ici",
+    "finalizeItinerary": "Finaliser l’itinéraire",
+    "finalizeModalTitle": "Finaliser l’itinéraire",
+    "finalizeModalBody": "Cela verrouille le plan du voyage. Ensuite, seuls les admins du voyage peuvent ajouter, modifier ou supprimer des activités. Tout le monde peut encore voter sur les nouvelles propositions.",
+    "finalizeConfirm": "Finaliser",
+    "finalizing": "Finalisation...",
+    "finalizeSuccess": "Itinéraire finalisé. Le voyage est verrouillé.",
+    "finalizeError": "Impossible de finaliser l’itinéraire. Réessayez."
   },
   "activityModal": {
     "addActivity": "Ajouter une activité",

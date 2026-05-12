@@ -1002,12 +1002,12 @@ Implement voting system for activities and scenarios. Everyone can vote.
 
 #### Finalize Itinerary
 
-- [ ] 🔴 **Add finalize button**:
-  - [ ] "Finalize Itinerary" button (owner only)
-  - [ ] Confirmation modal
-  - [ ] Change trip status to "locked"
+- [x] 🟢 **Add finalize button**:
+  - [x] "Finalize Itinerary" button (owner only)
+  - [x] Confirmation modal
+  - [x] Change trip status to "locked"
   - [ ] Notify all members
-  - [ ] Switch to admin-only editing mode
+  - [x] Switch to admin-only editing mode (via `useTripDetailPermissions` + existing activity rules)
 
 #### Post-Finalization Voting
 
@@ -1030,7 +1030,7 @@ Implement voting system for activities and scenarios. Everyone can vote.
   - [x] Vote buttons (aria / tooltips for existing activity vote controls)
   - [x] Vote counts (affichage numérique)
   - [x] Decision view
-  - [ ] Finalize modal
+  - [x] Finalize modal
   - [ ] Notifications
 
 ### Acceptance Criteria
@@ -1040,7 +1040,7 @@ Implement voting system for activities and scenarios. Everyone can vote.
 - [x] Real-time vote updates work
 - [x] Everyone can vote (activités proposées)
 - [x] Decision view works
-- [ ] Finalize itinerary works
+- [x] Finalize itinerary works (owner → `locked`, modal, i18n)
 - [ ] Post-finalization voting works (badges / notifs)
 - [ ] All text is internationalized (remaining: finalize / notifications follow-ups)
 - [ ] Tests pass (unit targeted ✅ ; E2E still open)
