@@ -1066,7 +1066,7 @@ Objectif : fermer les cases restantes de l’AC **#37** sans rouvrir un nouveau 
 
 ## 🎯 Issue #11: Trip Detail Screen - Chat & Collaboration
 
-**Status:** 🟡 **PARTIALLY DONE** — **Présence + frappe** mergés dans **PR [#41](https://github.com/igorms-pro/voyagely/pull/41)** (GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40)) ; réactions / mentions / non-lus / `last_seen` restent ouverts  
+**Status:** 🟡 **PARTIALLY DONE** — **Présence + frappe** mergés dans **PR [#41](https://github.com/igorms-pro/voyagely/pull/41)** (GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40)) ; **indicateur de non-lus** sur l’onglet Chat (`localStorage` + comptage initial + Realtime `INSERT`) ; réactions / mentions / `last_seen` restent ouverts  
 **Priority:** HIGH  
 **Phase:** Screen 4d  
 **Dependencies:** Issue #8 (trip detail core)
@@ -1107,7 +1107,7 @@ Complete chat with presence, typing indicators, and collaboration features.
   - [ ] @mentions - optional
   - [ ] Reply to message - optional
   - [x] Message timestamps (déjà affichés sur chaque bulle — `TripChatMessageList`)
-  - [ ] Unread message counter
+  - [x] Unread message counter (badge onglet Chat — `localStorage` + Realtime INSERT, sans migration)
 
 #### i18n
 
@@ -1117,6 +1117,7 @@ Complete chat with presence, typing indicators, and collaboration features.
   - [x] Empty state
   - [x] Presence indicators (compteur + liste membres + points en ligne)
   - [x] Typing indicators
+  - [x] Tab unread badge + `aria-label` / libellé navigation onglets (`tripDetail.chatTabAriaUnread` avec `{{display}}`, `tripDetail.tabsNavAria`)
 
 ### Acceptance Criteria
 
@@ -1124,7 +1125,7 @@ Complete chat with presence, typing indicators, and collaboration features.
 - [x] Presence tracking works (MVP Realtime — sans last_seen persistant)
 - [x] Typing indicators work
 - [x] Real-time updates work
-- [x] Texte chat couvert par i18n (y compris présence / frappe) — extensions futures : réactions, mentions
+- [x] Texte chat couvert par i18n (y compris présence / frappe / badge non-lus onglet) — extensions futures : réactions, mentions
 - [x] Tests unitaires ciblés (presence helper) ; E2E chat optionnel
 
 ---

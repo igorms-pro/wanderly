@@ -24,6 +24,7 @@ import {
   TripDetailDeleteModal,
   TripDetailFinalizeModal,
 } from './trip-detail';
+import { useTripDetailChatUnreadCount } from './trip-detail/hooks/useTripDetailChatUnreadCount';
 
 function getTripBudgetFromConstraints(
   currentTrip: { constraints: unknown },
@@ -135,6 +136,8 @@ export default function TripDetailPage() {
     applyScenarioAsBase,
     importScenarioActivityToItinerary,
   } = useTripDetail();
+
+  const chatUnreadCount = useTripDetailChatUnreadCount(tripId, user?.id, activeTab);
 
   const handleAddMeToActivity = async (activityId: string) => {
     if (!user?.id) return;
@@ -258,7 +261,12 @@ export default function TripDetailPage() {
         t={t}
       />
 
-      <TripDetailTabs activeTab={activeTab} onTabChange={setActiveTab} t={t} />
+      <TripDetailTabs
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        t={t}
+        chatUnreadCount={chatUnreadCount}
+      />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
         {activeTab === 'weather' && (

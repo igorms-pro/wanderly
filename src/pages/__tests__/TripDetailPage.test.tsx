@@ -10,7 +10,34 @@ import type { Vote, Activity } from '../../lib/types/database.types';
 vi.mock('../../lib/store');
 vi.mock('../../lib/supabase', () => ({
   supabase: {
-    from: vi.fn(),
+    from: vi.fn((table: string) => {
+      if (table === 'messages') {
+        return {
+          select: vi.fn(() => ({
+            eq: vi.fn().mockReturnThis(),
+            is: vi.fn().mockReturnThis(),
+            gt: vi.fn().mockReturnThis(),
+            or: vi.fn(() => Promise.resolve({ count: 0, error: null })),
+          })),
+        };
+      }
+      return {
+        select: vi.fn(() => ({
+          eq: vi.fn(() => Promise.resolve({ data: [], error: null })),
+        })),
+        insert: vi.fn(() => Promise.resolve({ error: null })),
+        delete: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            eq: vi.fn(() => Promise.resolve({ error: null })),
+          })),
+        })),
+      };
+    }),
+    channel: vi.fn(() => ({
+      on: vi.fn().mockReturnThis(),
+      subscribe: vi.fn(),
+    })),
+    removeChannel: vi.fn(() => Promise.resolve()),
     auth: {
       getUser: vi.fn(),
     },

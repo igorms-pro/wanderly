@@ -246,6 +246,8 @@
     "weather": "Météo",
     "explore": "Explorer",
     "chat": "Chat",
+    "chatTabAriaUnread": "Chat, {{display}} non lus",
+    "tabsNavAria": "Navigation secondaire du voyage",
     "addActivity": "Ajouter une activité",
     "noActivitiesYet": "Aucune activité dans cet itinéraire pour le moment.",
     "addFirstActivity": "Ajouter votre première activité",
