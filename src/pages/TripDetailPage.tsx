@@ -328,7 +328,14 @@ export default function TripDetailPage() {
             }}
           />
         )}
-        {activeTab === 'chat' && tripId && <TripChat tripId={tripId} userRole={getUserRole()} />}
+        {activeTab === 'chat' && tripId && (
+          <TripChat
+            tripId={tripId}
+            userRole={getUserRole()}
+            tripMembers={tripMembers}
+            memberProfiles={memberProfiles}
+          />
+        )}
       </main>
 
       {showAddActivityModal && tripId && (
