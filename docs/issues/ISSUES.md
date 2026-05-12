@@ -2,7 +2,7 @@
 
 > Goal: Build a complete SaaS travel planning platform with AI-powered itineraries, real-time collaboration, and seamless user experience.
 
-**Last Updated:** May 12, 2026
+**Last Updated:** May 13, 2026
 
 ### État repo / code (référence)
 
@@ -1066,7 +1066,7 @@ Objectif : fermer les cases restantes de l’AC **#37** sans rouvrir un nouveau 
 
 ## 🎯 Issue #11: Trip Detail Screen - Chat & Collaboration
 
-**Status:** 🟡 **PARTIALLY DONE** — **Présence + frappe** mergés dans **PR [#41](https://github.com/igorms-pro/voyagely/pull/41)** (GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40)) ; **indicateur de non-lus** sur l’onglet Chat (`localStorage` + comptage initial + Realtime `INSERT`) ; réactions / mentions / `last_seen` restent ouverts  
+**Status:** 🟢 **MVP (code sur branche `feature/issue-11-chat-unread-tab`)** — badge **non-lus** onglet Chat, **réactions** (`017_message_reactions.sql`), **@mentions**, typings Postgrest (`Relationships` + table `activity_participants`) ; chat de base + présence / frappe déjà sur `main` (GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40) / PR [#41](https://github.com/igorms-pro/voyagely/pull/41) si applicable). **Suite :** ouvrir / merger la PR Issue #11 → `main`. **Hors MVP / optionnel :** `last_seen` SQL, **reply** threads, non-lus multi-device (`last_read`).  
 **Priority:** HIGH  
 **Phase:** Screen 4d  
 **Dependencies:** Issue #8 (trip detail core)
@@ -1361,7 +1361,8 @@ Add trip templates and sharing capabilities.
 ### En cours / décisions
 
 - [ ] **PR #36** : merger les refactors branche `35-trip-detail-screen---activities-scenarios-v2` dans `main` (ou fermer / rebaser si obsolète).
-- [x] 🟡 **Issue #10** : **en cours** — branche `feature/issue-10-voting-system`, GitHub [#37](https://github.com/igorms-pro/voyagely/issues/37) (scénarios, décision, finaliser, i18n, tests).
+- [x] 🟢 **Issue #10** : **COMPLETED** sur `main` — PR [#38](https://github.com/igorms-pro/voyagely/pull/38) + [#39](https://github.com/igorms-pro/voyagely/pull/39) ; GitHub [#37](https://github.com/igorms-pro/voyagely/issues/37) fermée.
+- [x] 🟡 **Issue #11 (chat)** : **PR à ouvrir** depuis `feature/issue-11-chat-unread-tab` (non-lus + réactions + mentions + fix types) — merger sur `main` pour clôturer côté doc.
 - [x] 🟢 **Issues #0–#9** : fondations + dashboard + **trip detail core (#8)** + **activités / scénarios (#9)** sur `main`.
 
 ---
@@ -1430,8 +1431,8 @@ _Will be tracked here as discovered_
 - **Issue #7 (Dashboard)**: 🟢 100% - Completed (constraints, design overhaul, quick actions)
 - **Issue #8 (Trip Detail Core)**: 🟢 100% - ✅ COMPLETED (MVP)
 - **Issue #9 (Activities & Scenarios)**: 🟢 100% - ✅ COMPLETED sur `main` (PR #34)
-- **Issue #10 (Voting System)**: 🟡 **IN PROGRESS** — branche `feature/issue-10-voting-system`, GitHub [#37](https://github.com/igorms-pro/voyagely/issues/37) (reste scénarios / décision / finaliser / i18n / E2E)
-- **Issue #11 (Chat)**: 🟡 50% - Partially Done
+- **Issue #10 (Voting System)**: 🟢 **COMPLETED** sur `main` — PR [#38](https://github.com/igorms-pro/voyagely/pull/38) · [#39](https://github.com/igorms-pro/voyagely/pull/39) ; GitHub [#37](https://github.com/igorms-pro/voyagely/issues/37) fermée
+- **Issue #11 (Chat)**: 🟡 **PR en attente** — code sur `feature/issue-11-chat-unread-tab` (non-lus + réactions + mentions + typings) ; merger → 🟢 MVP
 - **Issue #12 (AI Generation)**: 🟡 ~35% - Partially Done (service + génération dans l’app ; manque durcissement & scope doc entier)
 - **Issue #13 (Context)**: 🔴 10% - Not Started
 
@@ -1441,11 +1442,11 @@ _Will be tracked here as discovered_
 - **Issue #15 (PWA/Offline)**: 🔴 0% - Phase 2
 - **Issue #16 (Templates)**: 🔴 0% - Phase 2
 
-**Overall MVP Completion: ~62%** (#8–#9 fermées ; suite : **#10** voting produit complet, puis chat enrichi, etc.)
+**Overall MVP Completion: ~68%** (#8–#11 code livré ; **#11** en attente merge PR ; suite : **#12** IA durcie / UX, puis **#13**)
 
 ---
 
-**Last Updated:** May 12, 2026  
+**Last Updated:** May 13, 2026  
 **Next Review:** Weekly
 
 **CRITICAL PATH**:
@@ -1455,6 +1456,6 @@ _Will be tracked here as discovered_
 3. Complete Issue #3 (Architecture doc) ✅
 4. Complete Issue #3b (Codebase reorganization – feature-based) ✅
 5. Complete Issue #4 (Design System) ✅
-6. Screens **#5 → #9** ✅ sur `main` (#8 trip detail core, #9 activités & scénarios) — suite : **#10** (reste scénarios / décision / finaliser), puis #11+.
+6. Screens **#5 → #10** ✅ sur `main` — **#11** chat : branche prête, **ouvrir PR + merge** ; puis **#12** (IA), **#13** (context).
 
-**BLOCKER** : ~~Issues #8–#9~~ — **terminées / livrées sur `main`**. Prochain focus : **compléter Issue #10** (parties non livrées) et merger **PR #36** si toujours pertinente.
+**BLOCKER** : ~~Issues #8–#10~~ — **#11** : merger la PR chat depuis `feature/issue-11-chat-unread-tab`. **PR #36** (refactors) — non bloquant, traiter ou fermer.
