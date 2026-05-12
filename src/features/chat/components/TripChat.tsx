@@ -1,6 +1,11 @@
 import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
+import type { TripMember } from '@/lib/types/database.types';
+
 import { useTripChat } from '../hooks/useTripChat';
+import { useTripChatCollaboration } from '../hooks/useTripChatCollaboration';
+import type { MemberProfileLite } from '../hooks/useTripChatCollaboration';
 import { TripChatHeader } from './TripChatHeader';
 import { TripChatMessageList } from './TripChatMessageList';
 import { TripChatInput } from './TripChatInput';
@@ -8,9 +13,16 @@ import { TripChatInput } from './TripChatInput';
 interface TripChatProps {
   tripId: string;
   userRole?: 'owner' | 'editor' | 'viewer' | 'moderator' | null;
+  tripMembers?: TripMember[];
+  memberProfiles?: MemberProfileLite;
 }
 
-export default function TripChat({ tripId, userRole }: TripChatProps) {
+export default function TripChat({
+  tripId,
+  userRole,
+  tripMembers = [],
+  memberProfiles = {},
+}: TripChatProps) {
   const { t } = useTranslation();
   const {
     loading,
@@ -32,23 +44,39 @@ export default function TripChat({ tripId, userRole }: TripChatProps) {
     user,
   } = useTripChat({ tripId, userRole });
 
+  const displayName = user?.display_name?.trim() || user?.email?.split('@')[0]?.trim() || 'Member';
+
+  const { onlineUserIds, onlineCount, memberPresenceRows, typingText, notifyTyping } =
+    useTripChatCollaboration({
+      tripId,
+      userId: user?.id,
+      userDisplayName: displayName,
+      tripMembers,
+      memberProfiles,
+    });
+
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm p-8 text-center">
         <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-600" />
-        <p className="mt-4 text-gray-600">{t('chat.loadingChat')}</p>
+        <p className="mt-4 text-gray-600 dark:text-gray-300">{t('chat.loadingChat')}</p>
       </div>
     );
   }
 
   return (
     <div
-      className="bg-white rounded-2xl shadow-sm overflow-hidden flex flex-col"
+      className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm overflow-hidden flex flex-col border border-gray-100 dark:border-gray-800"
       style={{ height: '600px' }}
     >
-      <TripChatHeader />
+      <TripChatHeader
+        onlineCount={onlineCount}
+        memberPresenceRows={memberPresenceRows}
+        typingText={typingText}
+      />
       <TripChatMessageList
         messages={messagesWithProfiles}
+        onlineUserIds={onlineUserIds}
         currentUserId={user?.id}
         editingMessageId={editingMessageId}
         editText={editText}
@@ -65,6 +93,7 @@ export default function TripChat({ tripId, userRole }: TripChatProps) {
         messageText={messageText}
         sending={sending}
         onChangeMessageText={setMessageText}
+        onDraftActivity={notifyTyping}
         onSubmit={handleSubmit}
       />
     </div>

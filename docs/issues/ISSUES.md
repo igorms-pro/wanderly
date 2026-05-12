@@ -1066,7 +1066,7 @@ Objectif : fermer les cases restantes de l’AC **#37** sans rouvrir un nouveau 
 
 ## 🎯 Issue #11: Trip Detail Screen - Chat & Collaboration
 
-**Status:** 🟡 **PARTIALLY DONE**  
+**Status:** 🟡 **PARTIALLY DONE** — **Présence + frappe** livrés sous **GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40)** (PR à venir sur `feature/issue-40-chat-presence-typing`) ; réactions / mentions / non-lus restent ouverts  
 **Priority:** HIGH  
 **Phase:** Screen 4d  
 **Dependencies:** Issue #8 (trip detail core)
@@ -1087,18 +1087,18 @@ Complete chat with presence, typing indicators, and collaboration features.
 
 #### Presence Tracking
 
-- [ ] 🔴 **Add presence tracking**:
-  - [ ] Show who's online in trip
-  - [ ] Online/offline indicator on avatars
-  - [ ] Last seen timestamps
-  - [ ] Active users count
+- [x] 🟢 **Add presence tracking** (MVP — Supabase Realtime Presence, pas de `last_seen` SQL) :
+  - [x] Show who's online in trip (pastilles + compteur dans l’en-tête chat)
+  - [x] Online/offline indicator on avatars (messages des autres)
+  - [ ] Last seen timestamps (hors scope MVP — persistance profil / table dédiée)
+  - [x] Active users count (compteur « membres en ligne »)
 
 #### Typing Indicators
 
-- [ ] 🔴 **Add typing indicators**:
-  - [ ] Broadcast typing state
-  - [ ] Display "User is typing..."
-  - [ ] Debounce typing events
+- [x] 🟢 **Add typing indicators**:
+  - [x] Broadcast typing state (canal Realtime `trip:{id}:chat-collab`, debounce ~450 ms)
+  - [x] Display "User is typing..." (ligne sous le titre du chat, `aria-live="polite"`)
+  - [x] Debounce typing events
 
 #### Enhanced Chat Features
 
@@ -1106,26 +1106,26 @@ Complete chat with presence, typing indicators, and collaboration features.
   - [ ] Message reactions (👍 👎 ❤️ 😂) - optional
   - [ ] @mentions - optional
   - [ ] Reply to message - optional
-  - [ ] Message timestamps
+  - [x] Message timestamps (déjà affichés sur chaque bulle — `TripChatMessageList`)
   - [ ] Unread message counter
 
 #### i18n
 
-- [ ] 🔴 **Verify all chat text is internationalized**:
-  - [ ] Input placeholder
-  - [ ] Send button
-  - [ ] Empty state
-  - [ ] Presence indicators
-  - [ ] Typing indicators
+- [x] 🟡 **Verify all chat text is internationalized**:
+  - [x] Input placeholder
+  - [x] Send button (`aria-label`)
+  - [x] Empty state
+  - [x] Presence indicators (compteur + liste membres + points en ligne)
+  - [x] Typing indicators
 
 ### Acceptance Criteria
 
-- [ ] Chat works fully
-- [ ] Presence tracking works
-- [ ] Typing indicators work
-- [ ] Real-time updates work
-- [ ] All text is internationalized
-- [ ] Tests pass (unit + E2E)
+- [x] Chat works fully (envoi / réception / édition / suppression, temps réel messages)
+- [x] Presence tracking works (MVP Realtime — sans last_seen persistant)
+- [x] Typing indicators work
+- [x] Real-time updates work
+- [x] Texte chat couvert par i18n (y compris présence / frappe) — extensions futures : réactions, mentions
+- [x] Tests unitaires ciblés (presence helper) ; E2E chat optionnel
 
 ---
 

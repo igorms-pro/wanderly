@@ -176,7 +176,12 @@
     "unknownUser": "Inconnu",
     "confirmDeleteMessage": "Êtes-vous sûr de vouloir supprimer ce message ?",
     "editMessage": "Modifier le message",
-    "deleteMessage": "Supprimer le message"
+    "deleteMessage": "Supprimer le message",
+    "onlineCount_one": "{{count}} membre en ligne",
+    "onlineCount_other": "{{count}} membres en ligne",
+    "userTyping": "{{name}} est en train d’écrire…",
+    "usersTyping": "{{names}} sont en train d’écrire…",
+    "memberPresenceListLabel": "Membres du voyage et statut en ligne"
   },
   "weather": {
     "current": "Météo actuelle",

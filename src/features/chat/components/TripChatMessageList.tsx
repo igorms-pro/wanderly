@@ -9,6 +9,7 @@ import { SystemChatNotice } from './SystemChatNotice';
 
 interface TripChatMessageListProps {
   messages: MessageWithProfile[];
+  onlineUserIds?: Set<string>;
   currentUserId?: string;
   editingMessageId: string | null;
   editText: string;
@@ -24,6 +25,7 @@ interface TripChatMessageListProps {
 
 export function TripChatMessageList({
   messages,
+  onlineUserIds,
   currentUserId,
   editingMessageId,
   editText,
@@ -82,15 +84,23 @@ export function TripChatMessageList({
             <div className={`max-w-[70%] ${isOwnMessage ? 'order-2' : 'order-1'}`}>
               {!isOwnMessage && (
                 <div className="flex items-center mb-1">
-                  <img
-                    src={
-                      message.sender_avatar ||
-                      `https://api.dicebear.com/7.x/avataaars/svg?seed=${message.user_id}`
-                    }
-                    alt={t('chat.avatarAlt')}
-                    className="w-6 h-6 rounded-full mr-2"
-                  />
-                  <span className="text-xs font-medium text-gray-600">
+                  <span className="relative mr-2 inline-block">
+                    <img
+                      src={
+                        message.sender_avatar ||
+                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${message.user_id}`
+                      }
+                      alt={t('chat.avatarAlt')}
+                      className="w-6 h-6 rounded-full"
+                    />
+                    {onlineUserIds?.has(message.user_id) ? (
+                      <span
+                        className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500 dark:border-gray-900"
+                        aria-label={t('chat.online')}
+                      />
+                    ) : null}
+                  </span>
+                  <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
                     {message.sender_name || t('chat.unknownUser')}
                   </span>
                 </div>
