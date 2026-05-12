@@ -1066,7 +1066,7 @@ Objectif : fermer les cases restantes de l’AC **#37** sans rouvrir un nouveau 
 
 ## 🎯 Issue #11: Trip Detail Screen - Chat & Collaboration
 
-**Status:** 🟡 **PARTIALLY DONE** — **Présence + frappe** livrés sous **GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40)** (PR à venir sur `feature/issue-40-chat-presence-typing`) ; réactions / mentions / non-lus restent ouverts  
+**Status:** 🟡 **PARTIALLY DONE** — **Présence + frappe** mergés dans **PR [#41](https://github.com/igorms-pro/voyagely/pull/41)** (GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40)) ; réactions / mentions / non-lus / `last_seen` restent ouverts  
 **Priority:** HIGH  
 **Phase:** Screen 4d  
 **Dependencies:** Issue #8 (trip detail core)
