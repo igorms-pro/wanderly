@@ -935,10 +935,10 @@ Implement activities CRUD (truth = itinerary actif) + AI scenario proposals (bas
 
 ## 🎯 Issue #10: Trip Detail Screen - Voting System
 
-**Status:** 🟡 **IN PROGRESS** — PR **#38** mergée ; **suite (10C)** sur la branche ci‑dessous  
+**Status:** 🟢 **COMPLETED** — PR [#38](https://github.com/igorms-pro/voyagely/pull/38) (10A/10B) + PR [#39](https://github.com/igorms-pro/voyagely/pull/39) (10C) mergées sur `main`  
 **GitHub:** [#37](https://github.com/igorms-pro/voyagely/issues/37)  
-**Branch:** `feature/issue-37-voting-follow-up`  
-**PR mergée (lot précédent):** [#38](https://github.com/igorms-pro/voyagely/pull/38)  
+**Branch:** ~~`feature/issue-37-voting-follow-up`~~ (supprimée après merge PR #39)  
+**PRs mergées:** [#38](https://github.com/igorms-pro/voyagely/pull/38) · [#39](https://github.com/igorms-pro/voyagely/pull/39)  
 **Previous merged:** PR **#34** (Issue doc #9 sur `main`). **PR #36** (refactors `35-…`) ouverte — ack **non bloquant** pour #10.  
 **Priority:** HIGH  
 **Phase:** Screen 4c  
@@ -960,7 +960,7 @@ Implement voting system for activities and scenarios. Everyone can vote.
 - [x] **Finalize itinerary** : owner, trip `planned` → `locked` (modal + toast + reload).
 - [x] **Vote sur scénarios** : table `itinerary_votes`, UI liste scénarios, realtime, badge « Leading », EN/FR.
 
-### Scope 10C — Suite (branche `feature/issue-37-voting-follow-up`, PR à venir)
+### Scope 10C — Suite (PR [#39](https://github.com/igorms-pro/voyagely/pull/39) mergée)
 
 Objectif : fermer les cases restantes de l’AC **#37** sans rouvrir un nouveau ticket GitHub.
 
@@ -1051,7 +1051,7 @@ Objectif : fermer les cases restantes de l’AC **#37** sans rouvrir un nouveau 
 ### Acceptance Criteria
 
 - [x] Voting works on activities
-- [x] Voting works on scenarios (livré PR #38 — à garder cohérent avec les tests E2E 10C)
+- [x] Voting works on scenarios (PR #38 + migration `016_itinerary_votes`)
 - [x] Real-time vote updates work
 - [x] Everyone can vote (activités proposées)
 - [x] Decision view works
@@ -1060,7 +1060,7 @@ Objectif : fermer les cases restantes de l’AC **#37** sans rouvrir un nouveau 
 - [x] All text is internationalized (incl. notifications 10C)
 - [x] Tests pass (unit + `trip-system-chat.test.ts` ; E2E smoke `trip-itinerary-tabs` si env seed / auth)
 
-**Note** : Scope **10C** est implémenté sur `feature/issue-37-voting-follow-up` — merger la PR puis passer le statut Issue **#10 / GH #37** à **COMPLETED** si revue OK.
+**Note** : Fermer **GitHub #37** côté repo si ce n’est pas fait automatiquement au merge.
 
 ---
 
