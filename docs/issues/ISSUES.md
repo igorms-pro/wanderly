@@ -935,9 +935,10 @@ Implement activities CRUD (truth = itinerary actif) + AI scenario proposals (bas
 
 ## 🎯 Issue #10: Trip Detail Screen - Voting System
 
-**Status:** 🟡 **IN PROGRESS** — vote **activités** déjà sur `main` ; cette issue couvre la **suite** (scénarios, décision, finaliser, i18n, tests)  
+**Status:** 🟡 **IN PROGRESS** — PR **#38** mergée sur `main` (décision + finaliser + votes scénarios) ; reste notifs / E2E / polish selon AC  
 **GitHub:** [#37](https://github.com/igorms-pro/voyagely/issues/37)  
-**Branch:** `feature/issue-10-voting-system`  
+**Branch:** ~~`feature/issue-10-voting-system`~~ (supprimée après merge)  
+**PR mergée:** [#38](https://github.com/igorms-pro/voyagely/pull/38)  
 **Previous merged:** PR **#34** (Issue doc #9 sur `main`). **PR #36** (refactors `35-…`) ouverte — ack **non bloquant** pour #10.  
 **Priority:** HIGH  
 **Phase:** Screen 4c  
