@@ -935,10 +935,10 @@ Implement activities CRUD (truth = itinerary actif) + AI scenario proposals (bas
 
 ## 🎯 Issue #10: Trip Detail Screen - Voting System
 
-**Status:** 🟡 **IN PROGRESS** — PR **#38** mergée sur `main` (décision + finaliser + votes scénarios) ; reste notifs / E2E / polish selon AC  
+**Status:** 🟡 **IN PROGRESS** — PR **#38** mergée ; **suite (10C)** sur la branche ci‑dessous  
 **GitHub:** [#37](https://github.com/igorms-pro/voyagely/issues/37)  
-**Branch:** ~~`feature/issue-10-voting-system`~~ (supprimée après merge)  
-**PR mergée:** [#38](https://github.com/igorms-pro/voyagely/pull/38)  
+**Branch:** `feature/issue-37-voting-follow-up`  
+**PR mergée (lot précédent):** [#38](https://github.com/igorms-pro/voyagely/pull/38)  
 **Previous merged:** PR **#34** (Issue doc #9 sur `main`). **PR #36** (refactors `35-…`) ouverte — ack **non bloquant** pour #10.  
 **Priority:** HIGH  
 **Phase:** Screen 4c  
@@ -959,6 +959,16 @@ Implement voting system for activities and scenarios. Everyone can vote.
 
 - [x] **Finalize itinerary** : owner, trip `planned` → `locked` (modal + toast + reload).
 - [x] **Vote sur scénarios** : table `itinerary_votes`, UI liste scénarios, realtime, badge « Leading », EN/FR.
+
+### Scope 10C — Suite (branche `feature/issue-37-voting-follow-up`, PR à venir)
+
+Objectif : fermer les cases restantes de l’AC **#37** sans rouvrir un nouveau ticket GitHub.
+
+- [ ] **E2E** : au minimum un flux smoke « trip detail → itinéraire → vote activité » (et idéalement scénario si données dispo) — étendre / stabiliser `e2e/activities-votes.spec.ts` ou nouveau spec dédié.
+- [ ] **Notif membres à la finalisation** : message **système** dans le chat du trip (`messages.message_type = 'system'`) ou mécanisme équivalent documenté — pas d’email obligatoire en MVP.
+- [ ] **Post-verrouillage** : badge « changement proposé » sur les activités `proposed` quand `trip.status === 'locked'` (i18n EN/FR).
+- [ ] **Notif changements** (MVP) : même canal que ci-dessus (message système) quand une activité est ajoutée/modifiée après lock par un admin — ou décision produit : toast seulement pour l’auteur (à trancher dans la PR).
+- [ ] **AC / doc** : cocher « Voting works on scenarios » ; ajuster la ligne i18n « notifications » quand les chaînes existent.
 
 ### État code (mai 2026)
 
@@ -1041,7 +1051,7 @@ Implement voting system for activities and scenarios. Everyone can vote.
 ### Acceptance Criteria
 
 - [x] Voting works on activities
-- [ ] Voting works on scenarios
+- [x] Voting works on scenarios (livré PR #38 — à garder cohérent avec les tests E2E 10C)
 - [x] Real-time vote updates work
 - [x] Everyone can vote (activités proposées)
 - [x] Decision view works
