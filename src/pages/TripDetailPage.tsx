@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/contexts/ToastContext';
 import WeatherWidget from '@/components/WeatherWidget';
 import NearbyPlaces from '@/components/NearbyPlaces';
 import { TripChat } from '@/features/chat';
@@ -8,6 +9,7 @@ import {
   CreateActivityModal,
   EditActivityModal,
 } from '@/features/activities';
+import { AiScenarioGenerationError } from '@/lib/ai/aiScenarioGenerationError';
 import { useStore } from '@/lib/store';
 import { supabase } from '@/lib/supabase';
 import { DashboardHeader } from '@/pages/dashboard/DashboardHeader';
@@ -61,6 +63,7 @@ function getConstraintsSummary(currentTrip: { constraints: unknown }) {
 
 export default function TripDetailPage() {
   const navigate = useNavigate();
+  const { addToast } = useToast();
   const signOut = useStore((s) => s.signOut);
   const deleteActivity = useStore((s) => s.deleteActivity);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -316,7 +319,16 @@ export default function TripDetailPage() {
             canManageScenarios={canManageScenarios()}
             onGenerateAiScenario={async () => {
               if (!currentTrip) return;
-              await generateAiScenario(currentTrip, tripMembers.length, locale);
+              try {
+                await generateAiScenario(currentTrip, tripMembers.length, locale);
+                addToast({ variant: 'success', message: t('tripDetail.aiGenerateSuccess') });
+              } catch (e) {
+                if (e instanceof AiScenarioGenerationError) {
+                  addToast({ variant: 'error', message: t(e.i18nKey()) });
+                  return;
+                }
+                addToast({ variant: 'error', message: t('tripDetail.aiGenerateErrorGeneric') });
+              }
             }}
             onCreateScenario={createScenario}
             onDeleteScenario={deleteScenario}

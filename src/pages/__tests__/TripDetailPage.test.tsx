@@ -21,6 +21,44 @@ vi.mock('../../lib/supabase', () => ({
           })),
         };
       }
+      if (table === 'itineraries') {
+        const headCountChain = {
+          eq: vi.fn().mockReturnThis(),
+          is: vi.fn(() => Promise.resolve({ count: 0, error: null })),
+        };
+        const listChain = {
+          eq: vi.fn().mockReturnThis(),
+          is: vi.fn(() => Promise.resolve({ data: [], error: null })),
+        };
+        return {
+          select: vi.fn((_cols?: string, opts?: { count?: string; head?: boolean }) => {
+            if (opts?.count === 'exact' && opts?.head) return headCountChain;
+            return listChain;
+          }),
+          insert: vi.fn(() => ({
+            select: vi.fn(() => ({
+              single: vi.fn(() =>
+                Promise.resolve({
+                  data: {
+                    id: 'it-new',
+                    trip_id: 'trip-1',
+                    generated_by_ai: true,
+                    title: 'AI',
+                  },
+                  error: null,
+                }),
+              ),
+            })),
+          })),
+        };
+      }
+      if (table === 'itinerary_days') {
+        return {
+          insert: vi.fn(() => ({
+            select: vi.fn(() => Promise.resolve({ data: [], error: null })),
+          })),
+        };
+      }
       return {
         select: vi.fn(() => ({
           eq: vi.fn(() => Promise.resolve({ data: [], error: null })),

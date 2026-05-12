@@ -1,8 +1,10 @@
-import type { Database, Trip, TripConstraints } from '../types/database.types';
-import { supabase } from '../supabase';
-import { captureFeatureError } from '../errorHandling';
-import type { AppState, SetState, GetState } from './types';
+import { AiScenarioGenerationError } from '../ai/aiScenarioGenerationError';
+import { MAX_AI_SCENARIOS_PER_TRIP } from '../ai/aiScenarioLimits';
 import { generateItineraryFromConstraints } from '../ai/openai-itinerary-service';
+import { captureFeatureError } from '../errorHandling';
+import { supabase } from '../supabase';
+import type { Database, Trip, TripConstraints } from '../types/database.types';
+import type { AppState, GetState, SetState } from './types';
 import type { TripScenario } from './tripDetailSlice.scenarios';
 
 type ItineraryRow = Database['public']['Tables']['itineraries']['Row'];
@@ -27,6 +29,21 @@ export function createTripDetailAiScenarioOpsSlice(
   return {
     generateAiScenario: async (trip, membersCount, locale) => {
       try {
+        const { count, error: quotaErr } = await supabase
+          .from('itineraries')
+          .select('id', { head: true, count: 'exact' })
+          .eq('trip_id', trip.id)
+          .eq('generated_by_ai', true)
+          .is('deleted_at', null);
+
+        if (quotaErr) {
+          captureFeatureError(quotaErr, 'ai_scenario_quota_count', { trip_id: trip.id });
+          throw new AiScenarioGenerationError('unknown');
+        }
+        if ((count ?? 0) >= MAX_AI_SCENARIOS_PER_TRIP) {
+          throw new AiScenarioGenerationError('quota_exceeded');
+        }
+
         const constraints = parseTripConstraints(trip.constraints);
 
         const interests =
@@ -116,9 +133,13 @@ export function createTripDetailAiScenarioOpsSlice(
 
         await get().loadScenarios(trip.id);
       } catch (err) {
-        captureFeatureError(err, 'ai_scenario_generate', {
-          trip_id: trip.id,
-        });
+        const skipSentry =
+          err instanceof AiScenarioGenerationError && err.code === 'quota_exceeded';
+        if (!skipSentry) {
+          captureFeatureError(err, 'ai_scenario_generate', {
+            trip_id: trip.id,
+          });
+        }
         throw err;
       }
     },

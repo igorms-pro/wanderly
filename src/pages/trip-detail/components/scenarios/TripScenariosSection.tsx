@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { MAX_AI_SCENARIOS_PER_TRIP } from '@/lib/ai/aiScenarioLimits';
 import type { TripScenario } from '@/lib/store/tripDetailSlice.scenarios';
 import type { Activity } from '@/lib/types/database.types';
 import { TripScenarioList } from './TripScenarioList';
@@ -23,6 +24,8 @@ interface TripScenariosSectionProps {
   onUseScenarioAsBase: (scenarioItineraryId: string) => Promise<void>;
   onAddScenarioActivityToItinerary: (date: string, activity: Activity) => Promise<void>;
   t: (key: string, options?: Record<string, unknown>) => string;
+  constraintsHintLevel?: 'weak' | 'ok';
+  aiScenarioCount?: number;
 }
 
 export function TripScenariosSection({
@@ -42,6 +45,8 @@ export function TripScenariosSection({
   onUseScenarioAsBase,
   onAddScenarioActivityToItinerary,
   t,
+  constraintsHintLevel = 'ok',
+  aiScenarioCount = 0,
 }: TripScenariosSectionProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [previewScenarioId, setPreviewScenarioId] = useState<string | null>(null);
@@ -60,7 +65,7 @@ export function TripScenariosSection({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              disabled={isGenerating}
+              disabled={isGenerating || aiScenarioCount >= MAX_AI_SCENARIOS_PER_TRIP}
               onClick={async () => {
                 setIsGenerating(true);
                 try {
@@ -88,6 +93,42 @@ export function TripScenariosSection({
       <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
         {t('tripDetail.scenariosSectionDescription')}
       </p>
+
+      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+        {t('tripDetail.aiQuotaUsage', {
+          used: aiScenarioCount,
+          max: MAX_AI_SCENARIOS_PER_TRIP,
+        })}
+      </p>
+
+      {constraintsHintLevel === 'weak' && canCreate && (
+        <div
+          className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
+          role="status"
+        >
+          <p className="font-medium">{t('tripDetail.aiConstraintsHintTitle')}</p>
+          <p className="mt-1 opacity-90">{t('tripDetail.aiConstraintsHintBody')}</p>
+        </div>
+      )}
+
+      {isGenerating && (
+        <div
+          className="mb-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-700 dark:bg-gray-800/60"
+          role="status"
+          aria-live="polite"
+          aria-busy="true"
+        >
+          <p className="text-xs font-medium text-gray-800 dark:text-gray-200">
+            {t('tripDetail.aiGeneratingProgress')}
+          </p>
+          <div
+            className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700"
+            aria-hidden
+          >
+            <div className="h-full w-2/5 animate-pulse rounded-full bg-orange-500" />
+          </div>
+        </div>
+      )}
 
       <TripScenarioList
         scenarios={scenarios}

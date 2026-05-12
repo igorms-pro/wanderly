@@ -1,12 +1,14 @@
 import { z } from 'zod';
 
 import { Analytics } from '../analytics';
+import { AiScenarioGenerationError } from './aiScenarioGenerationError';
 import { callOpenAIChat, OpenAIError, parseJSONResponse } from './openai-client';
 import {
   buildItineraryPrompt,
   buildActivitySuggestionsPrompt,
   ITINERARY_PROMPT_VERSION,
 } from './openai-prompts';
+import { extractHttpStatus } from './openaiRetry';
 
 export interface ItineraryRequest {
   destination: string;
@@ -86,6 +88,21 @@ const isDemoApiKey = () => {
   return !key || key === 'dsdsadas';
 };
 
+function mapItineraryFailureToAiScenarioError(error: unknown): AiScenarioGenerationError {
+  if (error instanceof AiScenarioGenerationError) return error;
+  if (error instanceof OpenAIError) {
+    if (error.code === 'config_missing') return new AiScenarioGenerationError('openai_config');
+    if (error.code === 'invalid_json') return new AiScenarioGenerationError('openai_parse');
+    const status = extractHttpStatus(error.cause);
+    if (status === 401 || status === 403) return new AiScenarioGenerationError('openai_auth');
+    if (status === 429) return new AiScenarioGenerationError('openai_rate_limit');
+    if (status !== undefined && status >= 500)
+      return new AiScenarioGenerationError('openai_server');
+    if (error.code === 'request_failed') return new AiScenarioGenerationError('openai_network');
+  }
+  return new AiScenarioGenerationError('unknown');
+}
+
 export async function generateItineraryFromConstraints(
   params: GenerateItineraryParams,
 ): Promise<GeneratedItinerary> {
@@ -132,16 +149,16 @@ export async function generateItineraryFromConstraints(
       console.error('[OpenAI] Error generating itinerary from constraints:', error);
     }
 
-    if (error instanceof OpenAIError && error.code === 'config_missing') {
-      return generateMockItinerary(params.request);
-    }
-
     Analytics.trackError(
       error instanceof Error ? error.message : 'Unknown itinerary generation error',
       'openai_itinerary_generation',
     );
 
-    return generateMockItinerary(params.request);
+    if (import.meta.env.DEV) {
+      return generateMockItinerary(params.request);
+    }
+
+    throw mapItineraryFailureToAiScenarioError(error);
   }
 }
 
@@ -153,6 +170,10 @@ export interface GenerateActivitySuggestionsParams {
   locale?: string;
 }
 
+/**
+ * Suggests activities for one day. Not wired in MVP trip UI; reserved for future “idea” flows
+ * (e.g. activity modal) and manual testing.
+ */
 export async function generateActivitySuggestions(
   params: GenerateActivitySuggestionsParams,
 ): Promise<AIActivitySuggestion[]> {

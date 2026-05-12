@@ -1,4 +1,5 @@
 import type { Activity, TripMember } from '@/lib/types/database.types';
+import { getAiConstraintsHintLevel } from '@/lib/ai/tripConstraintsHint';
 import { TripItineraryContextSummary } from './TripItineraryContextSummary';
 import { ItineraryViewTabs } from './ItineraryViewTabs';
 import { TripItineraryEmptyState } from './TripItineraryEmptyState';
@@ -123,6 +124,9 @@ export function TripDetailItinerary({
     itineraryDayIdByDate,
     canEdit: canReorder,
   });
+
+  const aiConstraintsHintLevel = getAiConstraintsHintLevel(constraintsSummary, budgetCents);
+  const aiScenarioCount = scenarios.filter((s) => s.isAiGenerated).length;
 
   return (
     <div className="space-y-6">
@@ -259,6 +263,8 @@ export function TripDetailItinerary({
             onDeleteScenario={onDeleteScenario}
             onUseScenarioAsBase={onUseScenarioAsBase}
             onAddScenarioActivityToItinerary={onAddScenarioActivityToItinerary}
+            constraintsHintLevel={aiConstraintsHintLevel}
+            aiScenarioCount={aiScenarioCount}
             t={t}
           />
         )}

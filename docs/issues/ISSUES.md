@@ -124,7 +124,7 @@ Complete chat with presence, typing indicators, and collaboration features.
 
 ## 🎯 Issue #12: Trip Detail Screen - AI Itinerary Generation
 
-**Status:** 🟡 **EN COURS (MVP+)** — socle produit déjà en place ; durcissement **2026-05** : retry API, prompts enrichis (enfants, must-do, no-go), version de prompt dans analytics, erreurs scénario → Sentry. Reste : **budget coûts / quotas**, UX erreurs & progression, E2E ciblé.  
+**Status:** 🟡 **MVP #12 quasi bouclé** — quotas UI+DB, toasts, progression, hints contraintes, prod sans mock silencieux ; reste **E2E** / **dashboard coûts** / branchement suggestions UI si produit le veut.  
 **Priority:** HIGH  
 **Phase:** Screen 4e  
 **Dependencies:** Issues #0–#10 (archivées — `main`)
@@ -143,7 +143,7 @@ Génération IA d’**itinéraires scénarisés** (copie possible vers l’itin�
 ### État code (mai 2026)
 
 - **Livré** : `openai-itinerary-service.ts` (Zod, mock si pas de clé), `openai-client.ts` (retry exponentiel 429/5xx), `openai-prompts.ts` (`ITINERARY_PROMPT_VERSION`, enfants / must_dos / no_gos), bouton **Generate with AI** (`TripScenariosSection` + i18n), persistance scénarios IA (`tripDetailSlice.aiScenarioOps`), votes scénarios (#10).
-- **Suite #12** : plafonds / quotas par trip ou par org, toasts UX sur échec (sans mock silencieux en prod si clé invalide), suivi coûts agrégé (PostHog/Sentry), E2E « génère un scénario » si env stable.
+- **Suite #12** : coûts agrégés / dashboards admin ; E2E « génère un scénario » si env CI stable ; suggestions d’activités branchées sur l’UI (optionnel).
 
 ### Tasks
 
@@ -154,21 +154,21 @@ Génération IA d’**itinéraires scénarisés** (copie possible vers l’itin�
 - [x] 🟢 **Prompt version** (`ITINERARY_PROMPT_VERSION` → événement analytics)
 - [x] 🟢 **Retry** exponentiel sur erreurs transitoires (`openai-client` + `openaiRetry.ts`)
 - [x] 🟢 **Token usage** dans events PostHog (itinéraire + suggestions)
-- [ ] 🔴 **Cost / quotas** métier (plafond par trip, message utilisateur)
+- [x] 🟢 **Cost / quotas** métier — **10 scénarios IA max / trip** (`MAX_AI_SCENARIOS_PER_TRIP` + comptage DB `itineraries.generated_by_ai`), bouton désactivé + toast quota
 - [x] 🟢 **Erreurs** génération scénario → **Sentry** (`captureFeatureError` dans `tripDetailSlice.aiScenarioOps`)
 
 #### AI Generation UI
 
 - [x] 🟢 Bouton **Generate with AI** (itinéraire / scénarios)
-- [ ] 🟡 Indicateur de progression dédié (au-delà du loading bouton existant)
+- [x] 🟢 Indicateur de progression + **aria-busy** pendant la génération (`TripScenariosSection`)
 - [x] 🟢 Loading sur l’action de génération (composant scénarios)
-- [ ] 🟡 Toasts **succès / échec** explicites (échec réseau vs validation)
+- [x] 🟢 Toasts **succès / échec** (codes `AiScenarioGenerationError` → i18n) + **prod** : plus de fallback mock silencieux sur erreur API (mock seulement clé démo / **DEV**)
 
 #### Constraint Collection
 
 - [x] 🟢 Contraintes du trip injectées dans le prompt quand présentes
-- [ ] 🔴 Parcours « améliore tes contraintes avant de régénérer » (empty state intelligent)
-- [ ] 🔴 Message **« meilleurs résultats avec contraintes »** (copy + i18n)
+- [x] 🟡 Parcours léger : **encart** « de meilleurs résultats » si contraintes faibles (`getAiConstraintsHintLevel`) — édition trip reste le flux existant (hero)
+- [x] 🟢 Message **« meilleurs résultats avec contraintes »** (copy + i18n EN/FR)
 
 #### AI Scenario Generation
 
@@ -177,7 +177,7 @@ Génération IA d’**itinéraires scénarisés** (copie possible vers l’itin�
 
 #### AI Activity Suggestions
 
-- [ ] 🟡 Service `generateActivitySuggestions` — brancher partout où l’UI le prévoit (si partiel, documenter)
+- [x] 🟢 `generateActivitySuggestions` — **documenté** (JSDoc) comme hors UI MVP ; branchement modal activités = suivi post-MVP
 
 #### AI Workflow
 
@@ -186,15 +186,15 @@ Génération IA d’**itinéraires scénarisés** (copie possible vers l’itin�
 #### i18n
 
 - [x] 🟢 Libellés bouton / section scénarios (clés `tripDetail.*`)
-- [ ] 🟡 Messages d’erreur / quota / retry côté UI (clés dédiées)
+- [x] 🟢 Messages d’erreur / quota / succès génération — **i18n** `tripDetail.ai*` (EN/FR)
 
 ### Acceptance Criteria
 
 - [x] L’IA produit un scénario cohérent avec les dates et la destination
 - [x] Les scénarios IA apparaissent avec les autres ; le groupe peut voter
-- [x] Erreurs API gérées sans crash (retry + fallback mock si pas de clé — à affiner prod)
-- [ ] Tous les messages utilisateur liés à l’IA passent par i18n (reste erreurs/quotas)
-- [ ] Tests : unitaires retry + E2E génération (si CI env)
+- [x] Erreurs API : retry + **erreurs typées** en prod (plus de mock silencieux hors DEV / clé démo)
+- [x] Messages utilisateur IA (succès / erreurs / quota / hints) via **i18n**
+- [x] Tests unitaires : **retry** (`openaiRetry`) + **hint contraintes** (`tripConstraintsHint`) ; E2E génération **si** env seed / clé (optionnel)
 
 ---
 
@@ -402,7 +402,7 @@ _Will be tracked here as discovered_
 ### Trip detail — suite MVP
 
 - **Issue #11 (Chat)**: 🟢 **COMPLETED (MVP)** — branche `feature/issue-11-chat-unread-tab` ; merger PR → `main`
-- **Issue #12 (AI Generation)**: 🟡 **~55%** — service + UI base + retry + prompts + Sentry ; reste quotas/UX erreurs/i18n fin + E2E
+- **Issue #12 (AI Generation)**: 🟡 **~85%** — quotas + UX + i18n + prod strict ; reste E2E / reporting coûts agrégé
 - **Issue #13 (Context)**: 🔴 10% - Not Started
 
 ### Phase 2 (Post-MVP)
