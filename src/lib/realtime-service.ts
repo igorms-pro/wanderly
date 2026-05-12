@@ -127,6 +127,32 @@ export const subscribeToVotes = (
     .subscribe();
 };
 
+/** Scenario (itinerary) votes for the current trip — filtered server-side by trip_id */
+export const subscribeToItineraryVotes = (
+  tripId: string,
+  callback: (payload: RealtimePayload) => void,
+): RealtimeChannel => {
+  return supabase
+    .channel(`trip:${tripId}:itinerary_votes`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'itinerary_votes',
+        filter: `trip_id=eq.${tripId}`,
+      },
+      (payload) => {
+        callback({
+          eventType: payload.eventType as 'INSERT' | 'UPDATE' | 'DELETE',
+          new: payload.new,
+          old: payload.old,
+        });
+      },
+    )
+    .subscribe();
+};
+
 /**
  * Subscribe to all trips for the current user
  * This listens to the trips table for any changes

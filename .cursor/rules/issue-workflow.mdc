@@ -1,0 +1,39 @@
+---
+description: Enforce per-issue GitHub + git workflow (merge → issue → branch → dev → PR → docs)
+alwaysApply: true
+---
+
+# Voyagely — Issue workflow (must follow)
+
+When starting or finishing work tied to an Issue, follow this exact sequence.
+
+## Start an Issue (before coding)
+
+- **Merge previous work**: ensure the previous Issue is merged to `main` (or explicitly acknowledged as not needed).
+- **Create GitHub Issue**: create/confirm the Issue exists on GitHub and capture its number (e.g. `#25`).
+- **Create branch**: `feature/issue-XX-short-slug` (or `fix/...`, `chore/...`, etc. per `git-workflow.mdc`).
+- **Update docs**: in `docs/issues/ISSUES.md`, set the Issue status to **🟡 IN PROGRESS** and note:
+  - GitHub Issue number
+  - branch name
+  - (if applicable) previous PR merged
+
+## During development
+
+- Keep changes scoped to the current Issue.
+- Ensure all interactive states exist: loading / empty / error / default / disabled.
+- Keep i18n keys up to date for any new user-facing copy.
+
+## Finish an Issue (before moving on)
+
+- **Open PR**: create a PR referencing the GitHub Issue number in title/body.
+- **Update docs**: in `docs/issues/ISSUES.md`:
+  - mark tasks + AC checkboxes
+  - add PR link
+  - set status to **🟢 COMPLETED** when AC is OK
+- Only then start the next Issue.
+
+## If the user says “on en a déjà”
+
+- Do **not** recreate Issues/branches/PRs.
+- Instead: verify current branch + local git status, then update `docs/issues/ISSUES.md` to reflect reality.
+

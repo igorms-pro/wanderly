@@ -1,6 +1,7 @@
 import type { AppState, SetState, GetState } from './types';
 import { createTripDetailActivitiesSlice } from './tripDetailSlice.activities';
 import { createTripDetailVotesSlice } from './tripDetailSlice.votes';
+import { createTripDetailItineraryVotesSlice } from './tripDetailSlice.itineraryVotes';
 import { createTripDetailScenariosSlice } from './tripDetailSlice.scenarios';
 import { createTripDetailItineraryDaysSlice } from './tripDetailSlice.itineraryDays';
 import { createTripDetailActiveItinerarySlice } from './tripDetailSlice.activeItinerary';
@@ -10,6 +11,7 @@ export function createTripDetailSlice(set: SetState, get: GetState): Partial<App
   return {
     ...createTripDetailActivitiesSlice(set, get),
     ...createTripDetailVotesSlice(set, get),
+    ...createTripDetailItineraryVotesSlice(set, get),
     ...createTripDetailScenariosSlice(set, get),
     ...createTripDetailItineraryDaysSlice(set, get),
     ...createTripDetailActiveItinerarySlice(set, get),

@@ -29,7 +29,7 @@ export function useItineraryViewState({
   const [viewMode, setViewMode] = useState<ItineraryViewMode>(() => {
     try {
       const s = sessionStorage.getItem(ITINERARY_VIEW_KEY);
-      if (s === 'list' || s === 'calendar' || s === 'timeline') return s;
+      if (s === 'list' || s === 'calendar' || s === 'timeline' || s === 'decision') return s;
     } catch {
       /* ignore */
     }

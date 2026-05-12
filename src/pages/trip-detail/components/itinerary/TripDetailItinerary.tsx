@@ -5,11 +5,14 @@ import { TripItineraryEmptyState } from './TripItineraryEmptyState';
 import { TripItineraryListView } from './TripItineraryListView';
 import { TripItineraryCalendarView } from './TripItineraryCalendarView';
 import { TripItineraryTimelineView } from './TripItineraryTimelineView';
+import { TripItineraryDecisionView } from './TripItineraryDecisionView';
 import { TripScenariosSection } from '../scenarios/TripScenariosSection';
 import { useItineraryViewState } from './useItineraryViewState';
 import { useItineraryDragAndDrop } from '../../hooks/useItineraryDragAndDrop';
 
-export type ItineraryViewMode = 'list' | 'calendar' | 'timeline';
+export type ItineraryViewMode = 'list' | 'calendar' | 'timeline' | 'decision';
+
+const EMPTY_SCENARIO_VOTE_COUNTS = { upvotes: 0, downvotes: 0 };
 
 export interface ConstraintsSummary {
   pace?: 'relaxed' | 'balanced' | 'packed';
@@ -43,6 +46,12 @@ interface TripDetailItineraryProps {
   scenarios?: import('@/lib/store/tripDetailSlice.scenarios').TripScenario[];
   canCreateScenarios?: boolean;
   canManageScenarios?: boolean;
+  canVoteScenario?: boolean;
+  votingScenarioId?: string | null;
+  winningScenarioIds?: string[];
+  getScenarioVoteCounts?: (itineraryId: string) => { upvotes: number; downvotes: number };
+  getUserScenarioVote?: (itineraryId: string) => 'up' | 'down' | null;
+  onScenarioVote?: (itineraryId: string, choice: 'up' | 'down') => void;
   onGenerateAiScenario?: () => Promise<void>;
   onCreateScenario?: (title: string | null, days: { date: string; dayIndex?: number }[]) => void;
   onDeleteScenario?: (scenarioId: string) => void;
@@ -82,6 +91,12 @@ export function TripDetailItinerary({
   scenarios = [],
   canCreateScenarios = false,
   canManageScenarios = false,
+  canVoteScenario = false,
+  votingScenarioId = null,
+  winningScenarioIds = [],
+  getScenarioVoteCounts = () => EMPTY_SCENARIO_VOTE_COUNTS,
+  getUserScenarioVote = () => null,
+  onScenarioVote = () => {},
   onGenerateAiScenario,
   onCreateScenario,
   onDeleteScenario,
@@ -132,6 +147,14 @@ export function TripDetailItinerary({
 
       {sortedDates.length === 0 ? (
         <TripItineraryEmptyState t={t} canEdit={canEdit} onAddActivity={onAddActivity} />
+      ) : viewMode === 'decision' ? (
+        <TripItineraryDecisionView
+          sortedDates={sortedDatesForView}
+          activitiesByDate={activitiesByDateForView}
+          getVoteCounts={getVoteCounts}
+          t={t}
+          searchQuery={searchQuery}
+        />
       ) : viewMode === 'list' ? (
         <TripItineraryListView
           sortedDates={sortedDatesForView}
@@ -225,6 +248,12 @@ export function TripDetailItinerary({
             sortedDates={sortedDates}
             canCreate={canCreateScenarios}
             canManage={canManageScenarios}
+            canVoteScenario={canVoteScenario}
+            votingScenarioId={votingScenarioId}
+            winningScenarioIds={winningScenarioIds}
+            getScenarioVoteCounts={getScenarioVoteCounts}
+            getUserScenarioVote={getUserScenarioVote}
+            onScenarioVote={onScenarioVote}
             onGenerateAiScenario={onGenerateAiScenario}
             onCreateScenario={onCreateScenario}
             onDeleteScenario={onDeleteScenario}

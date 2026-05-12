@@ -45,7 +45,7 @@ export function TimelineActivityVotes({
         type="button"
         onClick={() => onVote(activityId, 'up')}
         disabled={votingActivityId === activityId || !canVote}
-        aria-label={userVote === 'up' ? 'Remove upvote' : 'Upvote'}
+        aria-label={userVote === 'up' ? t('tripDetail.removeUpvote') : t('tripDetail.upvote')}
         className={`p-1.5 rounded-lg transition ${
           userVote === 'up'
             ? 'bg-green-100 dark:bg-green-900/30 text-green-600'
@@ -62,7 +62,7 @@ export function TimelineActivityVotes({
         type="button"
         onClick={() => onVote(activityId, 'down')}
         disabled={votingActivityId === activityId || !canVote}
-        aria-label={userVote === 'down' ? 'Remove downvote' : 'Downvote'}
+        aria-label={userVote === 'down' ? t('tripDetail.removeDownvote') : t('tripDetail.downvote')}
         className={`p-1.5 rounded-lg transition ${
           userVote === 'down'
             ? 'bg-red-100 dark:bg-red-900/30 text-red-600'

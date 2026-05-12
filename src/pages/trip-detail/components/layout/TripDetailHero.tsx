@@ -1,4 +1,4 @@
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Lock, Trash2 } from 'lucide-react';
 import type { Trip } from '@/lib/types/database.types';
 import type { TripMember } from '@/lib/types/database.types';
 import { TripDetailHeroView } from './TripDetailHeroView';
@@ -25,6 +25,8 @@ interface TripDetailHeroProps {
   isDeleting: boolean;
   canEdit: () => boolean;
   canDelete: () => boolean;
+  showFinalizeButton?: boolean;
+  onFinalizeClick?: () => void;
   onStartEdit: () => void;
   onCancelEdit: () => void;
   onSave: () => Promise<void>;
@@ -41,6 +43,8 @@ export function TripDetailHero({
   isDeleting,
   canEdit,
   canDelete,
+  showFinalizeButton = false,
+  onFinalizeClick,
   onStartEdit,
   onCancelEdit,
   onSave,
@@ -73,6 +77,17 @@ export function TripDetailHero({
                 >
                   <Edit className="w-4 h-4 mr-2" />
                   {t('tripDetail.edit')}
+                </button>
+              )}
+              {showFinalizeButton && onFinalizeClick && (
+                <button
+                  type="button"
+                  onClick={onFinalizeClick}
+                  className="px-4 py-2.5 min-h-[44px] bg-emerald-500/90 backdrop-blur-sm border border-emerald-400/40 rounded-lg text-white hover:bg-emerald-600/90 transition flex items-center"
+                  aria-label={t('tripDetail.finalizeItinerary')}
+                >
+                  <Lock className="w-4 h-4 mr-2" aria-hidden />
+                  {t('tripDetail.finalizeItinerary')}
                 </button>
               )}
               {canDelete() && (

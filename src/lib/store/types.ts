@@ -1,4 +1,4 @@
-import type { User, Trip, Activity, Message, Vote } from '../types/database.types';
+import type { User, Trip, Activity, Message, Vote, ItineraryVote } from '../types/database.types';
 import type { TripScenario } from './tripDetailSlice.scenarios';
 import type { Database } from '../types/database.types';
 
@@ -92,6 +92,15 @@ export interface AppState {
   setVotes: (votes: Record<string, Vote[]>) => void;
   loadVotes: (activityIds: string[]) => Promise<void>;
   createOrUpdateVote: (activityId: string, choice: 'up' | 'down') => Promise<void>;
+
+  itineraryVotes: Record<string, ItineraryVote[]>;
+  setItineraryVotes: (votes: Record<string, ItineraryVote[]>) => void;
+  loadItineraryVotes: (itineraryIds: string[]) => Promise<void>;
+  createOrUpdateItineraryVote: (
+    tripId: string,
+    itineraryId: string,
+    choice: 'up' | 'down',
+  ) => Promise<void>;
 
   // Messages
   messages: Message[];

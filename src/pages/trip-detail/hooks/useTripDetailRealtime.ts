@@ -1,12 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../../../lib/store';
-import type { Activity, Vote, Trip } from '../../../lib/types/database.types';
+import type { Activity, Vote, Trip, ItineraryVote } from '../../../lib/types/database.types';
 import {
   subscribeToTrip,
   subscribeToMessages,
   subscribeToActivities,
   subscribeToVotes,
+  subscribeToItineraryVotes,
   RealtimePayload,
   unsubscribeFromChannel,
 } from '../../../lib/realtime-service';
@@ -54,11 +55,13 @@ export function useTripDetailRealtime(tripId: string | undefined) {
   const setActivities = useStore((s) => s.setActivities);
   const setVotes = useStore((s) => s.setVotes);
   const loadVotes = useStore((s) => s.loadVotes);
+  const setItineraryVotes = useStore((s) => s.setItineraryVotes);
 
   const tripSubscriptionRef = useRef<RealtimeChannel | null>(null);
   const messagesSubscriptionRef = useRef<RealtimeChannel | null>(null);
   const activitiesSubscriptionRef = useRef<RealtimeChannel | null>(null);
   const votesSubscriptionRef = useRef<RealtimeChannel | null>(null);
+  const itineraryVotesSubscriptionRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
     if (!tripId) return;
@@ -120,6 +123,62 @@ export function useTripDetailRealtime(tripId: string | undefined) {
       },
     );
 
+    itineraryVotesSubscriptionRef.current = subscribeToItineraryVotes(
+      tripId,
+      (payload: RealtimePayload) => {
+        try {
+          const { itineraryVotes: cur } = useStore.getState();
+          if (payload.eventType === 'INSERT' && payload.new) {
+            const r = payload.new as Record<string, unknown>;
+            if (r.trip_id !== tripId || !r.itinerary_id) return;
+            const mapped: ItineraryVote = {
+              id: r.id as string,
+              trip_id: r.trip_id as string,
+              itinerary_id: r.itinerary_id as string,
+              user_id: r.user_id as string,
+              choice: r.choice as 'up' | 'down',
+              created_at: r.created_at as string,
+            };
+            const list = cur[mapped.itinerary_id] || [];
+            const withoutUser = list.filter((x) => x.user_id !== mapped.user_id);
+            setItineraryVotes({
+              ...cur,
+              [mapped.itinerary_id]: [...withoutUser, mapped],
+            });
+          } else if (payload.eventType === 'UPDATE' && payload.new) {
+            const r = payload.new as Record<string, unknown>;
+            if (r.trip_id !== tripId || !r.itinerary_id) return;
+            const mapped: ItineraryVote = {
+              id: r.id as string,
+              trip_id: r.trip_id as string,
+              itinerary_id: r.itinerary_id as string,
+              user_id: r.user_id as string,
+              choice: r.choice as 'up' | 'down',
+              created_at: r.created_at as string,
+            };
+            const list = cur[mapped.itinerary_id] || [];
+            const withoutUser = list.filter((x) => x.user_id !== mapped.user_id);
+            setItineraryVotes({
+              ...cur,
+              [mapped.itinerary_id]: [...withoutUser, mapped],
+            });
+          } else if (payload.eventType === 'DELETE' && payload.old) {
+            const r = payload.old as Record<string, unknown>;
+            const itineraryId = r.itinerary_id as string | undefined;
+            const voteId = r.id as string | undefined;
+            if (!itineraryId || !voteId) return;
+            const list = cur[itineraryId] || [];
+            setItineraryVotes({
+              ...cur,
+              [itineraryId]: list.filter((x) => x.id !== voteId),
+            });
+          }
+        } catch (e) {
+          console.error('Error handling itinerary votes real-time event:', e);
+        }
+      },
+    );
+
     votesSubscriptionRef.current = subscribeToVotes(tripId, (payload: RealtimePayload) => {
       try {
         const { activities: curActivities } = useStore.getState();
@@ -177,6 +236,7 @@ export function useTripDetailRealtime(tripId: string | undefined) {
         messagesSubscriptionRef,
         activitiesSubscriptionRef,
         votesSubscriptionRef,
+        itineraryVotesSubscriptionRef,
       ].forEach((ref) => {
         if (ref.current) {
           unsubscribeFromChannel(ref.current);
@@ -193,6 +253,7 @@ export function useTripDetailRealtime(tripId: string | undefined) {
     updateActivityInState,
     setActivities,
     setVotes,
+    setItineraryVotes,
     loadVotes,
   ]);
 }

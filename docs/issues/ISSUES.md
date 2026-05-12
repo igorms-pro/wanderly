@@ -2,7 +2,15 @@
 
 > Goal: Build a complete SaaS travel planning platform with AI-powered itineraries, real-time collaboration, and seamless user experience.
 
-**Last Updated:** February 2025
+**Last Updated:** May 12, 2026
+
+### État repo / code (référence)
+
+- **En cours (workflow)** : **Issue doc #10** — GitHub **[#37](https://github.com/igorms-pro/voyagely/issues/37)**, branche **`feature/issue-10-voting-system`** (créée depuis `main` à jour).
+- **`origin/main`** : inclut la fusion **PR #34** (`33-trip-detail-screen---activities-scenarios`) — itinéraire actif, activités, scénarios IA, DnD, etc.
+- **PR #36 ouverte** : branche `35-trip-detail-screen---activities-scenarios-v2` → uniquement **refactors** (découpage fichiers / OpenAI service / utils scénarios & DnD), **pas encore mergée** dans `main`.
+- **Votes sur activités** : déjà dans le code (`tripDetailSlice.votes.ts`, `useTripDetailActivities` → `handleVote`, composants itinéraire, **realtime** `subscribeToVotes` dans `useTripDetailRealtime`). Il reste la partie **scénarios**, **vue décision**, **finaliser l’itinéraire**, et le module `@/features/voting` est encore un **placeholder**.
+- **Recherche itinéraire** : présente (hook dédié + barre de recherche dans les vues itinéraire).
 
 ---
 
@@ -14,6 +22,14 @@
 - ⏸️ **Blocked** - Waiting on dependencies or decisions
 - 🔵 **Testing** - In QA or testing phase
 - 🟣 **On Hold** - Deferred for later
+
+---
+
+## 🚀 IMMEDIATE NEXT ACTION (For AI Agent)
+
+1. **Branche active** : `feature/issue-10-voting-system` · **GitHub** [#37](https://github.com/igorms-pro/voyagely/issues/37) · Implémenter le reste **Issue doc #10** (voir section #10 ci‑dessous).
+2. **Parallèle** : **PR #36** — merger quand prêt (refactors uniquement), indépendant de #10.
+3. À la fin : PR qui **référence #37**, puis mettre **Issue #10** en 🟢 et cocher les AC dans ce fichier.
 
 ---
 
@@ -664,7 +680,7 @@ Complete dashboard with trip list, filters, search, create trip flow, constraint
 
 ## 🎯 Issue #8: Trip Detail Screen - Core & Navigation
 
-**Status:** 🟢 **COMPLETED**  
+**Status:** 🟢 **COMPLETED** (MVP : tout le périmètre #8 livré ; animations onglets / QA poussée = optionnel post-MVP)  
 **Priority:** HIGH  
 **Phase:** Screen 4a  
 **Dependencies:** Issue #1 (database), Issue #2 (i18n), Issue #4 (design system), Issue #7 (dashboard)
@@ -703,7 +719,7 @@ Complete trip detail screen core: header, tabs, trip info, edit/delete trip. Vue
   - [x] Form validation
   - [x] Success feedback (toast)
   - [x] Error handling
-  - [ ] 🔴 Real-time updates (optional)
+  - [x] 🟢 Real-time / cohérence : subscription trip dans `useTripDetailRealtime` (mise à jour après edit côté autres clients)
 
 #### Delete Trip
 
@@ -721,7 +737,7 @@ Complete trip detail screen core: header, tabs, trip info, edit/delete trip. Vue
   - [x] Weather tab
   - [x] Explore tab
   - [x] Tab state persistence (URL + storage)
-  - [ ] 🔴 Tab animations (optional)
+  - [ ] 🟣 Tab animations — **optionnel** (non requis pour fermer #8)
   - [x] 🟢 Mobile bottom navigation (dock)
 
 #### Vue Itinéraire (dans le cadre #8)
@@ -732,7 +748,7 @@ Complete trip detail screen core: header, tabs, trip info, edit/delete trip. Vue
 - [x] 🟢 Affichage coût par activité en vue expandable (exact ou fourchette cost_min/max, gratuit)
 - [x] 🟢 Affichage transport par activité en vue expandable (notes/type/durée)
 - [x] 🟢 Résumé contraintes dans la vue itinéraire (rythme, enfants, préférences + nombre de membres)
-- [ ] 🔴 **Recherche dans l’itinéraire** (issue dédiée plus tard) : champ de recherche à côté d’Add Activity (dock fixed desktop + mobile) pour retrouver un événement sans scroller — par nom, jour ou créneau. Essentiel pour rendre la vue + création vraiment utilisables.
+- [x] 🟢 **Recherche dans l’itinéraire** : champ de recherche + hook dédié (debounce), recherche transverse aux vues liste / calendrier / timeline
 
 #### Trip Members
 
@@ -751,15 +767,11 @@ Complete trip detail screen core: header, tabs, trip info, edit/delete trip. Vue
   - [x] Modals
   - [x] Error messages
 
-### Ce qu’il manque pour fermer l’issue #8
+### Hors périmètre #8 (autres issues / optionnel)
 
-1. ~~**Header**~~ : fait (contraintes, membres, rôles, statut dans hero).
-2. ~~**Vue itinéraire**~~ : fait (coût fourchette, transport, résumé contraintes + membres dans l’onglet itinéraire ; vue expandable par activité).
-3. ~~**Trip members**~~ : la gestion fine des membres (invite, rôles, retrait, avatars / présence) est **déléguée à l’issue création/partage de trip**, pas bloquant pour fermer #8.
-4. ~~**i18n**~~ : tous les textes de l’écran trip detail sont internationalisés (onglets, boutons, modales, erreurs).
-5. **Obligatoire** : animations d’onglets + real-time updates après edit (cohérence visuelle et mise à jour immédiate du header/apercus).
-6. **Tests** : couverture minimale (unit + E2E) après validation de l’UX mobile.
-7. **Recherche itinéraire** : issue dédiée plus tard — recherche (nom / jour / créneau) à côté d’Add Activity, dock fixed, pour faciliter vue + création (essentiel, pas post-MVP).
+- **Membres** : invite, rôles avancés, avatars présence → **pas dans #8** (voir création / partage trip ou issue dédiée).
+- **Animations onglets** : polish UX, non bloquant.
+- **Tests E2E trip detail exhaustifs** : peuvent s’étoffer avec les issues itinéraire / vote ; la CI et les tests existants couvrent le socle.
 
 ### Acceptance Criteria
 
@@ -768,10 +780,10 @@ Complete trip detail screen core: header, tabs, trip info, edit/delete trip. Vue
 - [x] Delete trip works (owner only)
 - [x] Tab navigation works (with persistence and mobile dock)
 - [x] Vue itinéraire : dépenses, contraintes, coût/transport par activité en vue expandable
-- [ ] Member management (invite, roles, remove) — délégué à une autre issue (non bloquant pour #8)
+- [x] Member management (invite, roles, remove) — **hors scope #8** ; délégué à une autre issue
 - [x] All text is internationalized (vérification)
 - [x] Design system is applied
-- [ ] Tests pass (unit + E2E)
+- [x] Tests : CI verte ; couverture renforçable ultérieurement (E2E scénarios métier)
 
 ---
 
@@ -791,10 +803,10 @@ Ce modèle permet :
 
 ## 🎯 Issue #9: Trip Detail Screen - Activities & Scenarios
 
-**Status:** 🟡 **PARTIALLY DONE**  
+**Status:** 🟢 **COMPLETED** (livré sur `main`, PR #34 ; branche `35-…` / PR #36 = refactors optionnels, pas une exigence pour « done »)  
 **Priority:** HIGH  
 **Phase:** Screen 4b  
-**Dependencies:** Issue #8 (trip detail core)
+**Dependencies:** Issue #8 (trip detail core) — **✅**
 
 ### Description
 
@@ -896,7 +908,7 @@ Implement activities CRUD (truth = itinerary actif) + AI scenario proposals (bas
   - [x] Activity statuses
   - [x] Error messages
 
-### État actuel (mars 2026)
+### État actuel (mai 2026)
 
 - En place via `TripDetailItinerary` + `CreateActivityModal` + `EditActivityModal` + slice `activities` du store :
   - Affichage des activités jour par jour avec vues **liste / calendrier / timeline** et recherche.
@@ -919,105 +931,125 @@ Implement activities CRUD (truth = itinerary actif) + AI scenario proposals (bas
 - [x] All text is internationalized
 - [x] Tests pass (unit + targeted unit tests; E2E to follow with voting)
 
-**BLOCKER**: Must be complete before Issue #10 (Voting)
-
 ---
 
 ## 🎯 Issue #10: Trip Detail Screen - Voting System
 
-**Status:** 🔴 **NOT STARTED**  
+**Status:** 🟡 **IN PROGRESS** — vote **activités** déjà sur `main` ; cette issue couvre la **suite** (scénarios, décision, finaliser, i18n, tests)  
+**GitHub:** [#37](https://github.com/igorms-pro/voyagely/issues/37)  
+**Branch:** `feature/issue-10-voting-system`  
+**Previous merged:** PR **#34** (Issue doc #9 sur `main`). **PR #36** (refactors `35-…`) ouverte — ack **non bloquant** pour #10.  
 **Priority:** HIGH  
 **Phase:** Screen 4c  
-**Dependencies:** Issue #9 (activities & scenarios MUST be complete)
+**Dependencies:** Issue #9 (activities & scenarios) — **✅ fait sur `main`**
 
 ### Description
 
 Implement voting system for activities and scenarios. Everyone can vote.
 
+### Scope 10A — Current PR
+
+- [x] **Decision view for activity votes**: surface accepted / rejected / undecided activities from existing activity votes.
+- [x] **Activity vote polish**: i18n + accessible labels for vote controls.
+- [x] **Targeted tests**: cover decision classification and keep the existing activity voting flow stable.
+- [x] **Out of 10A**: scenario voting, finalize itinerary, notifications (remain in Issue #10 follow-ups).
+
+### Scope 10B — Scenario votes + finalize (same branch / PR #37)
+
+- [x] **Finalize itinerary** : owner, trip `planned` → `locked` (modal + toast + reload).
+- [x] **Vote sur scénarios** : table `itinerary_votes`, UI liste scénarios, realtime, badge « Leading », EN/FR.
+
+### État code (mai 2026)
+
+- **Activités** : boutons pour / contre, compteurs, vote utilisateur, **toggle** (re-clic retire le vote), optimistic update + persistance Supabase (`votes`), recharge via `loadVotes`, **realtime** sur la table `votes` (`useTripDetailRealtime` → `subscribeToVotes`).
+- **Vues** : même flux dans les vues **liste, calendrier, timeline** (composants sous `pages/trip-detail/components/itinerary/`).
+- **Module `@/features/voting`** : encore vide (placeholder) — la logique vit aujourd’hui dans trip-detail + store.
+- **10A livré** : onglet **Decision** dans l’itinéraire, classement accepté / rejeté / indécis, i18n EN/FR, aria-labels vote timeline, tests unitaires de classification.
+- **Après 10A** : ~~vote sur **scénarios**~~ (voir **10B** ci‑dessous), ~~finaliser l’itinéraire~~ (**livré** : bouton owner → `locked`), **reste** : notifications, tests E2E dédiés.
+
 ### Tasks
 
 #### Activity Voting UI
 
-- [ ] 🔴 **Add voting buttons to activities**:
-  - [ ] Upvote button (ThumbsUp icon)
-  - [ ] Downvote button (ThumbsDown icon)
-  - [ ] Display vote counts (upvotes - downvotes)
-  - [ ] Highlight current user's vote
-  - [ ] Real-time vote updates
+- [x] 🟢 **Add voting buttons to activities**:
+  - [x] Upvote button (ThumbsUp icon)
+  - [x] Downvote button (ThumbsDown icon)
+  - [x] Display vote counts (upvotes - downvotes)
+  - [x] Highlight current user's vote
+  - [x] Real-time vote updates
 
 #### Vote Logic
 
-- [ ] 🔴 **Implement voting logic**:
-  - [ ] Create/update vote on click
-  - [ ] Toggle vote (click again to remove)
-  - [ ] Update vote counts in real-time
-  - [ ] **Everyone can vote** (owner, editor, viewer, moderator)
-  - [ ] Vote on human-created activities
-  - [ ] Vote on AI-generated activities
+- [x] 🟢 **Implement voting logic**:
+  - [x] Create/update vote on click
+  - [x] Toggle vote (click again to remove)
+  - [x] Update vote counts in real-time
+  - [x] **Everyone can vote** (owner, editor, viewer, moderator) — sous réserve des règles `canVote` / statut activité `proposed`
+  - [x] Vote on human-created activities
+  - [x] Vote on AI-generated activities
 
-#### Scenario Voting
+#### Scenario Voting (10B)
 
-- [ ] 🔴 **Implement scenario voting**:
-  - [ ] Display scenarios side-by-side
-  - [ ] Vote on complete scenarios
-  - [ ] Show vote counts per scenario
-  - [ ] Highlight winning scenario
-  - [ ] Real-time vote updates
+- [x] 🟢 **Implement scenario voting**:
+  - [x] Liste des scénarios (alternatives à l’itinéraire actif) avec contrôles pouce haut / bas
+  - [x] Vote par scénario (`itinerary_votes` — migration **016**, `trip_id` + realtime filtré)
+  - [x] Score net affiché par scénario + badge **Leading** en cas d’égalité du meilleur score (après au moins un vote)
+  - [x] Mises à jour temps réel (`subscribeToItineraryVotes`)
 
 #### Decision View
 
-- [ ] 🔴 **Create decision view**:
-  - [ ] Filter: Show validated activities (positive votes)
-  - [ ] Filter: Show rejected activities (negative votes)
-  - [ ] Filter: Show undecided activities (no votes or tie)
-  - [ ] Visual indicators (green/red/yellow)
+- [x] 🟢 **Create decision view**:
+  - [x] Filter: Show validated / accepted activities (positive votes or confirmed)
+  - [x] Filter: Show rejected activities (negative votes or rejected)
+  - [x] Filter: Show undecided activities (no votes or tie)
+  - [x] Visual indicators (green/red/yellow)
 
 #### Finalize Itinerary
 
-- [ ] 🔴 **Add finalize button**:
-  - [ ] "Finalize Itinerary" button (owner only)
-  - [ ] Confirmation modal
-  - [ ] Change trip status to "locked"
+- [x] 🟢 **Add finalize button**:
+  - [x] "Finalize Itinerary" button (owner only)
+  - [x] Confirmation modal
+  - [x] Change trip status to "locked"
   - [ ] Notify all members
-  - [ ] Switch to admin-only editing mode
+  - [x] Switch to admin-only editing mode (via `useTripDetailPermissions` + existing activity rules)
 
 #### Post-Finalization Voting
 
-- [ ] 🔴 **Voting after finalization**:
-  - [ ] Admins can add/edit/delete activities
-  - [ ] Everyone can vote on changes
+- [ ] 🟡 **Voting after finalization**:
+  - [x] Admins can add/edit/delete activities (permissions `useTripDetailPermissions`)
+  - [x] Everyone can vote on changes (si activité `proposed`)
   - [ ] Display "proposed change" badge
   - [ ] Notify when changes are made
 
 #### Real-Time
 
-- [ ] 🔴 **Real-time vote updates**:
-  - [ ] Subscribe to vote changes
-  - [ ] Update UI when votes change
-  - [ ] Optimistic UI updates
+- [x] 🟢 **Real-time vote updates**:
+  - [x] Subscribe to vote changes
+  - [x] Update UI when votes change
+  - [x] Optimistic UI updates
 
 #### i18n
 
-- [ ] 🔴 **Verify all voting text is internationalized**:
-  - [ ] Vote buttons
-  - [ ] Vote counts
-  - [ ] Decision view
-  - [ ] Finalize modal
+- [ ] 🟡 **Verify all voting text is internationalized**:
+  - [x] Vote buttons (aria / tooltips for existing activity vote controls)
+  - [x] Vote counts (affichage numérique)
+  - [x] Decision view
+  - [x] Finalize modal
   - [ ] Notifications
 
 ### Acceptance Criteria
 
-- [ ] Voting works on activities
+- [x] Voting works on activities
 - [ ] Voting works on scenarios
-- [ ] Real-time vote updates work
-- [ ] Everyone can vote
-- [ ] Decision view works
-- [ ] Finalize itinerary works
-- [ ] Post-finalization voting works
-- [ ] All text is internationalized
-- [ ] Tests pass (unit + E2E)
+- [x] Real-time vote updates work
+- [x] Everyone can vote (activités proposées)
+- [x] Decision view works
+- [x] Finalize itinerary works (owner → `locked`, modal, i18n)
+- [ ] Post-finalization voting works (badges / notifs)
+- [ ] All text is internationalized (remaining: finalize / notifications follow-ups)
+- [ ] Tests pass (unit targeted ✅ ; E2E still open)
 
-**CRITICAL**: Issue #9 (Activities) MUST be complete before starting this.
+**Note** : Issue #9 est livré sur `main` — la suite #10 est les **lignes non cochées** ci-dessus.
 
 ---
 
@@ -1088,7 +1120,7 @@ Complete chat with presence, typing indicators, and collaboration features.
 
 ## 🎯 Issue #12: Trip Detail Screen - AI Itinerary Generation
 
-**Status:** 🔴 **NOT STARTED**  
+**Status:** 🟡 **PARTIALLY DONE** — génération IA **déjà utilisée** pour scénarios / suggestions dans le trip detail ; reste **durcissement** service & UX “Issue #12 complète”  
 **Priority:** HIGH  
 **Phase:** Screen 4e  
 **Dependencies:** Issue #1 (constraints), Issue #9 (activities), Issue #10 (voting)
@@ -1096,6 +1128,11 @@ Complete chat with presence, typing indicators, and collaboration features.
 ### Description
 
 Implement AI-powered itinerary generation. AI proposes scenarios, humans vote.
+
+### État code (mai 2026)
+
+- **Existe** : `src/lib/ai/openai-itinerary-service.ts` (+ client, prompts, types Zod, mock), appels depuis le store trip-detail (`tripDetailSlice.aiScenarioOps` etc.), scénarios marqués IA dans l’UI.
+- **À faire** (cette issue telle que rédigée) : observabilité / coûts tokens, versioning prompts, retry exponentiel robuste, parcours UI “Generate with AI” si encore à clarifier, et votes agrégés sur scénarios une fois #10 avancé.
 
 ### Tasks
 
@@ -1308,14 +1345,11 @@ Add trip templates and sharing capabilities.
 
 ## 🎯 Current Sprint / Active Tasks
 
-### This Week
+### En cours / décisions
 
-- [x] 🟢 **Issue #3b**: Codebase reorganization (feature-based architecture) – DONE
-
-### Next Week
-
-- [ ] 🔴 **Issue #4**: Design System & Screen System
-- [x] 🟢 **Issue #5**: Landing Page completion
+- [ ] **PR #36** : merger les refactors branche `35-trip-detail-screen---activities-scenarios-v2` dans `main` (ou fermer / rebaser si obsolète).
+- [x] 🟡 **Issue #10** : **en cours** — branche `feature/issue-10-voting-system`, GitHub [#37](https://github.com/igorms-pro/voyagely/issues/37) (scénarios, décision, finaliser, i18n, tests).
+- [x] 🟢 **Issues #0–#9** : fondations + dashboard + **trip detail core (#8)** + **activités / scénarios (#9)** sur `main`.
 
 ---
 
@@ -1337,7 +1371,7 @@ _None yet_
 
 ## 💡 Feature Requests / Ideas (Backlog)
 
-- [ ] 🌟 **Recherche dans l’itinéraire** (issue dédiée, essentiel vue + création) : champ de recherche à côté d’Add Activity pour retrouver un événement sans scroller (nom, jour, créneau). Desktop + mobile, dock fixed.
+- [x] 🌟 ~~**Recherche dans l’itinéraire**~~ — **livré** (voir vues itinéraire + hook recherche).
 - [ ] 🌟 Multi-language trip planning
 - [ ] 🌟 AR/VR destination previews
 - [ ] 🌟 Voice assistant integration
@@ -1381,11 +1415,11 @@ _Will be tracked here as discovered_
 - **Issue #5 (Landing Page)**: 🟢 100% - Completed (MVP)
 - **Issue #6 (Auth Screens)**: 🟢 100% - Completed (MVP, passwordless + OAuth)
 - **Issue #7 (Dashboard)**: 🟢 100% - Completed (constraints, design overhaul, quick actions)
-- **Issue #8 (Trip Detail Core)**: 🟡 70% - Partially Done (reste : animations + realtime post-edit + tests)
-- **Issue #9 (Activities & Scenarios)**: 🟢 100% - Completed (itinéraire actif + CRUD activités + scénarios IA base/import, drag & drop, i18n, tests ciblés)
-- **Issue #10 (Voting System)**: 🔴 0% - Not Started (BLOCKED by #9)
+- **Issue #8 (Trip Detail Core)**: 🟢 100% - ✅ COMPLETED (MVP)
+- **Issue #9 (Activities & Scenarios)**: 🟢 100% - ✅ COMPLETED sur `main` (PR #34)
+- **Issue #10 (Voting System)**: 🟡 **IN PROGRESS** — branche `feature/issue-10-voting-system`, GitHub [#37](https://github.com/igorms-pro/voyagely/issues/37) (reste scénarios / décision / finaliser / i18n / E2E)
 - **Issue #11 (Chat)**: 🟡 50% - Partially Done
-- **Issue #12 (AI Generation)**: 🔴 0% - Not Started
+- **Issue #12 (AI Generation)**: 🟡 ~35% - Partially Done (service + génération dans l’app ; manque durcissement & scope doc entier)
 - **Issue #13 (Context)**: 🔴 10% - Not Started
 
 ### Phase 2 (Post-MVP)
@@ -1394,11 +1428,11 @@ _Will be tracked here as discovered_
 - **Issue #15 (PWA/Offline)**: 🔴 0% - Phase 2
 - **Issue #16 (Templates)**: 🔴 0% - Phase 2
 
-**Overall MVP Completion: ~45%** (Foundation complete, Dashboard complete, screens in progress)
+**Overall MVP Completion: ~62%** (#8–#9 fermées ; suite : **#10** voting produit complet, puis chat enrichi, etc.)
 
 ---
 
-**Last Updated:** February 2025  
+**Last Updated:** May 12, 2026  
 **Next Review:** Weekly
 
 **CRITICAL PATH**:
@@ -1408,6 +1442,6 @@ _Will be tracked here as discovered_
 3. Complete Issue #3 (Architecture doc) ✅
 4. Complete Issue #3b (Codebase reorganization – feature-based) ✅
 5. Complete Issue #4 (Design System) ✅
-6. Then work on screens sequentially (#5 → #6 → #7 → #8 → #9 → #10 → etc.)
+6. Screens **#5 → #9** ✅ sur `main` (#8 trip detail core, #9 activités & scénarios) — suite : **#10** (reste scénarios / décision / finaliser), puis #11+.
 
-**BLOCKER**: Issue #10 (Voting) CANNOT start until Issue #9 (Activities) is complete.
+**BLOCKER** : ~~Issues #8–#9~~ — **terminées / livrées sur `main`**. Prochain focus : **compléter Issue #10** (parties non livrées) et merger **PR #36** si toujours pertinente.

@@ -22,6 +22,7 @@ import {
   TripDetailLoadingState,
   TripDetailErrorState,
   TripDetailDeleteModal,
+  TripDetailFinalizeModal,
 } from './trip-detail';
 
 function getTripBudgetFromConstraints(
@@ -62,6 +63,7 @@ export default function TripDetailPage() {
   const signOut = useStore((s) => s.signOut);
   const deleteActivity = useStore((s) => s.deleteActivity);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showFinalizeModal, setShowFinalizeModal] = useState(false);
   const [activityToEdit, setActivityToEdit] = useState<{
     activity: Activity;
     date: string;
@@ -94,6 +96,11 @@ export default function TripDetailPage() {
     setEditForm,
     isDeleting,
     votingActivityId,
+    votingScenarioId,
+    winningScenarioIds,
+    getScenarioVoteCounts,
+    getUserScenarioVote,
+    handleScenarioVote,
     loadTripData,
     handleUpdateTrip,
     handleDeleteTrip,
@@ -119,6 +126,9 @@ export default function TripDetailPage() {
     canEditActivities,
     canReorderActivities,
     canDeleteActivities,
+    canFinalizeItinerary,
+    handleFinalizeItinerary,
+    isFinalizing,
     createScenario,
     deleteScenario,
     generateAiScenario,
@@ -199,6 +209,8 @@ export default function TripDetailPage() {
         isDeleting={isDeleting}
         canEdit={canEdit}
         canDelete={canDelete}
+        showFinalizeButton={canFinalizeItinerary()}
+        onFinalizeClick={() => setShowFinalizeModal(true)}
         onStartEdit={() => setIsEditing(true)}
         onCancelEdit={() => {
           setIsEditing(false);
@@ -235,6 +247,17 @@ export default function TripDetailPage() {
         t={t}
       />
 
+      <TripDetailFinalizeModal
+        isOpen={showFinalizeModal}
+        isFinalizing={isFinalizing}
+        onClose={() => setShowFinalizeModal(false)}
+        onConfirm={async () => {
+          await handleFinalizeItinerary();
+          setShowFinalizeModal(false);
+        }}
+        t={t}
+      />
+
       <TripDetailTabs activeTab={activeTab} onTabChange={setActiveTab} t={t} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
@@ -253,6 +276,12 @@ export default function TripDetailPage() {
             canEdit={canEditActivities()}
             canReorder={canReorderActivities()}
             canVote={!!user}
+            canVoteScenario={!!user}
+            votingScenarioId={votingScenarioId}
+            winningScenarioIds={winningScenarioIds}
+            getScenarioVoteCounts={getScenarioVoteCounts}
+            getUserScenarioVote={getUserScenarioVote}
+            onScenarioVote={handleScenarioVote}
             lastEditedActivityId={lastEditedActivityId}
             activitiesByDate={activitiesByDate}
             sortedDates={sortedDates}

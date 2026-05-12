@@ -15,6 +15,7 @@ interface UseTripScenariosResult {
 export function useTripScenarios(tripId: string | undefined): UseTripScenariosResult {
   const scenarios = useStore((s) => s.scenarios);
   const loadScenarios = useStore((s) => s.loadScenarios);
+  const loadItineraryVotes = useStore((s) => s.loadItineraryVotes);
   const createScenario = useStore((s) => s.createScenario);
   const deleteScenario = useStore((s) => s.deleteScenario);
 
@@ -27,13 +28,15 @@ export function useTripScenarios(tripId: string | undefined): UseTripScenariosRe
     setLoading(true);
     try {
       await loadScenarios(tripId);
+      const itineraryIds = useStore.getState().scenarios.map((s) => s.id);
+      await loadItineraryVotes(itineraryIds);
     } catch (err: any) {
       console.error('Error loading scenarios:', err);
       setError(err.message || 'Failed to load scenarios');
     } finally {
       setLoading(false);
     }
-  }, [loadScenarios, tripId]);
+  }, [loadItineraryVotes, loadScenarios, tripId]);
 
   const create = useCallback(
     async (title: string | null, days: { date: string; dayIndex?: number }[]) => {
