@@ -2,7 +2,7 @@
 
 > Goal: Build a complete SaaS travel planning platform with AI-powered itineraries, real-time collaboration, and seamless user experience.
 
-**Last Updated:** May 13, 2026 (merge local `main` — chat #11 + IA Edge #12 + timeline #13)
+**Last Updated:** May 13, 2026 (`main` / `origin` — #11, #12, timeline #13)
 
 ## 📋 Status Legend
 
@@ -17,17 +17,15 @@
 
 ### État repo / code (référence)
 
-- **`main` (local)** : inclut désormais **`feature/issue-11-chat-unread-tab`** en fast-forward — chat **#11**, IA Edge **#12** (fonctions, `018`, quotas tier), timeline **temps entre activités** (#13 slice). **À faire :** `git push origin main` pour aligner **GitHub** ; fermer / lier les Issues GitHub **#11** / **#12** si besoin.
-- **`origin/main`** (distant) : sera aligné après le **push** ci-dessus.
+- **`main` / `origin/main`** : alignés (push mai 2026) — incluent **`feature/issue-11-chat-unread-tab`** en fast-forward : chat **#11**, IA Edge **#12** (fonctions, `018`, quotas tier), timeline **temps entre activités** (#13 slice). **GitHub :** fermer / lier Issues **#11** / **#12** si encore ouvertes.
 
 ---
 
 ## 🚀 IMMEDIATE NEXT ACTION (For AI Agent)
 
-1. **`git push origin main`** — publier le merge local (CI + équipe).
-2. **GitHub** : fermer ou mettre à jour les Issues **#11** / **#12** ; ouvrir / merger une **PR** rétroactive si tu préfères le flux PR avant push (dans ce cas `main` local peut devancer `origin` jusqu’au merge PR).
-3. **Issue #13** : suite — **carte activités** / route (optionnel) ; E2E smoke **Edge** sur staging si utile.
-4. **PR #36** : optionnel — traiter ou fermer.
+1. **GitHub** : fermer ou mettre à jour les Issues **#11** / **#12** si encore ouvertes ; vérifier **CI** sur `main`.
+2. **Issue #13** : suite — **carte activités** / route (optionnel) ; E2E smoke **Edge** sur staging si utile.
+3. **PR #36** : optionnel — traiter ou fermer.
 
 ---
 
@@ -56,7 +54,7 @@ Les sections détaillées **#0 à #10** ont été retirées pour limiter la main
 
 ## 🎯 Issue #11: Trip Detail Screen - Chat & Collaboration
 
-**Status:** 🟢 **COMPLETED (MVP)** — non-lus onglet, réactions (`017`), mentions, typings Postgrest ; présence / frappe. Code sur **`main` (local)** via merge `feature/issue-11-chat-unread-tab` — **pousser `origin/main`**. Réfs GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40) / PR [#41](https://github.com/igorms-pro/voyagely/pull/41) si applicable. **Hors MVP :** `last_seen` SQL, reply threads, non-lus multi-device.  
+**Status:** 🟢 **COMPLETED (MVP)** — non-lus onglet, réactions (`017`), mentions, typings Postgrest ; présence / frappe. Sur **`main`** (merge `feature/issue-11-chat-unread-tab`). Réfs GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40) / PR [#41](https://github.com/igorms-pro/voyagely/pull/41) si applicable. **Hors MVP :** `last_seen` SQL, reply threads, non-lus multi-device.  
 **Priority:** HIGH  
 **Phase:** Screen 4d  
 **Dependencies:** Issues #0–#10 (archivées — `main`)
@@ -123,8 +121,8 @@ Complete chat with presence, typing indicators, and collaboration features.
 
 ## 🎯 Issue #12: Trip Detail Screen - AI Itinerary Generation
 
-**Status:** 🟢 **COMPLETED (MVP)** — code fusionné dans **`main` (local)** mai 2026 : Edge **`ai-generate-itinerary`** / **`ai-generate-activity-suggestions`**, migration **`018`**, quotas **tier** + RBAC, client **`edge`** par défaut, E2E + tests unitaires. **Distant :** pousser `main`. Optionnel : reporting coûts agrégé admin, **Stripe** → `ai_tier` premium.  
-**GitHub:** fermer / référencer Issue **#12** après push `main`.  
+**Status:** 🟢 **COMPLETED (MVP)** — sur **`main` / `origin`** (mai 2026) : Edge **`ai-generate-itinerary`** / **`ai-generate-activity-suggestions`**, migration **`018`**, quotas **tier** + RBAC, client **`edge`** par défaut, E2E + tests unitaires. Optionnel : reporting coûts agrégé admin, **Stripe** → `ai_tier` premium.  
+**GitHub:** fermer / référencer Issue **#12** si encore ouverte.  
 **Branche historique :** `feature/issue-11-chat-unread-tab` (fast-forward → `main`).  
 **Priority:** HIGH  
 **Phase:** Screen 4e  
@@ -159,7 +157,7 @@ Génération IA d’**itinéraires scénarisés** (copie possible vers l’itin�
 - [x] 🟢 **Cost / quotas métier** — par **tier** `free` / `premium` (`profiles.ai_tier`) : plafonds scénarios / trip + suggestions / mois (Edge + client alignés), comptage DB `itineraries.generated_by_ai`, bouton désactivé + toast quota
 - [x] 🟢 **RBAC IA** — seuls **owner / editor / moderator** peuvent lancer la génération (403 `forbidden_ai` + i18n)
 - [x] 🟢 **Erreurs** génération scénario → **Sentry** (`captureFeatureError` dans `tripDetailSlice.aiScenarioOps`)
-- [x] 🟢 **Merge `main`** — fast-forward depuis `feature/issue-11-chat-unread-tab` (mai 2026, local)
+- [x] 🟢 **Merge `main`** — fast-forward depuis `feature/issue-11-chat-unread-tab` → poussé sur **`origin/main`** (mai 2026)
 
 #### AI Generation UI
 
@@ -334,9 +332,9 @@ Add trip templates and sharing capabilities.
 ### En cours / décisions
 
 - [ ] **PR #36** : merger les refactors branche `35-trip-detail-screen---activities-scenarios-v2` dans `main` (ou fermer / rebaser si obsolète).
-- [x] 🟢 **Issue #11 (chat)** : **MVP COMPLETED** — fusionné dans **`main` (local)** ; pousser `origin/main`.
+- [x] 🟢 **Issue #11 (chat)** : **MVP COMPLETED** — sur **`main`**.
 - [x] 🟢 **Issues #0–#10** : terminées sur `main` (voir tableau archive ci-dessus).
-- [x] 🟢 **Issue #12 (IA)** : **MVP COMPLETED** — merge local `main` (voir section #12) ; pousser `origin/main`.
+- [x] 🟢 **Issue #12 (IA)** : **MVP COMPLETED** — sur **`main`** (voir section #12).
 
 ---
 
@@ -396,7 +394,7 @@ _Will be tracked here as discovered_
 
 ### Trip detail — suite MVP
 
-- **Issue #11 (Chat)**: 🟢 **COMPLETED (MVP)** — sur **`main` (local)** ; `git push origin main`
+- **Issue #11 (Chat)**: 🟢 **COMPLETED (MVP)** — sur **`main`**
 - **Issue #12 (AI Generation)**: 🟢 **COMPLETED (MVP)** — Edge + migration 018 + tier + logs ; optionnel smoke E2E staging / reporting agrégé
 - **Issue #13 (Context)**: 🟡 **partiel** — météo / lieux / i18n ; **temps entre activités** sur timeline livré ; carte / route post-MVP (voir section #13)
 
@@ -406,7 +404,7 @@ _Will be tracked here as discovered_
 - **Issue #15 (PWA/Offline)**: 🔴 0% - Phase 2
 - **Issue #16 (Templates)**: 🔴 0% - Phase 2
 
-**Overall MVP Completion: ~78%** (#11 / **#12** sur **`main` local** — push `origin` ; suite **#13** carte / route)
+**Overall MVP Completion: ~78%** (#11 / **#12** sur **`main`** ; suite **#13** carte / route)
 
 ---
 
@@ -414,8 +412,8 @@ _Will be tracked here as discovered_
 
 **CRITICAL PATH**:
 
-1. **`git push origin main`** — publier #11 + #12 + slices #13.
-2. **GitHub** : fermer / mettre à jour Issues **#11** / **#12** si applicable.
-3. **#13** : carte activités / route (optionnel) ; **PR #36** : optionnel.
+1. **GitHub** : Issues **#11** / **#12** + **CI** sur `main`.
+2. **#13** : carte activités / route (optionnel).
+3. **PR #36** : optionnel.
 
-**BLOCKER** : aucun bloquant produit — **push `origin/main`** est la prochaine étape pour aligner le distant ; **PR #36** non bloquant.
+**BLOCKER** : aucun bloquant produit ; **PR #36** non bloquant.
