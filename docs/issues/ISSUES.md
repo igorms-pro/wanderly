@@ -81,7 +81,7 @@ Complete chat with presence, typing indicators, and collaboration features.
 - [x] 🟢 **Add presence tracking** (MVP — Supabase Realtime Presence, pas de `last_seen` SQL) :
   - [x] Show who's online in trip (pastilles + compteur dans l’en-tête chat)
   - [x] Online/offline indicator on avatars (messages des autres)
-  - [ ] Last seen timestamps (hors scope MVP — persistance profil / table dédiée)
+  - [x] **Décision produit** : pas de **last seen** par membre ni d’**accusés de lecture** type WhatsApp (« tout le monde a vu ») sur le fil trip — trop bruyant / peu utile à ~20 personnes ; présence **live** + **non-lus** + mentions suffisent.
   - [x] Active users count (compteur « membres en ligne »)
 
 #### Typing Indicators
@@ -117,7 +117,7 @@ Complete chat with presence, typing indicators, and collaboration features.
 - [x] Presence tracking works (MVP Realtime — sans last_seen persistant)
 - [x] Typing indicators work
 - [x] Real-time updates work
-- [x] Texte chat couvert par i18n (y compris présence / frappe / badge non-lus onglet / réactions / mentions) — extensions futures : reply threads, réactions custom
+- [x] Texte chat couvert par i18n (y compris présence / frappe / badge non-lus onglet / réactions / mentions) — extensions futures possibles : **reply threads** (optionnel), réactions custom — **pas** last seen / relevés de lecture massifs sur le fil.
 - [x] Tests unitaires ciblés (presence helper) ; E2E chat optionnel
 
 ---
