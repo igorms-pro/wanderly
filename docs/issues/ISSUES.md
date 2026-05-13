@@ -2,7 +2,7 @@
 
 > Goal: Build a complete SaaS travel planning platform with AI-powered itineraries, real-time collaboration, and seamless user experience.
 
-**Last Updated:** May 13, 2026
+**Last Updated:** May 13, 2026 (sync Edge IA #12)
 
 ## 📋 Status Legend
 
@@ -19,16 +19,17 @@
 
 - **`origin/main`** : fondations **#0–#7** ; trip detail **#8–#10** (dont voting PR [#38](https://github.com/igorms-pro/voyagely/pull/38) / [#39](https://github.com/igorms-pro/voyagely/pull/39), GitHub [#37](https://github.com/igorms-pro/voyagely/issues/37) fermée) ; activités/scénarios **PR #34** ; refactors optionnels **PR #36** (non bloquant).
 - **#11 Chat** : 🟢 **MVP terminé** sur la branche **`feature/issue-11-chat-unread-tab`** — merger la PR → `main`.
-- **#12 IA** : 🟡 **en cours** — durcissement service (retry, prompts, Sentry) ; reste UX / coûts / E2E ciblés.
+- **#12 IA** : 🟡 **PR / merge `main` à faire** — Edge Functions **`ai-generate-itinerary`** + **`ai-generate-activity-suggestions`** déployées, secret **`OPENAI_API_KEY`** (Dashboard), migration **`018`** (`profiles.ai_tier`, `ai_generation_logs`), quotas **tier** + RBAC organisateurs ; reste **merge**, puis **E2E smoke** / reporting agrégé si voulu.
 - **Suite** : **#13** (contexte / enrichissement).
 
 ---
 
 ## 🚀 IMMEDIATE NEXT ACTION (For AI Agent)
 
-1. **Merger la PR Issue #11** (`feature/issue-11-chat-unread-tab`) → `main` si pas encore fait.
-2. **Poursuivre Issue #12** : coûts / quotas utilisateur, UX génération (loading / erreurs), E2E smoke génération si pertinent.
-3. **PR #36** : optionnel — traiter ou fermer.
+1. **Merger vers `main`** : PR **Issue #11** (`feature/issue-11-chat-unread-tab`) si pas encore fait — la branche locale inclut souvent aussi le **lot #12 Edge IA** ; soit **une PR décrite en deux parties (#11 + #12)**, soit **split** (cherry-pick / branche `feature/issue-12-ai-edge`) pour revue plus lisible.
+2. **Issue #12** : après merge, marquer section #12 **🟢** si AC OK ; sinon garder 🟡 pour **E2E** `ai-scenario-generation` contre **Edge** en staging / **dashboard coûts agrégés** (hors scope court terme).
+3. **Issue #13** : reprendre contexte / enrichissement une fois **`main`** stabilisé avec #11 / #12.
+4. **PR #36** : optionnel — traiter ou fermer.
 
 ---
 
@@ -124,7 +125,9 @@ Complete chat with presence, typing indicators, and collaboration features.
 
 ## 🎯 Issue #12: Trip Detail Screen - AI Itinerary Generation
 
-**Status:** 🟡 **MVP #12 quasi bouclé** — quotas UI+DB, toasts, progression, hints contraintes, prod sans mock silencieux ; reste **E2E** / **dashboard coûts** / branchement suggestions UI si produit le veut.  
+**Status:** 🟡 **IN PROGRESS — code prêt, merge `main` pending** — génération **côté Edge** (clé OpenAI hors navigateur), migration **018**, quotas **free/premium**, métriques **`ai_generation_logs`**, i18n erreurs quota / `forbidden_ai` ; **PR GitHub à ouvrir** puis statut 🟢 une fois mergé + smoke OK.  
+**GitHub:** lier la PR à l’Issue GitHub **#12** (projet `igorms-pro/voyagely`) — titre/body avec `Fixes #…` ou référence.  
+**Branche (état repo mai 2026) :** `feature/issue-11-chat-unread-tab` — y compris changements **#12** ; recommandé : PR dont le corps liste **#11** et **#12**, ou branche dédiée **`feature/issue-12-ai-edge`** pour isoler la revue IA.  
 **Priority:** HIGH  
 **Phase:** Screen 4e  
 **Dependencies:** Issues #0–#10 (archivées — `main`)
@@ -142,8 +145,8 @@ Génération IA d’**itinéraires scénarisés** (copie possible vers l’itin�
 
 ### État code (mai 2026)
 
-- **Livré** : `openai-itinerary-service.ts` (Zod, mock si pas de clé), `openai-client.ts` (retry exponentiel 429/5xx), `openai-prompts.ts` (`ITINERARY_PROMPT_VERSION`, enfants / must_dos / no_gos), bouton **Generate with AI** (`TripScenariosSection` + i18n), persistance scénarios IA (`tripDetailSlice.aiScenarioOps`), votes scénarios (#10).
-- **Suite #12** : coûts agrégés / dashboards admin ; E2E « génère un scénario » si env CI stable ; suggestions d’activités branchées sur l’UI (optionnel).
+- **Livré** : `openai-itinerary-service.ts` (mode **`edge`** par défaut → `aiEdgeClient` → fonctions **`ai-generate-itinerary`** / **`ai-generate-activity-suggestions`**), Zod + prompts, **`018`** `profiles.ai_tier` + **`ai_generation_logs`** (serveur), quotas alignés **`aiScenarioLimits`** / `_shared/limits.ts`, **Generate with AI** réservé aux **organisateurs** (owner/editor/moderator), suggestions modal + quota mensuel, retry client (`openai-client`), votes scénarios (#10), analytics **trip_id** + tokens + coût approx., **E2E** `ai-scenario-generation.spec.ts` (à valider contre projet avec Edge déployé).
+- **Suite #12** : **PR + merge `main`** ; optionnel — dashboards admin coûts agrégés ; E2E smoke stable avec **`VITE_AI_GENERATION_MODE=edge`** sur staging ; **monétisation** `ai_tier` **premium** (Stripe / autre) — hors livraison actuelle.
 
 ### Tasks
 
@@ -154,8 +157,11 @@ Génération IA d’**itinéraires scénarisés** (copie possible vers l’itin�
 - [x] 🟢 **Prompt version** (`ITINERARY_PROMPT_VERSION` → événement analytics)
 - [x] 🟢 **Retry** exponentiel sur erreurs transitoires (`openai-client` + `openaiRetry.ts`)
 - [x] 🟢 **Token usage** dans events PostHog (itinéraire + suggestions)
-- [x] 🟢 **Cost / quotas** métier — **10 scénarios IA max / trip** (`MAX_AI_SCENARIOS_PER_TRIP` + comptage DB `itineraries.generated_by_ai`), bouton désactivé + toast quota
+- [x] 🟢 **Edge Functions** — OpenAI **uniquement serveur** (`OPENAI_API_KEY` Secret Supabase), **`verify_jwt`**, logs **`ai_generation_logs`** (tokens / durée)
+- [x] 🟢 **Cost / quotas métier** — par **tier** `free` / `premium` (`profiles.ai_tier`) : plafonds scénarios / trip + suggestions / mois (Edge + client alignés), comptage DB `itineraries.generated_by_ai`, bouton désactivé + toast quota
+- [x] 🟢 **RBAC IA** — seuls **owner / editor / moderator** peuvent lancer la génération (403 `forbidden_ai` + i18n)
 - [x] 🟢 **Erreurs** génération scénario → **Sentry** (`captureFeatureError` dans `tripDetailSlice.aiScenarioOps`)
+- [ ] 🟡 **PR** ouverte + **merge `main`** (workflow Issue — obligatoire avant 🟢 COMPLETED)
 
 #### AI Generation UI
 
@@ -177,7 +183,7 @@ Génération IA d’**itinéraires scénarisés** (copie possible vers l’itin�
 
 #### AI Activity Suggestions
 
-- [x] 🟢 `generateActivitySuggestions` — **documenté** (JSDoc) comme hors UI MVP ; branchement modal activités = suivi post-MVP
+- [x] 🟢 `generateActivitySuggestions` branché sur le **modal activité** (EN/FR + mock si clé démo)
 
 #### AI Workflow
 
@@ -194,13 +200,13 @@ Génération IA d’**itinéraires scénarisés** (copie possible vers l’itin�
 - [x] Les scénarios IA apparaissent avec les autres ; le groupe peut voter
 - [x] Erreurs API : retry + **erreurs typées** en prod (plus de mock silencieux hors DEV / clé démo)
 - [x] Messages utilisateur IA (succès / erreurs / quota / hints) via **i18n**
-- [x] Tests unitaires : **retry** (`openaiRetry`) + **hint contraintes** (`tripConstraintsHint`) ; E2E génération **si** env seed / clé (optionnel)
+- [x] Tests unitaires : **retry** (`openaiRetry`) + **hint contraintes** (`tripConstraintsHint`) + **parse suggestions** (`openai-activity-suggestions-parse`) ; E2E `e2e/ai-scenario-generation.spec.ts` (auth + trip seed ; sinon skip)
 
 ---
 
 ## 🎯 Issue #13: Trip Detail Screen - Context & Enrichment
 
-**Status:** 🔴 **NOT STARTED**  
+**Status:** 🟡 **IN PROGRESS**  
 **Priority:** MEDIUM  
 **Phase:** Screen 4f  
 **Dependencies:** Issue #9 (activities)
@@ -213,28 +219,22 @@ Add weather, places, and travel time context to trip detail screen.
 
 #### Weather Widget
 
-- [x] 🟢 **Weather widget exists**:
-  - [x] Basic weather display
-  - [ ] 🔴 Weather API integration
-  - [ ] 🔴 Display forecast for trip dates
-  - [ ] 🔴 Weather icons
-  - [ ] 🔴 Temperature, precipitation, wind
+- [x] 🟢 **Weather API** : `VITE_OPENWEATHER_API_KEY` (sans clé → mock) ; pas de clé en dur
+- [x] 🟢 **Forecast** pour les dates du voyage (comportement inchangé + fallback mock)
+- [x] 🟢 **Icônes / température / vent / humidité** (affichage existant + i18n)
 
 #### Places Widget
 
-- [x] 🟢 **Nearby places widget exists**:
-  - [x] Basic places display
-  - [ ] 🔴 Google Places API integration
-  - [ ] 🔴 Display nearby POIs
-  - [ ] 🔴 Place details (rating, photos, hours)
-  - [ ] 🔴 "Add to itinerary" button
+- [x] 🟢 **Google Places** : `VITE_GOOGLE_MAPS_API_KEY` uniquement (sans clé → mock `getMockNearbyPlaces`)
+- [x] 🟢 **POI à proximité** + libellés catégories **i18n** (`tripDetail.explore*`)
+- [ ] 🔴 Place details (photos, horaires) — post-MVP
+- [ ] 🔴 "Add to itinerary" — post-MVP
 
 #### Travel Time
 
-- [ ] 🔴 **Add travel time between activities**:
-  - [ ] Calculate travel time between consecutive activities
-  - [ ] Display travel time on timeline
-  - [ ] Route visualization (optional)
+- [x] 🟢 **Temps entre activités** — préfère `transport_duration_minutes` sur l’activité **suivante** ; sinon estimation **Haversine** + vitesse moyenne (affichage « approximatif ») si `lat`/`lon` sur les deux
+- [x] 🟢 Affichage sur la **timeline** (connecteur entre cartes)
+- [ ] 🔴 **Route visualization** (optional)
 
 #### Maps
 
@@ -245,18 +245,15 @@ Add weather, places, and travel time context to trip detail screen.
 
 #### i18n
 
-- [ ] 🔴 **Verify all context text is internationalized**:
-  - [ ] Weather labels
-  - [ ] Places labels
-  - [ ] Travel time labels
+- [x] 🟢 Libellés météo / lieux (`tripDetail.explore*`)
 
 ### Acceptance Criteria
 
-- [ ] Weather displays correctly
-- [ ] Places display correctly
-- [ ] Travel time calculates correctly
-- [ ] All text is internationalized
-- [ ] Tests pass
+- [x] Weather displays correctly (API or mock)
+- [x] Places display correctly (API or mock)
+- [x] Travel time between consecutive activities (stored duration or coordinate estimate)
+- [x] Weather and places labels internationalized (`tripDetail.explore*`)
+- [x] Tests pass
 
 ---
 
@@ -341,7 +338,7 @@ Add trip templates and sharing capabilities.
 - [ ] **PR #36** : merger les refactors branche `35-trip-detail-screen---activities-scenarios-v2` dans `main` (ou fermer / rebaser si obsolète).
 - [x] 🟢 **Issue #11 (chat)** : **MVP COMPLETED** — merger la PR `feature/issue-11-chat-unread-tab` → `main` pour alignement prod.
 - [x] 🟢 **Issues #0–#10** : terminées sur `main` (voir tableau archive ci-dessus).
-- [ ] 🟡 **Issue #12 (IA)** : durcissement en cours (voir section #12).
+- [ ] 🟡 **Issue #12 (IA)** : livré sur branche — **PR / merge `main`** (voir section #12).
 
 ---
 
@@ -402,8 +399,8 @@ _Will be tracked here as discovered_
 ### Trip detail — suite MVP
 
 - **Issue #11 (Chat)**: 🟢 **COMPLETED (MVP)** — branche `feature/issue-11-chat-unread-tab` ; merger PR → `main`
-- **Issue #12 (AI Generation)**: 🟡 **~85%** — quotas + UX + i18n + prod strict ; reste E2E / reporting coûts agrégé
-- **Issue #13 (Context)**: 🔴 10% - Not Started
+- **Issue #12 (AI Generation)**: 🟡 **~95%** — Edge + migration 018 + tier + logs serveur ; reste **merge `main`** + smoke E2E / reporting agrégé optionnel
+- **Issue #13 (Context)**: 🟡 **partiel** — météo / lieux / i18n widgets avancés ; travel time & détails lieux post-MVP (voir section #13)
 
 ### Phase 2 (Post-MVP)
 
@@ -411,7 +408,7 @@ _Will be tracked here as discovered_
 - **Issue #15 (PWA/Offline)**: 🔴 0% - Phase 2
 - **Issue #16 (Templates)**: 🔴 0% - Phase 2
 
-**Overall MVP Completion: ~72%** (#11 MVP doc OK + code sur branche ; merger PR ; **#12** avancée ; suite **#13**)
+**Overall MVP Completion: ~74%** (#11 + **#12** prêts sur branche — merger PR(s) → `main` ; suite **#13**)
 
 ---
 
@@ -419,8 +416,8 @@ _Will be tracked here as discovered_
 
 **CRITICAL PATH**:
 
-1. **Merger PR #11** (`feature/issue-11-chat-unread-tab`) → `main` si besoin.
-2. **#12** : quotas / UX erreurs / i18n messages IA + E2E ; puis **#13** (contexte).
+1. **Ouvrir PR(s)** depuis `feature/issue-11-chat-unread-tab` (références GitHub **#11** / **#12**) → merger **`main`**.
+2. **#12** : après merge, fermer l’Issue GitHub si AC OK ; smoke **E2E** + staging Edge si besoin ; puis **#13** (contexte).
 3. **PR #36** : optionnel — traiter ou fermer.
 
-**BLOCKER** : aucun bloquant produit — **#12** est le focus technique ; **PR #36** non bloquant.
+**BLOCKER** : aucun bloquant produit — **merge `main`** est la prochaine étape livrante ; **PR #36** non bloquant.

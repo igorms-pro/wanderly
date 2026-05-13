@@ -59,6 +59,15 @@ vi.mock('../../lib/supabase', () => ({
           })),
         };
       }
+      if (table === 'profiles') {
+        return {
+          select: vi.fn(() => ({
+            eq: vi.fn(() => ({
+              maybeSingle: vi.fn(() => Promise.resolve({ data: { ai_tier: 'free' }, error: null })),
+            })),
+          })),
+        };
+      }
       return {
         select: vi.fn(() => ({
           eq: vi.fn(() => Promise.resolve({ data: [], error: null })),

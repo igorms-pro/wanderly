@@ -134,11 +134,13 @@ export const buildActivitySuggestionsPrompt = (
 ${interestsLine}
 ${existingLine}
 
-Return only JSON with an array of activity suggestions, each having:
+Return only a JSON object (no markdown) with a single key "suggestions" whose value is an array of objects, each having:
 - title
 - description
 - category
 - suggestedTimeOfDay ("morning" | "afternoon" | "evening" | "night")
+
+Example shape: { "suggestions": [ { "title": "...", "description": "...", "category": "food", "suggestedTimeOfDay": "morning" } ] }
 
 ${languageInstruction}`;
 };

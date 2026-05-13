@@ -10,6 +10,7 @@ import {
   EditActivityModal,
 } from '@/features/activities';
 import { AiScenarioGenerationError } from '@/lib/ai/aiScenarioGenerationError';
+import { maxAiScenariosForTier } from '@/lib/ai/aiScenarioLimits';
 import { useStore } from '@/lib/store';
 import { supabase } from '@/lib/supabase';
 import { DashboardHeader } from '@/pages/dashboard/DashboardHeader';
@@ -128,6 +129,7 @@ export default function TripDetailPage() {
     scenariosError,
     canCreateActivitiesAndScenarios,
     canManageScenarios,
+    userAiTier,
     canEditActivities,
     canReorderActivities,
     canDeleteActivities,
@@ -199,6 +201,8 @@ export default function TripDetailPage() {
   if (!currentTrip) {
     return null;
   }
+
+  const maxAiScenariosPerTrip = maxAiScenariosForTier(userAiTier);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -316,6 +320,8 @@ export default function TripDetailPage() {
             memberProfiles={memberProfiles}
             scenarios={scenarios}
             canCreateScenarios={canCreateActivitiesAndScenarios()}
+            canGenerateAiScenario={canManageScenarios()}
+            maxAiScenariosPerTrip={maxAiScenariosPerTrip}
             canManageScenarios={canManageScenarios()}
             onGenerateAiScenario={async () => {
               if (!currentTrip) return;

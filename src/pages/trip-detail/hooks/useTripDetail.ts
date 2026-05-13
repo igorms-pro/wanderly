@@ -1,7 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+
+import type { AiTier } from '@/lib/ai/aiScenarioLimits';
 import { useStore } from '@/lib/store';
+import { supabase } from '@/lib/supabase';
 import { useToast } from '@/contexts/ToastContext';
 import { TripMember } from '@/lib/types/database.types';
 import { useTripDetailRealtime } from './useTripDetailRealtime';
@@ -63,6 +66,7 @@ function useTripDetailData() {
   }));
   const [isDeleting, setIsDeleting] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
+  const [userAiTier, setUserAiTier] = useState<AiTier>('free');
 
   useTripDetailRealtime(tripId ?? undefined);
   const { addToast } = useToast();
@@ -151,10 +155,28 @@ function useTripDetailData() {
     loadTripData();
   }, [tripId, user, navigate, loadTripData]);
 
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    void supabase
+      .from('profiles')
+      .select('ai_tier')
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled) return;
+        setUserAiTier(data?.ai_tier === 'premium' ? 'premium' : 'free');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
   return {
     t,
     locale: i18n.language,
     user,
+    userAiTier,
     tripId,
     navigate,
     loading,

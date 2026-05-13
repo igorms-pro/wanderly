@@ -1,8 +1,14 @@
-// Google Places API Service
+// Google Places API — requires VITE_GOOGLE_MAPS_API_KEY; otherwise callers fall back to mock data.
 import axios from 'axios';
 
 const GOOGLE_MAPS_API_KEY =
-  import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyCO0kKndUNlmQi3B5mxy4dblg_8WYcuKuk';
+  typeof import.meta.env.VITE_GOOGLE_MAPS_API_KEY === 'string'
+    ? import.meta.env.VITE_GOOGLE_MAPS_API_KEY.trim()
+    : '';
+
+export function hasGoogleMapsApiKey(): boolean {
+  return GOOGLE_MAPS_API_KEY.length > 0;
+}
 
 export interface PlaceDetails {
   name: string;
@@ -50,6 +56,9 @@ export async function searchPlaces(
   query: string,
   location?: { lat: number; lng: number },
 ): Promise<NearbyPlace[]> {
+  if (!hasGoogleMapsApiKey()) {
+    return [];
+  }
   try {
     const params: any = {
       key: GOOGLE_MAPS_API_KEY,
@@ -71,7 +80,9 @@ export async function searchPlaces(
 
     return [];
   } catch (error) {
-    console.error('Error searching places:', error);
+    if (import.meta.env.DEV) {
+      console.error('Error searching places:', error);
+    }
     return [];
   }
 }
@@ -82,6 +93,9 @@ export async function getNearbyPlaces(
   type: string = 'tourist_attraction',
   radius: number = 5000,
 ): Promise<NearbyPlace[]> {
+  if (!hasGoogleMapsApiKey()) {
+    return [];
+  }
   try {
     const response = await axios.get(
       'https://maps.googleapis.com/maps/api/place/nearbysearch/json',
@@ -101,12 +115,17 @@ export async function getNearbyPlaces(
 
     return [];
   } catch (error) {
-    console.error('Error fetching nearby places:', error);
+    if (import.meta.env.DEV) {
+      console.error('Error fetching nearby places:', error);
+    }
     return [];
   }
 }
 
 export async function getPlaceDetails(placeId: string): Promise<PlaceDetails | null> {
+  if (!hasGoogleMapsApiKey()) {
+    return null;
+  }
   try {
     const response = await axios.get('https://maps.googleapis.com/maps/api/place/details/json', {
       params: {
@@ -123,18 +142,26 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceDetails | n
 
     return null;
   } catch (error) {
-    console.error('Error fetching place details:', error);
+    if (import.meta.env.DEV) {
+      console.error('Error fetching place details:', error);
+    }
     return null;
   }
 }
 
 export function getPlacePhotoUrl(photoReference: string, maxWidth: number = 400): string {
+  if (!hasGoogleMapsApiKey()) {
+    return '';
+  }
   return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidth}&photo_reference=${photoReference}&key=${GOOGLE_MAPS_API_KEY}`;
 }
 
 export async function geocodeAddress(
   address: string,
 ): Promise<{ lat: number; lng: number } | null> {
+  if (!hasGoogleMapsApiKey()) {
+    return null;
+  }
   try {
     const response = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
       params: {
@@ -150,7 +177,9 @@ export async function geocodeAddress(
 
     return null;
   } catch (error) {
-    console.error('Error geocoding address:', error);
+    if (import.meta.env.DEV) {
+      console.error('Error geocoding address:', error);
+    }
     return null;
   }
 }

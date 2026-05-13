@@ -169,7 +169,7 @@ export const Analytics = {
     posthog.capture('error_occurred', {
       error,
       context,
-      ...properties,
+      ...(properties ?? {}),
     });
   },
 

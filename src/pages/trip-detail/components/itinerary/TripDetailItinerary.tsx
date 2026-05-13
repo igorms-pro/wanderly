@@ -46,6 +46,9 @@ interface TripDetailItineraryProps {
   memberProfiles?: Record<string, { display_name: string | null; avatar_url: string | null }>;
   scenarios?: import('@/lib/store/tripDetailSlice.scenarios').TripScenario[];
   canCreateScenarios?: boolean;
+  /** Owner / editor / moderator — AI scenario generation. */
+  canGenerateAiScenario?: boolean;
+  maxAiScenariosPerTrip?: number;
   canManageScenarios?: boolean;
   canVoteScenario?: boolean;
   votingScenarioId?: string | null;
@@ -91,6 +94,8 @@ export function TripDetailItinerary({
   memberProfiles = {},
   scenarios = [],
   canCreateScenarios = false,
+  canGenerateAiScenario = false,
+  maxAiScenariosPerTrip = 3,
   canManageScenarios = false,
   canVoteScenario = false,
   votingScenarioId = null,
@@ -251,6 +256,8 @@ export function TripDetailItinerary({
             scenarios={scenarios}
             sortedDates={sortedDates}
             canCreate={canCreateScenarios}
+            canGenerateAiScenario={canGenerateAiScenario}
+            maxAiScenariosPerTrip={maxAiScenariosPerTrip}
             canManage={canManageScenarios}
             canVoteScenario={canVoteScenario}
             votingScenarioId={votingScenarioId}

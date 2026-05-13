@@ -1,0 +1,7 @@
+# Local Supabase config — extend when using CLI for functions deploy
+
+[functions.ai-generate-itinerary]
+verify_jwt = true
+
+[functions.ai-generate-activity-suggestions]
+verify_jwt = true

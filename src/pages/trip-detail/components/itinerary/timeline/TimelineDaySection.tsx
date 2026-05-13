@@ -1,8 +1,10 @@
+import { Fragment } from 'react';
 import { format } from 'date-fns';
 import type { Activity, TripMember } from '@/lib/types/database.types';
 import type { MemberProfile } from '../../../ItineraryActivityTypes';
 import { sortActivitiesByDayOrder } from '../../../hooks/itinerary-utils';
 import { TimelineActivityCard } from './TimelineActivityCard';
+import { TimelineTravelBetween } from './TimelineTravelBetween';
 
 interface TimelineDaySectionProps {
   date: string;
@@ -15,7 +17,7 @@ interface TimelineDaySectionProps {
   getVoteCounts: (activityId: string) => { upvotes: number; downvotes: number };
   getUserVote: (activityId: string) => 'up' | 'down' | null;
   onVote: (activityId: string, choice: 'up' | 'down') => void;
-  t: (key: string) => string;
+  t: (key: string, options?: Record<string, string | number>) => string;
   currency: string;
   membersCount: number;
   activityParticipantsMap: Record<string, string[]>;
@@ -99,36 +101,39 @@ export function TimelineDaySection({
         )}
         {sortedActivities.map((activity, i) => {
           const isExpanded = expandedId === activity.id;
+          const prev = i > 0 ? sortedActivities[i - 1] : null;
           return (
-            <TimelineActivityCard
-              key={activity.id}
-              activity={activity}
-              index={i}
-              date={date}
-              currency={currency}
-              canVote={canVote}
-              votingActivityId={votingActivityId}
-              getVoteCounts={getVoteCounts}
-              getUserVote={getUserVote}
-              onVote={onVote}
-              t={t}
-              isExpanded={isExpanded}
-              onToggleExpanded={() =>
-                setExpandedId(expandedId === activity.id ? null : activity.id)
-              }
-              tripMembersCount={membersCount}
-              activityParticipantsMap={activityParticipantsMap}
-              tripMembers={tripMembers}
-              memberProfiles={memberProfiles}
-              canEditActivity={canEdit}
-              onEditActivity={onEditActivity}
-              onDeleteActivity={onDeleteActivity}
-              isJustEdited={lastEditedActivityId === activity.id}
-              canReorder={canReorder}
-              onDragStart={onDragStart}
-              onDragOver={onDragOver}
-              onDrop={canReorder ? onDropOnActivity : undefined}
-            />
+            <Fragment key={activity.id}>
+              {prev ? <TimelineTravelBetween prev={prev} next={activity} t={t} /> : null}
+              <TimelineActivityCard
+                activity={activity}
+                index={i}
+                date={date}
+                currency={currency}
+                canVote={canVote}
+                votingActivityId={votingActivityId}
+                getVoteCounts={getVoteCounts}
+                getUserVote={getUserVote}
+                onVote={onVote}
+                t={t}
+                isExpanded={isExpanded}
+                onToggleExpanded={() =>
+                  setExpandedId(expandedId === activity.id ? null : activity.id)
+                }
+                tripMembersCount={membersCount}
+                activityParticipantsMap={activityParticipantsMap}
+                tripMembers={tripMembers}
+                memberProfiles={memberProfiles}
+                canEditActivity={canEdit}
+                onEditActivity={onEditActivity}
+                onDeleteActivity={onDeleteActivity}
+                isJustEdited={lastEditedActivityId === activity.id}
+                canReorder={canReorder}
+                onDragStart={onDragStart}
+                onDragOver={onDragOver}
+                onDrop={canReorder ? onDropOnActivity : undefined}
+              />
+            </Fragment>
           );
         })}
       </div>

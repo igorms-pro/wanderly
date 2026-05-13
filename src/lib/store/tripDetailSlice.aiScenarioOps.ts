@@ -1,5 +1,5 @@
 import { AiScenarioGenerationError } from '../ai/aiScenarioGenerationError';
-import { MAX_AI_SCENARIOS_PER_TRIP } from '../ai/aiScenarioLimits';
+import { maxAiScenariosForTier, type AiTier } from '../ai/aiScenarioLimits';
 import { generateItineraryFromConstraints } from '../ai/openai-itinerary-service';
 import { captureFeatureError } from '../errorHandling';
 import { supabase } from '../supabase';
@@ -29,6 +29,21 @@ export function createTripDetailAiScenarioOpsSlice(
   return {
     generateAiScenario: async (trip, membersCount, locale) => {
       try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) throw new AiScenarioGenerationError('unknown');
+
+        const { data: profileRow } = await supabase
+          .from('profiles')
+          .select('ai_tier')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        const tier: AiTier =
+          (profileRow as { ai_tier?: string } | null)?.ai_tier === 'premium' ? 'premium' : 'free';
+        const maxScenarios = maxAiScenariosForTier(tier);
+
         const { count, error: quotaErr } = await supabase
           .from('itineraries')
           .select('id', { head: true, count: 'exact' })
@@ -40,7 +55,7 @@ export function createTripDetailAiScenarioOpsSlice(
           captureFeatureError(quotaErr, 'ai_scenario_quota_count', { trip_id: trip.id });
           throw new AiScenarioGenerationError('unknown');
         }
-        if ((count ?? 0) >= MAX_AI_SCENARIOS_PER_TRIP) {
+        if ((count ?? 0) >= maxScenarios) {
           throw new AiScenarioGenerationError('quota_exceeded');
         }
 
@@ -52,6 +67,8 @@ export function createTripDetailAiScenarioOpsSlice(
             : undefined;
 
         const result = await generateItineraryFromConstraints({
+          tripId: trip.id,
+          membersCount,
           request: {
             destination: trip.destination_text,
             startDate: trip.start_date,

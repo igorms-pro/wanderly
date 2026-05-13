@@ -1,7 +1,14 @@
-// Weather API Service using OpenWeatherMap
+// Weather API (OpenWeatherMap). Without VITE_OPENWEATHER_API_KEY, returns mock forecast data.
 import axios from 'axios';
 
-const OPENWEATHER_API_KEY = '8c0a4e88b89e4e1f9b5b4c5f5e5e5e5e'; // Free tier API key
+const OPENWEATHER_API_KEY =
+  typeof import.meta.env.VITE_OPENWEATHER_API_KEY === 'string'
+    ? import.meta.env.VITE_OPENWEATHER_API_KEY.trim()
+    : '';
+
+export function hasOpenWeatherApiKey(): boolean {
+  return OPENWEATHER_API_KEY.length > 0;
+}
 
 export interface WeatherData {
   temp: number;
@@ -22,6 +29,10 @@ export async function getWeatherForecast(
   startDate: string,
   endDate: string,
 ): Promise<ForecastData> {
+  if (!hasOpenWeatherApiKey()) {
+    return generateMockWeather(startDate, endDate);
+  }
+
   try {
     // Get coordinates for the city
     const geoResponse = await axios.get(
@@ -78,8 +89,9 @@ export async function getWeatherForecast(
 
     return { daily: dailyForecasts };
   } catch (error) {
-    console.error('Error fetching weather:', error);
-    // Return mock weather data as fallback
+    if (import.meta.env.DEV) {
+      console.error('Error fetching weather:', error);
+    }
     return generateMockWeather(startDate, endDate);
   }
 }

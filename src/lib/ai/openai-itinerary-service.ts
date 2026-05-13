@@ -1,8 +1,18 @@
 import { z } from 'zod';
 
 import { Analytics } from '../analytics';
+import {
+  AiSuggestionsEdgeError,
+  invokeAiActivitySuggestions,
+  invokeAiGenerateItinerary,
+} from './aiEdgeClient';
 import { AiScenarioGenerationError } from './aiScenarioGenerationError';
-import { callOpenAIChat, OpenAIError, parseJSONResponse } from './openai-client';
+import {
+  callOpenAIChat,
+  OpenAIError,
+  parseJSONResponse,
+  type OpenAIChatUsage,
+} from './openai-client';
 import {
   buildItineraryPrompt,
   buildActivitySuggestionsPrompt,
@@ -78,9 +88,47 @@ const activitySuggestionSchema = z.object({
 
 const activitySuggestionsSchema = z.array(activitySuggestionSchema);
 
+function estimateGpt41MiniCostUsdCents(usage?: OpenAIChatUsage): number | undefined {
+  if (!usage) return undefined;
+  const pt = usage.promptTokens ?? 0;
+  const ct = usage.completionTokens ?? 0;
+  if (!pt && !ct) return undefined;
+  const usd = (pt / 1_000_000) * 0.15 + (ct / 1_000_000) * 0.6;
+  return Math.round(usd * 100);
+}
+
+export function parseActivitySuggestionsPayload(content: string): AIActivitySuggestion[] {
+  let json: unknown;
+  try {
+    json = JSON.parse(content);
+  } catch {
+    throw new OpenAIError('Invalid suggestions payload', { code: 'invalid_json' });
+  }
+  if (Array.isArray(json)) {
+    return activitySuggestionsSchema.parse(json);
+  }
+  if (!json || typeof json !== 'object') {
+    throw new OpenAIError('Invalid suggestions payload', { code: 'invalid_json' });
+  }
+  const raw = json as Record<string, unknown>;
+  const arr = raw.suggestions ?? raw.activities;
+  if (!Array.isArray(arr)) {
+    throw new OpenAIError('Invalid suggestions payload', { code: 'invalid_json' });
+  }
+  return activitySuggestionsSchema.parse(arr);
+}
+
 export interface GenerateItineraryParams {
   request: ItineraryRequest;
   locale?: string;
+  tripId?: string;
+  /** Used when generating via Supabase Edge (member count for prompt). */
+  membersCount?: number;
+}
+
+function isEdgeAiGenerationMode(): boolean {
+  const mode = import.meta.env.VITE_AI_GENERATION_MODE;
+  return (mode ?? 'edge') !== 'client';
 }
 
 const isDemoApiKey = () => {
@@ -112,6 +160,41 @@ export async function generateItineraryFromConstraints(
     return generateMockItinerary(request);
   }
 
+  if (isEdgeAiGenerationMode() && params.tripId) {
+    try {
+      const { itinerary, usage } = await invokeAiGenerateItinerary({
+        tripId: params.tripId,
+        locale,
+        membersCount: Math.max(1, params.membersCount ?? 1),
+      });
+
+      const estimatedCostUsdCents = estimateGpt41MiniCostUsdCents({
+        promptTokens: usage?.prompt_tokens,
+        completionTokens: usage?.completion_tokens,
+      });
+
+      Analytics.capture('openai_itinerary_generated', {
+        trip_id: params.tripId,
+        duration_ms: usage?.duration_ms,
+        model: 'gpt-4o-mini',
+        total_tokens: usage?.total_tokens,
+        prompt_tokens: usage?.prompt_tokens,
+        completion_tokens: usage?.completion_tokens,
+        estimated_cost_usd_cents: estimatedCostUsdCents,
+        prompt_version: usage?.prompt_version ?? ITINERARY_PROMPT_VERSION,
+        source: 'edge',
+      });
+
+      return itinerary;
+    } catch (e) {
+      if (import.meta.env.DEV) {
+        console.error('[AI Edge] itinerary:', e);
+      }
+      if (e instanceof AiScenarioGenerationError) throw e;
+      throw new AiScenarioGenerationError('unknown');
+    }
+  }
+
   try {
     const prompt = buildItineraryPrompt({ request, locale });
 
@@ -136,10 +219,16 @@ export async function generateItineraryFromConstraints(
 
     const itinerary = parseJSONResponse(result.content, aiItineraryScenarioSchema);
 
+    const estimatedCostUsdCents = estimateGpt41MiniCostUsdCents(result.usage);
+
     Analytics.capture('openai_itinerary_generated', {
+      trip_id: params.tripId,
       duration_ms: Math.round(result.durationMs),
       model: 'gpt-4.1-mini',
       total_tokens: result.usage?.totalTokens,
+      prompt_tokens: result.usage?.promptTokens,
+      completion_tokens: result.usage?.completionTokens,
+      estimated_cost_usd_cents: estimatedCostUsdCents,
       prompt_version: ITINERARY_PROMPT_VERSION,
     });
 
@@ -149,9 +238,15 @@ export async function generateItineraryFromConstraints(
       console.error('[OpenAI] Error generating itinerary from constraints:', error);
     }
 
+    Analytics.capture('openai_itinerary_generation_failed', {
+      trip_id: params.tripId,
+      prompt_version: ITINERARY_PROMPT_VERSION,
+    });
+
     Analytics.trackError(
       error instanceof Error ? error.message : 'Unknown itinerary generation error',
       'openai_itinerary_generation',
+      { trip_id: params.tripId },
     );
 
     if (import.meta.env.DEV) {
@@ -168,17 +263,54 @@ export interface GenerateActivitySuggestionsParams {
   existingActivities: string[];
   interests?: string[];
   locale?: string;
+  tripId?: string;
 }
 
 /**
- * Suggests activities for one day. Not wired in MVP trip UI; reserved for future “idea” flows
- * (e.g. activity modal) and manual testing.
+ * Suggests activities for one day (activity create/edit modal).
  */
 export async function generateActivitySuggestions(
   params: GenerateActivitySuggestionsParams,
 ): Promise<AIActivitySuggestion[]> {
   if (isDemoApiKey()) {
-    return [];
+    return generateMockActivitySuggestions(params);
+  }
+
+  if (isEdgeAiGenerationMode() && params.tripId) {
+    try {
+      const { suggestions, usage } = await invokeAiActivitySuggestions({
+        tripId: params.tripId,
+        destination: params.destination,
+        date: params.date,
+        existingActivities: params.existingActivities,
+        interests: params.interests,
+        locale: params.locale,
+      });
+
+      Analytics.capture('openai_activity_suggestions_generated', {
+        trip_id: params.tripId,
+        destination: params.destination,
+        date: params.date,
+        count: suggestions.length,
+        duration_ms: usage?.duration_ms,
+        total_tokens: usage?.total_tokens,
+        prompt_tokens: usage?.prompt_tokens,
+        completion_tokens: usage?.completion_tokens,
+        estimated_cost_usd_cents: estimateGpt41MiniCostUsdCents({
+          promptTokens: usage?.prompt_tokens,
+          completionTokens: usage?.completion_tokens,
+        }),
+        source: 'edge',
+      });
+
+      return suggestions;
+    } catch (e) {
+      if (e instanceof AiSuggestionsEdgeError) throw e;
+      if (import.meta.env.DEV) {
+        console.error('[AI Edge] suggestions:', e);
+      }
+      return [];
+    }
   }
 
   try {
@@ -209,13 +341,18 @@ export async function generateActivitySuggestions(
       },
     );
 
-    const suggestions = parseJSONResponse(result.content, activitySuggestionsSchema);
+    const suggestions = parseActivitySuggestionsPayload(result.content);
 
     Analytics.capture('openai_activity_suggestions_generated', {
+      trip_id: params.tripId,
       destination: params.destination,
       date: params.date,
       count: suggestions.length,
       duration_ms: Math.round(result.durationMs),
+      total_tokens: result.usage?.totalTokens,
+      prompt_tokens: result.usage?.promptTokens,
+      completion_tokens: result.usage?.completionTokens,
+      estimated_cost_usd_cents: estimateGpt41MiniCostUsdCents(result.usage),
     });
 
     return suggestions;
@@ -227,10 +364,62 @@ export async function generateActivitySuggestions(
     Analytics.trackError(
       error instanceof Error ? error.message : 'Unknown activity suggestions error',
       'openai_activity_suggestions',
+      { trip_id: params.tripId, destination: params.destination },
     );
 
     return [];
   }
+}
+
+function generateMockActivitySuggestions(params: {
+  destination: string;
+  locale?: string;
+}): AIActivitySuggestion[] {
+  const dest = params.destination.trim() || 'your destination';
+  const isFr = params.locale?.toLowerCase().startsWith('fr');
+  if (isFr) {
+    return [
+      {
+        title: `Balade dans ${dest}`,
+        description: 'Quartiers emblématiques, pauses photo et pause dans un café local.',
+        category: 'exploration',
+        suggestedTimeOfDay: 'morning',
+      },
+      {
+        title: 'Musée ou monument phare',
+        description:
+          "Bloc culture d'environ deux heures ; prévoir billet ou réservation si besoin.",
+        category: 'culture',
+        suggestedTimeOfDay: 'afternoon',
+      },
+      {
+        title: 'Dîner convivial',
+        description: 'Restaurant avec spécialités régionales, ambiance détendue.',
+        category: 'food',
+        suggestedTimeOfDay: 'evening',
+      },
+    ];
+  }
+  return [
+    {
+      title: `Neighborhood walk — ${dest}`,
+      description: 'Iconic streets, photo stops, and a local café break.',
+      category: 'exploration',
+      suggestedTimeOfDay: 'morning',
+    },
+    {
+      title: 'Landmark or museum block',
+      description: 'About two hours of culture; book ahead if tickets are required.',
+      category: 'culture',
+      suggestedTimeOfDay: 'afternoon',
+    },
+    {
+      title: 'Casual dinner',
+      description: 'Regional flavors at a friendly spot.',
+      category: 'food',
+      suggestedTimeOfDay: 'evening',
+    },
+  ];
 }
 
 // Generate mock itinerary for demo purposes

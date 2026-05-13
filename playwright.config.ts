@@ -2,8 +2,8 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: 'e2e',
-  // For now we only run the smoke test (landing + header/auth)
-  testMatch: /smoke\.spec\.ts$/,
+  // Smoke + focused trip/AI flows (skip gracefully when env/seed missing)
+  testMatch: /(smoke|trip-itinerary-tabs|ai-scenario-generation)\.spec\.ts$/,
   timeout: 30_000,
   fullyParallel: true,
   retries: process.env.CI ? 2 : 0,

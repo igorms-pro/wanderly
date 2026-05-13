@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
+import { useStore } from '@/lib/store';
 import type { Activity, TripMember } from '@/lib/types/database.types';
 import type { MemberProfile } from '@/pages/trip-detail/ItineraryActivityTypes';
 import { ActivityModalShell } from './ActivityModalShell';
@@ -36,6 +37,9 @@ export function EditActivityModal({
   onRemoveMe,
 }: EditActivityModalProps) {
   const { t } = useTranslation();
+  const tripDestination = useStore((s) =>
+    s.currentTrip?.id === tripId ? (s.currentTrip.destination_text ?? '') : '',
+  );
 
   const { formData, loading, error, handleChange, handleSubmit } = useEditActivityForm({
     tripId,
@@ -63,7 +67,13 @@ export function EditActivityModal({
       onSubmit={handleSubmit}
       mode="edit"
     >
-      <ActivityFormSections formData={formData} onChange={handleChange} />
+      <ActivityFormSections
+        tripId={tripId}
+        tripDestination={tripDestination}
+        formData={formData}
+        onChange={handleChange}
+        excludeActivityId={activity.id}
+      />
       {onAddMe && onRemoveMe && tripMembers.length > 0 && (
         <ActivityEditParticipantsSection
           activityId={activity.id}

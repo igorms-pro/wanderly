@@ -1,5 +1,6 @@
 export type AiScenarioGenerationCode =
   | 'quota_exceeded'
+  | 'forbidden_ai'
   | 'openai_config'
   | 'openai_auth'
   | 'openai_rate_limit'
@@ -10,6 +11,7 @@ export type AiScenarioGenerationCode =
 
 const I18N_BY_CODE: Record<AiScenarioGenerationCode, string> = {
   quota_exceeded: 'tripDetail.aiErrorQuota',
+  forbidden_ai: 'tripDetail.aiErrorForbiddenAi',
   openai_config: 'tripDetail.aiErrorConfig',
   openai_auth: 'tripDetail.aiErrorAuth',
   openai_rate_limit: 'tripDetail.aiErrorRateLimit',

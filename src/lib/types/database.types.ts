@@ -22,6 +22,8 @@ export interface Database {
           avatar_url: string | null;
           locale: string | null;
           timezone: string | null;
+          /** AI quota tier: free (default) or premium (higher caps). */
+          ai_tier: 'free' | 'premium';
           created_at: string; // TIMESTAMPTZ
           updated_at: string; // TIMESTAMPTZ
           deleted_at: string | null; // TIMESTAMPTZ
@@ -33,6 +35,7 @@ export interface Database {
           avatar_url?: string | null;
           locale?: string | null;
           timezone?: string | null;
+          ai_tier?: 'free' | 'premium';
           created_at?: string;
           updated_at?: string;
           deleted_at?: string | null;
@@ -44,6 +47,7 @@ export interface Database {
           avatar_url?: string | null;
           locale?: string | null;
           timezone?: string | null;
+          ai_tier?: 'free' | 'premium';
           created_at?: string;
           updated_at?: string;
           deleted_at?: string | null;

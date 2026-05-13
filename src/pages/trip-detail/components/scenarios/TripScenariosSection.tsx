@@ -1,6 +1,5 @@
 import { useState } from 'react';
 
-import { MAX_AI_SCENARIOS_PER_TRIP } from '@/lib/ai/aiScenarioLimits';
 import type { TripScenario } from '@/lib/store/tripDetailSlice.scenarios';
 import type { Activity } from '@/lib/types/database.types';
 import { TripScenarioList } from './TripScenarioList';
@@ -10,7 +9,10 @@ import { ScenarioPreviewModal } from './ScenarioPreviewModal';
 interface TripScenariosSectionProps {
   scenarios: TripScenario[];
   sortedDates: string[];
+  /** Manual scenario creation (any member during planning, stricter later). */
   canCreate: boolean;
+  /** Owner / editor / moderator only — AI generation & higher quotas. */
+  canGenerateAiScenario: boolean;
   canManage: boolean;
   canVoteScenario: boolean;
   votingScenarioId: string | null;
@@ -26,12 +28,14 @@ interface TripScenariosSectionProps {
   t: (key: string, options?: Record<string, unknown>) => string;
   constraintsHintLevel?: 'weak' | 'ok';
   aiScenarioCount?: number;
+  maxAiScenariosPerTrip: number;
 }
 
 export function TripScenariosSection({
   scenarios,
   sortedDates,
   canCreate,
+  canGenerateAiScenario,
   canManage,
   canVoteScenario,
   votingScenarioId,
@@ -47,6 +51,7 @@ export function TripScenariosSection({
   t,
   constraintsHintLevel = 'ok',
   aiScenarioCount = 0,
+  maxAiScenariosPerTrip,
 }: TripScenariosSectionProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [previewScenarioId, setPreviewScenarioId] = useState<string | null>(null);
@@ -55,38 +60,44 @@ export function TripScenariosSection({
     : null;
   const [isGenerating, setIsGenerating] = useState(false);
 
+  const showScenarioActions = canCreate || canGenerateAiScenario;
+
   return (
     <section className="mt-8 border-t border-gray-200 dark:border-gray-800 pt-6">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
           {t('tripDetail.scenariosSectionTitle')}
         </h3>
-        {canCreate && (
+        {showScenarioActions && (
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              disabled={isGenerating || aiScenarioCount >= MAX_AI_SCENARIOS_PER_TRIP}
-              onClick={async () => {
-                setIsGenerating(true);
-                try {
-                  await onGenerateAiScenario();
-                } finally {
-                  setIsGenerating(false);
-                }
-              }}
-              className="inline-flex items-center rounded-md bg-gray-900 dark:bg-gray-100 px-3 py-1.5 text-xs font-medium text-white dark:text-gray-900 hover:opacity-90 disabled:opacity-60"
-            >
-              {isGenerating
-                ? t('tripDetail.generatingScenario')
-                : t('tripDetail.generateAiScenario')}
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center rounded-md bg-orange-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-orange-700"
-            >
-              {t('tripDetail.addScenario')}
-            </button>
+            {canGenerateAiScenario ? (
+              <button
+                type="button"
+                disabled={isGenerating || aiScenarioCount >= maxAiScenariosPerTrip}
+                onClick={async () => {
+                  setIsGenerating(true);
+                  try {
+                    await onGenerateAiScenario();
+                  } finally {
+                    setIsGenerating(false);
+                  }
+                }}
+                className="inline-flex items-center rounded-md bg-gray-900 dark:bg-gray-100 px-3 py-1.5 text-xs font-medium text-white dark:text-gray-900 hover:opacity-90 disabled:opacity-60"
+              >
+                {isGenerating
+                  ? t('tripDetail.generatingScenario')
+                  : t('tripDetail.generateAiScenario')}
+              </button>
+            ) : null}
+            {canCreate ? (
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="inline-flex items-center rounded-md bg-orange-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-orange-700"
+              >
+                {t('tripDetail.addScenario')}
+              </button>
+            ) : null}
           </div>
         )}
       </div>
@@ -94,14 +105,16 @@ export function TripScenariosSection({
         {t('tripDetail.scenariosSectionDescription')}
       </p>
 
-      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-        {t('tripDetail.aiQuotaUsage', {
-          used: aiScenarioCount,
-          max: MAX_AI_SCENARIOS_PER_TRIP,
-        })}
-      </p>
+      {canGenerateAiScenario ? (
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+          {t('tripDetail.aiQuotaUsage', {
+            used: aiScenarioCount,
+            max: maxAiScenariosPerTrip,
+          })}
+        </p>
+      ) : null}
 
-      {constraintsHintLevel === 'weak' && canCreate && (
+      {constraintsHintLevel === 'weak' && showScenarioActions && (
         <div
           className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
           role="status"
