@@ -2,7 +2,7 @@
 
 > Goal: Build a complete SaaS travel planning platform with AI-powered itineraries, real-time collaboration, and seamless user experience.
 
-**Last Updated:** May 13, 2026 (sync Edge IA #12)
+**Last Updated:** May 13, 2026 (merge local `main` — chat #11 + IA Edge #12 + timeline #13)
 
 ## 📋 Status Legend
 
@@ -17,18 +17,16 @@
 
 ### État repo / code (référence)
 
-- **`origin/main`** : fondations **#0–#7** ; trip detail **#8–#10** (dont voting PR [#38](https://github.com/igorms-pro/voyagely/pull/38) / [#39](https://github.com/igorms-pro/voyagely/pull/39), GitHub [#37](https://github.com/igorms-pro/voyagely/issues/37) fermée) ; activités/scénarios **PR #34** ; refactors optionnels **PR #36** (non bloquant).
-- **#11 Chat** : 🟢 **MVP terminé** sur la branche **`feature/issue-11-chat-unread-tab`** — merger la PR → `main`.
-- **#12 IA** : 🟡 **PR / merge `main` à faire** — Edge Functions **`ai-generate-itinerary`** + **`ai-generate-activity-suggestions`** déployées, secret **`OPENAI_API_KEY`** (Dashboard), migration **`018`** (`profiles.ai_tier`, `ai_generation_logs`), quotas **tier** + RBAC organisateurs ; reste **merge**, puis **E2E smoke** / reporting agrégé si voulu.
-- **Suite** : **#13** (contexte / enrichissement).
+- **`main` (local)** : inclut désormais **`feature/issue-11-chat-unread-tab`** en fast-forward — chat **#11**, IA Edge **#12** (fonctions, `018`, quotas tier), timeline **temps entre activités** (#13 slice). **À faire :** `git push origin main` pour aligner **GitHub** ; fermer / lier les Issues GitHub **#11** / **#12** si besoin.
+- **`origin/main`** (distant) : sera aligné après le **push** ci-dessus.
 
 ---
 
 ## 🚀 IMMEDIATE NEXT ACTION (For AI Agent)
 
-1. **Merger vers `main`** : PR **Issue #11** (`feature/issue-11-chat-unread-tab`) si pas encore fait — la branche locale inclut souvent aussi le **lot #12 Edge IA** ; soit **une PR décrite en deux parties (#11 + #12)**, soit **split** (cherry-pick / branche `feature/issue-12-ai-edge`) pour revue plus lisible.
-2. **Issue #12** : après merge, marquer section #12 **🟢** si AC OK ; sinon garder 🟡 pour **E2E** `ai-scenario-generation` contre **Edge** en staging / **dashboard coûts agrégés** (hors scope court terme).
-3. **Issue #13** : reprendre contexte / enrichissement une fois **`main`** stabilisé avec #11 / #12.
+1. **`git push origin main`** — publier le merge local (CI + équipe).
+2. **GitHub** : fermer ou mettre à jour les Issues **#11** / **#12** ; ouvrir / merger une **PR** rétroactive si tu préfères le flux PR avant push (dans ce cas `main` local peut devancer `origin` jusqu’au merge PR).
+3. **Issue #13** : suite — **carte activités** / route (optionnel) ; E2E smoke **Edge** sur staging si utile.
 4. **PR #36** : optionnel — traiter ou fermer.
 
 ---
@@ -58,7 +56,7 @@ Les sections détaillées **#0 à #10** ont été retirées pour limiter la main
 
 ## 🎯 Issue #11: Trip Detail Screen - Chat & Collaboration
 
-**Status:** 🟢 **COMPLETED (MVP)** — non-lus onglet, réactions (`017`), mentions, typings Postgrest ; présence / frappe sur `main` (GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40) / PR [#41](https://github.com/igorms-pro/voyagely/pull/41) si applicable). **Branche** `feature/issue-11-chat-unread-tab` : merger la PR pour intégrer le tout dans `main`. **Hors MVP :** `last_seen` SQL, reply threads, non-lus multi-device.  
+**Status:** 🟢 **COMPLETED (MVP)** — non-lus onglet, réactions (`017`), mentions, typings Postgrest ; présence / frappe. Code sur **`main` (local)** via merge `feature/issue-11-chat-unread-tab` — **pousser `origin/main`**. Réfs GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40) / PR [#41](https://github.com/igorms-pro/voyagely/pull/41) si applicable. **Hors MVP :** `last_seen` SQL, reply threads, non-lus multi-device.  
 **Priority:** HIGH  
 **Phase:** Screen 4d  
 **Dependencies:** Issues #0–#10 (archivées — `main`)
@@ -125,9 +123,9 @@ Complete chat with presence, typing indicators, and collaboration features.
 
 ## 🎯 Issue #12: Trip Detail Screen - AI Itinerary Generation
 
-**Status:** 🟡 **IN PROGRESS — code prêt, merge `main` pending** — génération **côté Edge** (clé OpenAI hors navigateur), migration **018**, quotas **free/premium**, métriques **`ai_generation_logs`**, i18n erreurs quota / `forbidden_ai` ; **PR GitHub à ouvrir** puis statut 🟢 une fois mergé + smoke OK.  
-**GitHub:** lier la PR à l’Issue GitHub **#12** (projet `igorms-pro/voyagely`) — titre/body avec `Fixes #…` ou référence.  
-**Branche (état repo mai 2026) :** `feature/issue-11-chat-unread-tab` — y compris changements **#12** ; recommandé : PR dont le corps liste **#11** et **#12**, ou branche dédiée **`feature/issue-12-ai-edge`** pour isoler la revue IA.  
+**Status:** 🟢 **COMPLETED (MVP)** — code fusionné dans **`main` (local)** mai 2026 : Edge **`ai-generate-itinerary`** / **`ai-generate-activity-suggestions`**, migration **`018`**, quotas **tier** + RBAC, client **`edge`** par défaut, E2E + tests unitaires. **Distant :** pousser `main`. Optionnel : reporting coûts agrégé admin, **Stripe** → `ai_tier` premium.  
+**GitHub:** fermer / référencer Issue **#12** après push `main`.  
+**Branche historique :** `feature/issue-11-chat-unread-tab` (fast-forward → `main`).  
 **Priority:** HIGH  
 **Phase:** Screen 4e  
 **Dependencies:** Issues #0–#10 (archivées — `main`)
@@ -146,7 +144,7 @@ Génération IA d’**itinéraires scénarisés** (copie possible vers l’itin�
 ### État code (mai 2026)
 
 - **Livré** : `openai-itinerary-service.ts` (mode **`edge`** par défaut → `aiEdgeClient` → fonctions **`ai-generate-itinerary`** / **`ai-generate-activity-suggestions`**), Zod + prompts, **`018`** `profiles.ai_tier` + **`ai_generation_logs`** (serveur), quotas alignés **`aiScenarioLimits`** / `_shared/limits.ts`, **Generate with AI** réservé aux **organisateurs** (owner/editor/moderator), suggestions modal + quota mensuel, retry client (`openai-client`), votes scénarios (#10), analytics **trip_id** + tokens + coût approx., **E2E** `ai-scenario-generation.spec.ts` (à valider contre projet avec Edge déployé).
-- **Suite #12** : **PR + merge `main`** ; optionnel — dashboards admin coûts agrégés ; E2E smoke stable avec **`VITE_AI_GENERATION_MODE=edge`** sur staging ; **monétisation** `ai_tier` **premium** (Stripe / autre) — hors livraison actuelle.
+- **Suite #12** : optionnel — dashboards admin coûts agrégés ; E2E smoke **`VITE_AI_GENERATION_MODE=edge`** sur staging ; **monétisation** `ai_tier` **premium** (Stripe / autre).
 
 ### Tasks
 
@@ -161,7 +159,7 @@ Génération IA d’**itinéraires scénarisés** (copie possible vers l’itin�
 - [x] 🟢 **Cost / quotas métier** — par **tier** `free` / `premium` (`profiles.ai_tier`) : plafonds scénarios / trip + suggestions / mois (Edge + client alignés), comptage DB `itineraries.generated_by_ai`, bouton désactivé + toast quota
 - [x] 🟢 **RBAC IA** — seuls **owner / editor / moderator** peuvent lancer la génération (403 `forbidden_ai` + i18n)
 - [x] 🟢 **Erreurs** génération scénario → **Sentry** (`captureFeatureError` dans `tripDetailSlice.aiScenarioOps`)
-- [ ] 🟡 **PR** ouverte + **merge `main`** (workflow Issue — obligatoire avant 🟢 COMPLETED)
+- [x] 🟢 **Merge `main`** — fast-forward depuis `feature/issue-11-chat-unread-tab` (mai 2026, local)
 
 #### AI Generation UI
 
@@ -336,9 +334,9 @@ Add trip templates and sharing capabilities.
 ### En cours / décisions
 
 - [ ] **PR #36** : merger les refactors branche `35-trip-detail-screen---activities-scenarios-v2` dans `main` (ou fermer / rebaser si obsolète).
-- [x] 🟢 **Issue #11 (chat)** : **MVP COMPLETED** — merger la PR `feature/issue-11-chat-unread-tab` → `main` pour alignement prod.
+- [x] 🟢 **Issue #11 (chat)** : **MVP COMPLETED** — fusionné dans **`main` (local)** ; pousser `origin/main`.
 - [x] 🟢 **Issues #0–#10** : terminées sur `main` (voir tableau archive ci-dessus).
-- [ ] 🟡 **Issue #12 (IA)** : livré sur branche — **PR / merge `main`** (voir section #12).
+- [x] 🟢 **Issue #12 (IA)** : **MVP COMPLETED** — merge local `main` (voir section #12) ; pousser `origin/main`.
 
 ---
 
@@ -398,9 +396,9 @@ _Will be tracked here as discovered_
 
 ### Trip detail — suite MVP
 
-- **Issue #11 (Chat)**: 🟢 **COMPLETED (MVP)** — branche `feature/issue-11-chat-unread-tab` ; merger PR → `main`
-- **Issue #12 (AI Generation)**: 🟡 **~95%** — Edge + migration 018 + tier + logs serveur ; reste **merge `main`** + smoke E2E / reporting agrégé optionnel
-- **Issue #13 (Context)**: 🟡 **partiel** — météo / lieux / i18n widgets avancés ; travel time & détails lieux post-MVP (voir section #13)
+- **Issue #11 (Chat)**: 🟢 **COMPLETED (MVP)** — sur **`main` (local)** ; `git push origin main`
+- **Issue #12 (AI Generation)**: 🟢 **COMPLETED (MVP)** — Edge + migration 018 + tier + logs ; optionnel smoke E2E staging / reporting agrégé
+- **Issue #13 (Context)**: 🟡 **partiel** — météo / lieux / i18n ; **temps entre activités** sur timeline livré ; carte / route post-MVP (voir section #13)
 
 ### Phase 2 (Post-MVP)
 
@@ -408,7 +406,7 @@ _Will be tracked here as discovered_
 - **Issue #15 (PWA/Offline)**: 🔴 0% - Phase 2
 - **Issue #16 (Templates)**: 🔴 0% - Phase 2
 
-**Overall MVP Completion: ~74%** (#11 + **#12** prêts sur branche — merger PR(s) → `main` ; suite **#13**)
+**Overall MVP Completion: ~78%** (#11 / **#12** sur **`main` local** — push `origin` ; suite **#13** carte / route)
 
 ---
 
@@ -416,8 +414,8 @@ _Will be tracked here as discovered_
 
 **CRITICAL PATH**:
 
-1. **Ouvrir PR(s)** depuis `feature/issue-11-chat-unread-tab` (références GitHub **#11** / **#12**) → merger **`main`**.
-2. **#12** : après merge, fermer l’Issue GitHub si AC OK ; smoke **E2E** + staging Edge si besoin ; puis **#13** (contexte).
-3. **PR #36** : optionnel — traiter ou fermer.
+1. **`git push origin main`** — publier #11 + #12 + slices #13.
+2. **GitHub** : fermer / mettre à jour Issues **#11** / **#12** si applicable.
+3. **#13** : carte activités / route (optionnel) ; **PR #36** : optionnel.
 
-**BLOCKER** : aucun bloquant produit — **merge `main`** est la prochaine étape livrante ; **PR #36** non bloquant.
+**BLOCKER** : aucun bloquant produit — **push `origin/main`** est la prochaine étape pour aligner le distant ; **PR #36** non bloquant.
