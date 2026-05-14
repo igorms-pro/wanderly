@@ -2,7 +2,7 @@
 
 > Goal: Build a complete SaaS travel planning platform with AI-powered itineraries, real-time collaboration, and seamless user experience.
 
-**Last Updated:** May 13, 2026 — **#17 Premium** (GitHub [#42](https://github.com/igorms-pro/voyagely/issues/42)) 🟡 ; vérification GitHub #11/#12 + CI documentées.
+**Last Updated:** May 12, 2026 — **#17 Premium** (GitHub [#42](https://github.com/igorms-pro/voyagely/issues/42)) 🟡 : impl. **poussée** sur `origin/feature/issue-42-premium-stripe` ; **PR → `main`** à ouvrir pour clore ; vérification GitHub #11/#12 + CI documentées.
 
 ## 📋 Status Legend
 
@@ -19,13 +19,13 @@
 
 - **Vérification GitHub (mai 2026)** : doc **#11** ↔ GitHub **[#40](https://github.com/igorms-pro/voyagely/issues/40)** — **CLOSED**. Doc **#12** (IA Edge) : pas d’issue GitHub dédiée historique ; livré sur **`main`**. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain) — vérifier le dernier run après chaque push.
 - **`main` / `origin/main`** : chat **#11**, IA Edge **#12** (`018`, quotas `free`/`premium`, Edge Functions), timeline **temps entre activités** (#13 slice).
-- **Monétisation** : GitHub **[#42 — Premium / Stripe](https://github.com/igorms-pro/voyagely/issues/42)** — voir **Issue #17** ci-dessous (🟡 **IN PROGRESS**).
+- **Monétisation** : GitHub **[#42 — Premium / Stripe](https://github.com/igorms-pro/voyagely/issues/42)** — voir **Issue #17** ci-dessous : code sur **`origin/feature/issue-42-premium-stripe`** (🟡 **PR à ouvrir / merger**).
 
 ---
 
 ## 🚀 IMMEDIATE NEXT ACTION (For AI Agent)
 
-1. **Issue #17 / GitHub [#42](https://github.com/igorms-pro/voyagely/issues/42)** : monétisation **Premium** — branche **`feature/issue-42-premium-stripe`**, Stripe + webhook → `profiles.ai_tier`, UI + i18n + tests (voir section #17).
+1. **Issue #17 / GitHub [#42](https://github.com/igorms-pro/voyagely/issues/42)** : ouvrir une **PR** `feature/issue-42-premium-stripe` → `main` (réf. **Fixes #42**) ; configurer **secrets Stripe** + **migration `019`** + **webhook** sur le projet Supabase ; voir section #17.
 2. **CI** : [Actions sur `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain) — attendre **success** après push doc.
 3. **Issue #13** : suite optionnelle — carte activités / route ; E2E Edge staging si utile.
 4. **PR #36** : optionnel — traiter ou fermer ; GitHub **[#35](https://github.com/igorms-pro/voyagely/issues/35)** (scenarios v2) encore **OPEN**.
@@ -258,9 +258,10 @@ Add weather, places, and travel time context to trip detail screen.
 
 ## 🎯 Issue #17: Monétisation Premium (`profiles.ai_tier`)
 
-**Status:** 🟡 **IN PROGRESS**  
+**Status:** 🟡 **IN PROGRESS** — implémentation **poussée** sur **`origin/feature/issue-42-premium-stripe`** ; statut **🟢 COMPLETED** après merge PR vers `main` + vérif. staging (secrets + webhook).  
 **GitHub:** [#42 — Premium: Stripe + profiles.ai_tier (monétisation IA)](https://github.com/igorms-pro/voyagely/issues/42)  
-**Branche:** `feature/issue-42-premium-stripe` (à créer au démarrage dev — workflow Issue)  
+**Branche:** `feature/issue-42-premium-stripe` (**à jour sur `origin`**, mai 2026)  
+**PR:** _à créer sur GitHub_ (comparer `feature/issue-42-premium-stripe` → `main`, corps avec `Fixes #42`)  
 **Priority:** HIGH (revenu + alignement quotas IA déjà en prod)  
 **Phase:** Revenue / Screen compte  
 **Dependencies:** Issue **#12** (MVP IA + `018` sur `main`)
@@ -276,22 +277,22 @@ Passer d’un modèle **100 % gratuit** à des **abonnements ou achats** qui pos
 
 ### Tasks
 
-- [ ] 🔴 **Stripe** : compte, produit/prix (abonnement récurrent ou paiement unique), clés **secrètes** uniquement côté serveur / Edge (jamais `VITE_*` pour le secret signing).
-- [ ] 🔴 **Webhook** (Edge Function dédiée ou backend) : valider la signature Stripe, idempotence, mettre à jour `profiles.ai_tier` + colonnes facturation (`stripe_customer_id`, etc. si migration dédiée).
-- [ ] 🔴 **RLS** : les utilisateurs ne peuvent **pas** écrire `ai_tier` eux-mêmes ; mise à jour **uniquement** via service role / webhook.
-- [ ] 🔴 **UI** : page ou section Compte (« Passer à Premium »), retour Checkout succès/annulation, **loading / error / empty / disabled** (règles produit).
-- [ ] 🔴 **i18n** : EN/FR pour tout le flux ; `node scripts/sync-locale-tripdetail-activity.mjs` ou équivalent pour les autres locales.
-- [ ] 🔴 **Tests** : webhook (payload signé mock), régression quotas trip après upgrade `premium`.
+- [x] **Stripe (code + doc)** : Edge `create-checkout-session` ; secrets **uniquement** côté Supabase (voir `.env.example`) — **reste ops** : produit/prix Stripe + `STRIPE_PRICE_ID` / clés dans les secrets du projet.
+- [x] **Webhook** : Edge `stripe-webhook` — signature `constructEvent`, idempotence via table `stripe_webhook_events`, mise à jour `profiles` (`ai_tier`, ids Stripe).
+- [x] **RLS / DB** : migration **`019_stripe_billing_and_ai_tier_lock.sql`** — colonnes facturation + trigger empêchant les clients JWT de modifier `ai_tier` / champs Stripe.
+- [x] **UI** : route **`/account`**, bouton Premium, retours checkout (bannière succès / annulé), états loading / erreur / disabled.
+- [x] **i18n** : **EN** + **FR** pour le flux compte ; autres fichiers `locales/*.json` : clés `account.*` présentes (fallback aligné EN où besoin).
+- [ ] **Tests** : test automatisé **webhook** (payload signé mock) — **non fait** ; régression : `TripDetailPage.test` + `User.ai_tier` ajusté.
 
 ### Acceptance Criteria
 
-- [ ] Un utilisateur **payant** voit son profil en **`premium`** après webhook confirmé ; les **Edge** appliquent les plafonds premium sans contournement client.
-- [ ] Un utilisateur **free** inchangé si paiement échoue ou est remboursé / annulé (règle métier à documenter dans l’issue #42).
-- [ ] Aucune clé secrète Stripe dans le bundle Vite.
+- [x] Comportement **implémenté** : après `checkout.session.completed` (abonnement) le profil passe **`premium`** côté service ; plafonds **Edge** inchangés côté règles — **à valider** sur projet avec secrets + migration appliqués.
+- [x] **`customer.subscription.deleted`** → repasse **`free`** et nettoie `stripe_subscription_id` (impl. webhook).
+- [x] Aucune clé secrète Stripe dans le bundle Vite (uniquement `invoke` vers Edge avec JWT utilisateur).
 
 ### Finish (workflow)
 
-- [ ] PR vers `main` avec `Fixes #42` (ou référence) ; CI verte ; mettre cette section en **🟢 COMPLETED** + lien PR ci-dessous.
+- [ ] **PR** vers `main` avec **`Fixes #42`** ; CI verte sur la PR ; puis mettre cette section en **🟢 COMPLETED** + **lien PR** ici.
 
 ---
 
@@ -373,7 +374,7 @@ Add trip templates and sharing capabilities.
 
 ### En cours / décisions
 
-- [ ] 🟡 **Issue #17 (Premium / Stripe)** : **IN PROGRESS** — GitHub **[#42](https://github.com/igorms-pro/voyagely/issues/42)** ; branche **`feature/issue-42-premium-stripe`**.
+- [ ] 🟡 **Issue #17 (Premium / Stripe)** : **IN PROGRESS** — impl. poussée sur **`origin/feature/issue-42-premium-stripe`** ; GitHub **[#42](https://github.com/igorms-pro/voyagely/issues/42)** — **ouvrir PR** → `main`.
 - [ ] **PR #36** : merger les refactors branche `35-trip-detail-screen---activities-scenarios-v2` dans `main` (ou fermer / rebaser si obsolète) ; GitHub **[#35](https://github.com/igorms-pro/voyagely/issues/35)** encore ouverte.
 - [x] 🟢 **Issue #11 (chat)** : **MVP COMPLETED** — sur **`main`** ; GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40) **CLOSED**.
 - [x] 🟢 **Issues #0–#10** : terminées sur `main` (voir tableau archive ci-dessus).
@@ -439,7 +440,7 @@ _Will be tracked here as discovered_
 
 - **Issue #11 (Chat)**: 🟢 **COMPLETED (MVP)** — sur **`main`** ; GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40) **CLOSED**
 - **Issue #12 (AI Generation)**: 🟢 **COMPLETED (MVP)** — Edge + migration 018 + tier + logs ; optionnel smoke E2E staging / reporting agrégé
-- **Issue #17 (Premium / Stripe)**: 🟡 **IN PROGRESS** — GitHub [#42](https://github.com/igorms-pro/voyagely/issues/42) ; branche `feature/issue-42-premium-stripe`
+- **Issue #17 (Premium / Stripe)**: 🟡 **IN PROGRESS** — code sur **`origin/feature/issue-42-premium-stripe`** ; GitHub [#42](https://github.com/igorms-pro/voyagely/issues/42) — **PR à merger**
 - **Issue #13 (Context)**: 🟡 **partiel** — météo / lieux / i18n ; **temps entre activités** sur timeline livré ; carte / route post-MVP (voir section #13)
 
 ### Phase 2 (Post-MVP)
@@ -448,7 +449,7 @@ _Will be tracked here as discovered_
 - **Issue #15 (PWA/Offline)**: 🔴 0% - Phase 2
 - **Issue #16 (Templates)**: 🔴 0% - Phase 2
 
-**Overall MVP Completion: ~78%** — **focus revenu : #17 / [#42](https://github.com/igorms-pro/voyagely/issues/42)** ; suite **#13** carte / route
+**Overall MVP Completion: ~78%** — **#17** : impl. sur branche, **PR pour [#42](https://github.com/igorms-pro/voyagely/issues/42)** à ouvrir ; suite **#13** carte / route
 
 ---
 
@@ -456,7 +457,7 @@ _Will be tracked here as discovered_
 
 **CRITICAL PATH**:
 
-1. **Issue #17 / [#42](https://github.com/igorms-pro/voyagely/issues/42)** : Stripe + webhook → `profiles.ai_tier` + UI + i18n + tests.
+1. **Issue #17 / [#42](https://github.com/igorms-pro/voyagely/issues/42)** : **PR** branche `feature/issue-42-premium-stripe` → `main` ; déploiement **migration `019`** + secrets + webhook Stripe.
 2. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain).
 3. **#13** : carte activités / route (optionnel).
 4. **PR #36** / GitHub [#35](https://github.com/igorms-pro/voyagely/issues/35) : optionnel.
