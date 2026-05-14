@@ -231,6 +231,20 @@
     "errorLoadingTrips": "Error Loading Trips",
     "backToDashboard": "Back to Dashboard"
   },
+  "account": {
+    "title": "Account",
+    "back": "Back to dashboard",
+    "planLabel": "AI plan",
+    "planFree": "Free",
+    "planPremium": "Premium",
+    "upgradeCta": "Upgrade to Premium",
+    "upgradeHint": "Higher limits for AI scenarios and activity suggestions (Stripe checkout).",
+    "checkoutLoading": "Redirecting to secure checkout…",
+    "checkoutError": "Could not start checkout. Try again later.",
+    "checkoutSuccess": "Thanks! Premium may take a few seconds to apply after payment.",
+    "checkoutCancelled": "Checkout was cancelled.",
+    "manageHint": "To cancel your subscription, use the Stripe billing link from your receipt email (customer portal coming soon)."
+  },
   "tripDetail": {
     "loadingTrip": "Loading trip...",
     "errorLoadingTrip": "Error Loading Trip",

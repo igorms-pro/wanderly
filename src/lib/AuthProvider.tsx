@@ -23,6 +23,7 @@ function authUserToStoreUser(a: SupabaseUser): User {
       (a.user_metadata?.picture as string) ||
       `https://api.dicebear.com/7.x/avataaars/svg?seed=${a.id}`,
     created_at: a.created_at ?? new Date().toISOString(),
+    ai_tier: 'free',
   };
 }
 

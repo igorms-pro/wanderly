@@ -231,6 +231,20 @@
     "errorLoadingTrips": "Erreur lors du chargement des voyages",
     "backToDashboard": "Retour au tableau de bord"
   },
+  "account": {
+    "title": "Compte",
+    "back": "Retour au tableau de bord",
+    "planLabel": "Formule IA",
+    "planFree": "Gratuit",
+    "planPremium": "Premium",
+    "upgradeCta": "Passer à Premium",
+    "upgradeHint": "Plafonds IA plus élevés pour les scénarios et les suggestions d’activités (paiement Stripe).",
+    "checkoutLoading": "Redirection vers le paiement sécurisé…",
+    "checkoutError": "Impossible de démarrer le paiement. Réessayez plus tard.",
+    "checkoutSuccess": "Merci ! Le passage en Premium peut prendre quelques secondes après le paiement.",
+    "checkoutCancelled": "Le paiement a été annulé.",
+    "manageHint": "Pour résilier l’abonnement, utilisez le lien de facturation Stripe reçu par e-mail (portail client à venir)."
+  },
   "tripDetail": {
     "loadingTrip": "Chargement du voyage...",
     "errorLoadingTrip": "Erreur lors du chargement du voyage",
