@@ -290,9 +290,33 @@ Passer d’un modèle **100 % gratuit** à des **abonnements ou achats** qui pos
 - [x] **`customer.subscription.deleted`** → repasse **`free`** et nettoie `stripe_subscription_id` (impl. webhook).
 - [x] Aucune clé secrète Stripe dans le bundle Vite (uniquement `invoke` vers Edge avec JWT utilisateur).
 
+### Ops / Déploiement (reste à faire — toi)
+
+- [ ] **Déployer les Edge Functions** sur le projet Supabase :
+  ```bash
+  supabase functions deploy create-checkout-session --project-ref <ref>
+  supabase functions deploy stripe-webhook --project-ref <ref>
+  ```
+- [ ] **Appliquer la migration 019** (`019_stripe_billing_and_ai_tier_lock.sql`) sur la base de production/staging.
+- [ ] **Configurer les secrets Supabase Edge** :
+  ```bash
+  supabase secrets set STRIPE_SECRET_KEY=sk_... --project-ref <ref>
+  supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_... --project-ref <ref>
+  supabase secrets set STRIPE_PREMIUM_PRICE_ID=price_... --project-ref <ref>
+  ```
+- [ ] **Créer le produit/prix Stripe** : Dashboard Stripe → Products → créer un abonnement récurrent, récupérer le `price_...`.
+- [ ] **Configurer le webhook Stripe** : Dashboard Stripe → Developers → Webhooks → ajouter endpoint `https://<ref>.supabase.co/functions/v1/stripe-webhook` ; événements : `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed`, `invoice.payment_succeeded`.
+- [ ] **Ajouter `VITE_STRIPE_PUBLISHABLE_KEY`** dans le `.env` de déploiement (pk_test_... ou pk_live_...).
+- [ ] **Tester le flux complet** : Checkout → webhook → vérifier `profiles.ai_tier = 'premium'` en base.
+
+### Reste côté code (optionnel / nice-to-have)
+
+- [ ] **Test automatisé webhook** : test unitaire avec payload signé mock (non fait — voir tâche Tests ci-dessus).
+- [ ] **Customer Portal** : lien Stripe pour gérer / annuler l'abonnement depuis `/account` (optionnel v1).
+
 ### Finish (workflow)
 
-- [ ] **PR** vers `main` avec **`Fixes #42`** ; CI verte sur la PR ; puis mettre cette section en **🟢 COMPLETED** + **lien PR** ici.
+- [ ] **PR** [#44](https://github.com/igorms-pro/voyagely/pull/44) vers `main` avec **`Fixes #42`** ; CI verte sur la PR ; puis mettre cette section en **🟢 COMPLETED**.
 
 ---
 
