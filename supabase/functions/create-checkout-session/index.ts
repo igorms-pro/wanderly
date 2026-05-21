@@ -31,13 +31,14 @@ Deno.serve(async (req) => {
   }
 
   const secret = Deno.env.get('STRIPE_SECRET_KEY');
-  const priceId = Deno.env.get('STRIPE_PRICE_ID');
+  const priceMonthly = Deno.env.get('STRIPE_PRICE_ID_MONTHLY') ?? Deno.env.get('STRIPE_PRICE_ID');
+  const priceAnnual = Deno.env.get('STRIPE_PRICE_ID_YEARLY');
   const siteUrl = Deno.env.get('SITE_URL');
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
 
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-  if (!secret || !priceId || !siteUrl || !supabaseUrl || !anonKey || !serviceKey) {
+  if (!secret || !priceMonthly || !siteUrl || !supabaseUrl || !anonKey || !serviceKey) {
     return jsonResponse({ error: 'Server misconfigured' }, 500);
   }
 
@@ -46,11 +47,18 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'Unauthorized' }, 401);
   }
 
-  let body: { successPath?: string; cancelPath?: string };
+  let body: { successPath?: string; cancelPath?: string; billingCycle?: string };
   try {
     body = (await req.json()) as typeof body;
   } catch {
     body = {};
+  }
+
+  const rawCycle = typeof body.billingCycle === 'string' ? body.billingCycle.trim() : 'monthly';
+  const billingCycle = rawCycle === 'annual' ? 'annual' : 'monthly';
+  const priceId = billingCycle === 'annual' ? priceAnnual : priceMonthly;
+  if (!priceId) {
+    return jsonResponse({ error: 'annual_price_not_configured' }, 503);
   }
 
   let successPath: string;

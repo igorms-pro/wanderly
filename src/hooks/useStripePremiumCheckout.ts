@@ -2,7 +2,9 @@ import { useCallback, useState } from 'react';
 
 import { supabase } from '@/lib/supabase';
 
-const CHECKOUT_BODY = {
+export type PremiumBillingCycle = 'monthly' | 'annual';
+
+const CHECKOUT_PATHS = {
   successPath: '/account?checkout=success',
   cancelPath: '/account?checkout=cancelled',
 };
@@ -10,17 +12,17 @@ const CHECKOUT_BODY = {
 export function useStripePremiumCheckout(): {
   loading: boolean;
   error: string | null;
-  startCheckout: () => Promise<void>;
+  startCheckout: (billingCycle: PremiumBillingCycle) => Promise<void>;
 } {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const startCheckout = useCallback(async () => {
+  const startCheckout = useCallback(async (billingCycle: PremiumBillingCycle) => {
     setError(null);
     setLoading(true);
     try {
       const { data, error: fnError } = await supabase.functions.invoke('create-checkout-session', {
-        body: CHECKOUT_BODY,
+        body: { ...CHECKOUT_PATHS, billingCycle },
       });
       if (fnError) {
         setError(fnError.message || 'checkout_failed');

@@ -277,7 +277,7 @@ Passer d’un modèle **100 % gratuit** à des **abonnements ou achats** qui pos
 
 ### Tasks
 
-- [x] **Stripe (code + doc)** : Edge `create-checkout-session` ; secrets **uniquement** côté Supabase (voir `.env.example`) — **reste ops** : produit/prix Stripe + `STRIPE_PRICE_ID` / clés dans les secrets du projet.
+- [x] **Stripe (code + doc)** : Edge `create-checkout-session` ; secrets **uniquement** côté Supabase (voir `.env.example`) — **reste ops** : deux prix Stripe (`STRIPE_PRICE_ID_MONTHLY`, `STRIPE_PRICE_ID_YEARLY`) + clés / webhook.
 - [x] **Webhook** : Edge `stripe-webhook` — signature `constructEvent`, idempotence via table `stripe_webhook_events`, mise à jour `profiles` (`ai_tier`, ids Stripe).
 - [x] **RLS / DB** : migration **`019_stripe_billing_and_ai_tier_lock.sql`** — colonnes facturation + trigger empêchant les clients JWT de modifier `ai_tier` / champs Stripe.
 - [x] **UI** : route **`/account`**, bouton Premium, retours checkout (bannière succès / annulé), états loading / erreur / disabled.
@@ -302,11 +302,13 @@ Passer d’un modèle **100 % gratuit** à des **abonnements ou achats** qui pos
   ```bash
   supabase secrets set STRIPE_SECRET_KEY=sk_... --project-ref <ref>
   supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_... --project-ref <ref>
-  supabase secrets set STRIPE_PREMIUM_PRICE_ID=price_... --project-ref <ref>
+  supabase secrets set STRIPE_PRICE_ID_MONTHLY=price_... --project-ref <ref>
+  supabase secrets set STRIPE_PRICE_ID_YEARLY=price_... --project-ref <ref>
+  supabase secrets set SITE_URL=https://... --project-ref <ref>
   ```
-- [ ] **Créer le produit/prix Stripe** : Dashboard Stripe → Products → créer un abonnement récurrent, récupérer le `price_...`.
+- [ ] **Créer le produit / deux prix Stripe** : même produit **Voyagely Premium**, un prix **mensuel récurrent**, un prix **annuel récurrent** (annuel doit être moins cher par mois que x12 mensuel).
 - [ ] **Configurer le webhook Stripe** : Dashboard Stripe → Developers → Webhooks → ajouter endpoint `https://<ref>.supabase.co/functions/v1/stripe-webhook` ; événements : `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed`, `invoice.payment_succeeded`.
-- [ ] **Ajouter `VITE_STRIPE_PUBLISHABLE_KEY`** dans le `.env` de déploiement (pk_test_... ou pk_live_...).
+- [ ] **Ajouter `VITE_STRIPE_PUBLISHABLE_KEY`** dans le `.env` de déploiement (pk*test*... ou pk*live*...).
 - [ ] **Tester le flux complet** : Checkout → webhook → vérifier `profiles.ai_tier = 'premium'` en base.
 
 ### Reste côté code (optionnel / nice-to-have)

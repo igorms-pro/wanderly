@@ -1,104 +1,128 @@
-import { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
+import { useAccountBilling } from '@/hooks/useAccountBilling';
+import { useAccountPremiumSync } from '@/hooks/useAccountPremiumSync';
 import { useStripePremiumCheckout } from '@/hooks/useStripePremiumCheckout';
 import { useStore } from '@/lib/store';
-import { ThemeToggle } from '@/components/ThemeToggle';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { DashboardHeader } from '@/pages/dashboard/DashboardHeader';
+import { AccountCurrentPlan } from '@/pages/account/AccountCurrentPlan';
+import { AccountPlanPicker } from '@/pages/account/AccountPlanPicker';
+import { AccountPremiumManage } from '@/pages/account/AccountPremiumManage';
+import { Card } from '@/components/ui/Card';
 
 export default function AccountPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const user = useStore((s) => s.user);
-  const refreshUser = useStore((s) => s.refreshUser);
+  const signOut = useStore((s) => s.signOut);
   const [params, setParams] = useSearchParams();
   const [checkoutBanner, setCheckoutBanner] = useState<'success' | 'cancelled' | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const { billing, loading: billingLoading, refreshBilling } = useAccountBilling();
   const { loading, error, startCheckout } = useStripePremiumCheckout();
+  const { syncingPremium } = useAccountPremiumSync(checkoutBanner);
 
-  useEffect(() => {
-    void refreshUser();
-  }, [refreshUser]);
+  const isPremium = billing?.ai_tier === 'premium' || user?.ai_tier === 'premium';
+
+  const handleLogout = useCallback(async () => {
+    await signOut();
+    navigate('/login', { replace: true });
+  }, [signOut, navigate]);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refreshBilling(true);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshBilling]);
 
   useEffect(() => {
     const checkout = params.get('checkout');
     if (checkout !== 'success' && checkout !== 'cancelled') return;
     setCheckoutBanner(checkout);
-    void refreshUser();
+    void refreshBilling();
     const next = new URLSearchParams(params);
     next.delete('checkout');
     setParams(next, { replace: true });
-  }, [params, refreshUser, setParams]);
+  }, [params, refreshBilling, setParams]);
 
-  const tierLabel = user?.ai_tier === 'premium' ? t('account.planPremium') : t('account.planFree');
+  useEffect(() => {
+    if (checkoutBanner !== 'success' || isPremium) return;
+    const id = window.setInterval(() => void refreshBilling(), 3000);
+    return () => window.clearInterval(id);
+  }, [checkoutBanner, isPremium, refreshBilling]);
+
+  const showSyncBanner = checkoutBanner === 'success' && (syncingPremium || !isPremium);
+  const showActivatedBanner = checkoutBanner === 'success' && isPremium && !syncingPremium;
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100">
-      <header className="sticky top-0 z-10 border-b border-stone-200/80 dark:border-stone-800 bg-white/90 dark:bg-stone-900/90 backdrop-blur">
-        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
-          <Link
-            to="/dashboard"
-            className="inline-flex items-center gap-2 text-sm font-medium text-orange-600 dark:text-orange-400 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500"
-          >
-            <ArrowLeft className="w-4 h-4" aria-hidden />
-            {t('account.back')}
-          </Link>
-          <div className="flex items-center gap-2">
-            <LanguageSwitcher variant="dropdown" size="sm" />
-            <ThemeToggle />
-          </div>
+    <div className="min-h-screen bg-stone-50 dark:bg-stone-950">
+      <DashboardHeader user={user} onLogout={handleLogout} />
+
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-5">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-50 tracking-tight">
+            {t('account.title')}
+          </h1>
+          <p className="mt-1 text-sm text-stone-600 dark:text-stone-400">{t('account.subtitle')}</p>
         </div>
-      </header>
 
-      <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-        <h1 className="text-2xl font-bold tracking-tight">{t('account.title')}</h1>
+        <AccountCurrentPlan
+          billing={billing}
+          loading={billingLoading}
+          onRefresh={() => void handleRefresh()}
+          refreshing={refreshing}
+        />
 
-        {checkoutBanner === 'success' ? (
-          <p className="rounded-lg border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/40 px-4 py-3 text-sm text-emerald-900 dark:text-emerald-100">
-            {t('account.checkoutSuccess')}
-          </p>
+        {showSyncBanner ? (
+          <div
+            className="flex gap-3 rounded-xl border border-amber-200/80 dark:border-amber-800/60 bg-amber-50/90 dark:bg-amber-950/30 px-4 py-3 text-sm text-amber-950 dark:text-amber-100"
+            role="status"
+          >
+            <Loader2 className="w-5 h-5 shrink-0 animate-spin text-amber-600" aria-hidden />
+            <p>{t('account.checkoutSyncing')}</p>
+          </div>
         ) : null}
+
+        {showActivatedBanner ? (
+          <div
+            className="rounded-xl border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50 dark:bg-emerald-950/25 px-4 py-3 text-sm text-emerald-900 dark:text-emerald-100"
+            role="status"
+          >
+            {t('account.checkoutActivated')}
+          </div>
+        ) : null}
+
         {checkoutBanner === 'cancelled' ? (
-          <p className="rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-100 dark:bg-stone-900 px-4 py-3 text-sm">
+          <p className="rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-100/80 dark:bg-stone-900/80 px-4 py-3 text-sm text-stone-700 dark:text-stone-300">
             {t('account.checkoutCancelled')}
           </p>
         ) : null}
 
-        <section className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 p-5 shadow-sm">
-          <div className="flex items-start gap-3">
-            <Sparkles className="w-6 h-6 text-orange-500 shrink-0 mt-0.5" aria-hidden />
-            <div className="space-y-2 min-w-0">
-              <p className="text-sm font-medium text-stone-600 dark:text-stone-300">
-                {t('account.planLabel')}
-              </p>
-              <p className="text-lg font-semibold">{tierLabel}</p>
-              <p className="text-sm text-stone-600 dark:text-stone-400">
-                {t('account.upgradeHint')}
-              </p>
-              {user?.ai_tier !== 'premium' ? (
-                <div className="pt-2 space-y-2">
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={() => void startCheckout()}
-                    className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500"
-                  >
-                    {loading ? t('account.checkoutLoading') : t('account.upgradeCta')}
-                  </button>
-                  {error ? (
-                    <p className="text-sm text-rose-600 dark:text-rose-400" role="alert">
-                      {t('account.checkoutError')}
-                    </p>
-                  ) : null}
-                </div>
-              ) : (
-                <p className="text-sm text-stone-600 dark:text-stone-400 pt-1">
-                  {t('account.manageHint')}
-                </p>
-              )}
-            </div>
-          </div>
-        </section>
+        {isPremium ? (
+          <Card variant="default" className="p-5">
+            <p className="text-sm text-stone-600 dark:text-stone-400">
+              {t('account.premiumActiveHint')}
+            </p>
+            {billing?.stripe_customer_id ? <AccountPremiumManage /> : null}
+          </Card>
+        ) : (
+          <Card variant="default" className="p-5 sm:p-6">
+            <p className="text-sm text-stone-600 dark:text-stone-400 mb-5">
+              {t('account.upgradeHint')}
+            </p>
+            <AccountPlanPicker
+              loading={loading}
+              error={error}
+              onSelectPlan={(cycle) => void startCheckout(cycle)}
+            />
+          </Card>
+        )}
       </main>
     </div>
   );

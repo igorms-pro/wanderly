@@ -256,6 +256,11 @@
     "checkoutError": "Could not start checkout. Try again later.",
     "checkoutSuccess": "Thanks! Premium may take a few seconds to apply after payment.",
     "checkoutCancelled": "Checkout was cancelled.",
-    "manageHint": "To cancel your subscription, use the Stripe billing link from your receipt email (customer portal coming soon)."
+    "manageHint": "To cancel your subscription, use the Stripe billing link from your receipt email (customer portal coming soon).",
+    "billingChoiceHint": "Choose billing — yearly is cheaper per month.",
+    "upgradeMonthlyCta": "Subscribe monthly",
+    "upgradeAnnualCta": "Subscribe yearly",
+    "billingAnnualBadge": "Best value",
+    "annualSavingsHint": "Lower cost per month when billed annually."
   }
 }
