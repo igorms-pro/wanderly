@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useRef, useState, FormEvent } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/lib/supabase';
 import { useStore } from '@/lib/store';
+import { isBrowserOnline } from '@/lib/offline/networkStatus';
+import { queueChatMessage } from '@/lib/offline/offlineQueue';
 import type { Message } from '@/lib/types/database.types';
 import {
   fetchMessagesWithProfiles,
@@ -103,7 +106,30 @@ export function useTripChat({ tripId, userRole }: UseTripChatOptions) {
     setMessageText('');
 
     try {
-      const message = await sendChatMessage(tripId, user.id, text);
+      const clientMsgId = uuidv4();
+
+      if (!isBrowserOnline()) {
+        const optimisticMessage: Message = {
+          id: clientMsgId,
+          trip_id: tripId,
+          user_id: user.id,
+          content: text,
+          message_type: 'text',
+          created_at: new Date().toISOString(),
+        };
+        addMessage(optimisticMessage);
+        setMessagesWithProfiles((prev) => [
+          ...prev,
+          {
+            ...optimisticMessage,
+            sender_name: user.email?.split('@')[0] ?? t('chat.you'),
+          },
+        ]);
+        await queueChatMessage(tripId, user.id, text, clientMsgId);
+        return;
+      }
+
+      const message = await sendChatMessage(tripId, user.id, text, clientMsgId);
       addMessage(message);
     } catch (error) {
       console.error('Error sending message:', error);

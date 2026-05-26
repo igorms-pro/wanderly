@@ -9,12 +9,14 @@ import './lib/i18n.ts';
 import { initializeSentry } from './lib/sentry.ts';
 import { initializePostHog } from './lib/posthog.ts';
 import { initializeErrorHandling } from './lib/errorHandling.ts';
+import { registerPwaServiceWorker } from './lib/pwa/registerPwa.ts';
 import App from './App.tsx';
 
 // Initialize monitoring tools
 initializeSentry();
 initializePostHog();
 initializeErrorHandling();
+registerPwaServiceWorker();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

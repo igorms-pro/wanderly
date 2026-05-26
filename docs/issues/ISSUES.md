@@ -2,7 +2,7 @@
 
 > Goal: Build a complete SaaS travel planning platform with AI-powered itineraries, real-time collaboration, and seamless user experience.
 
-**Last Updated:** May 26, 2026 — **#14 dépenses** 🟢 [PR #51](https://github.com/igorms-pro/voyagely/pull/51) ; **#35 refactor v2** 🟢 [PR #49](https://github.com/igorms-pro/voyagely/pull/49) ; **#13** 🟢 [PR #46](https://github.com/igorms-pro/voyagely/pull/46) + [PR #48](https://github.com/igorms-pro/voyagely/pull/48) ; **#17 Premium** 🟢 [PR #44](https://github.com/igorms-pro/voyagely/pull/44) (QA en pause).
+**Last Updated:** May 26, 2026 — **#15 PWA** 🟡 [GitHub #52](https://github.com/igorms-pro/voyagely/issues/52) branche `feature/issue-15-pwa` ; **#14 dépenses** 🟢 [PR #51](https://github.com/igorms-pro/voyagely/pull/51) ; **#35 refactor v2** 🟢 [PR #49](https://github.com/igorms-pro/voyagely/pull/49) ; **#13** 🟢 [PR #46](https://github.com/igorms-pro/voyagely/pull/46) + [PR #48](https://github.com/igorms-pro/voyagely/pull/48) ; **#17 Premium** 🟢 [PR #44](https://github.com/igorms-pro/voyagely/pull/44) (QA en pause).
 
 ## 📋 Status Legend
 
@@ -19,7 +19,7 @@
 
 - **Vérification GitHub (mai 2026)** : doc **#11** ↔ GitHub **[#40](https://github.com/igorms-pro/voyagely/issues/40)** — **CLOSED**. Doc **#12** (IA Edge) : pas d’issue GitHub dédiée historique ; livré sur **`main`**. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain) — vérifier le dernier run après chaque push.
 - **`main` / `origin/main`** : chat **#11**, IA Edge **#12**, **Context #13**, **Premium #17** ([PR #44](https://github.com/igorms-pro/voyagely/pull/44), migration `019`), **Dépenses #14** ([PR #51](https://github.com/igorms-pro/voyagely/pull/51), migration `020`, onglet Expenses).
-- **Phase 2 produit** : **#15** → **#16** — 🔴 **prochaine priorité** (#15 PWA).
+- **Phase 2 produit** : **#15** 🟡 → **#16** — PWA en cours ([#52](https://github.com/igorms-pro/voyagely/issues/52)).
 
 ### 📌 Terminologie (ne pas confondre)
 
@@ -33,7 +33,7 @@
 
 ## 🚀 IMMEDIATE NEXT ACTION (For AI Agent)
 
-1. **Phase 2 produit** — **#15** (PWA) → **#16** (templates). **Priorité actuelle.**
+1. **Phase 2 produit** — **#15** (PWA) 🟡 en cours → **#16** (templates).
 2. **QA Premium** (#17) — checklist Stripe — optionnel / post-refactor.
 3. **Prod Stripe** : `SITE_URL` + secrets **live** quand domaine final.
 
@@ -430,7 +430,7 @@ Implement group expense tracking. Simple split calculation, no payment processin
 
 ## 🎯 Issue #15: PWA & Offline Support
 
-**Status:** 🔴 **NOT STARTED**  
+**Status:** 🟡 **IN PROGRESS** — GitHub **[#52](https://github.com/igorms-pro/voyagely/issues/52)** ; branche `feature/issue-15-pwa`  
 **Priority:** HIGH  
 **Phase:** Phase 2 (Month 5)  
 **Dependencies:** Phase 1 MVP complete
@@ -441,12 +441,21 @@ Make Voyagely usable during trips with PWA and offline capabilities.
 
 ### Tasks
 
-- [ ] 🔴 Service worker + caching
-- [ ] 🔴 Offline queue (IndexedDB)
-- [ ] 🔴 PWA manifest
-- [ ] 🔴 Background sync
-- [ ] 🔴 Mobile performance tuning
-- [ ] 🔴 Tests
+- [x] 🟢 Service worker + caching (vite-plugin-pwa + Workbox)
+- [x] 🟢 Offline queue (IndexedDB outbox — chat + votes)
+- [x] 🟢 PWA manifest + icons
+- [x] 🟢 Background sync (SyncManager + SW → client flush)
+- [x] 🟢 Mobile performance tuning (QueryClient defaults, manualChunks)
+- [x] 🟢 Tests (`offlineQueueHelpers`, `networkStatus`)
+- [x] 🟢 i18n EN + FR (`offline.*`)
+
+### Acceptance criteria (MVP)
+
+- [x] App installable as PWA (manifest + service worker)
+- [x] App shell cached for offline navigation
+- [x] Chat messages and votes queued offline, synced on reconnect
+- [x] Offline banner with pending count + manual sync
+- [x] Unit tests for queue helpers
 
 ---
 
@@ -551,7 +560,7 @@ _Will be tracked here as discovered_
 ### Phase 2 produit (Post-MVP — ordre #14 → #15 → #16)
 
 - **Issue #14 (Expenses)**: 🟢 **COMPLETED (MVP)** — [PR #51](https://github.com/igorms-pro/voyagely/pull/51) ; [#50](https://github.com/igorms-pro/voyagely/issues/50) fermée ; migration `020`
-- **Issue #15 (PWA/Offline)**: 🔴 0% — **prochaine**
+- **Issue #15 (PWA/Offline)**: 🟡 **IN PROGRESS** — [#52](https://github.com/igorms-pro/voyagely/issues/52) branche `feature/issue-15-pwa`
 - **Issue #16 (Templates)**: 🔴 0% — après #15
 
 **Overall MVP Completion: ~95%** — Phase 2 #14 livré ; **#15 PWA** prochaine ; QA Premium (#17) en pause

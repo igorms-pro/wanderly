@@ -183,7 +183,15 @@
     "usersTyping": "{{names}} sont en train d’écrire…",
     "memberPresenceListLabel": "Membres du voyage et statut en ligne",
     "reactionToggle": "Basculer la réaction {{emoji}}",
-    "mentionSuggestions": "Mentionner un membre du voyage"
+    "mentionSuggestions": "Mentionner un membre du voyage",
+    "you": "Vous"
+  },
+  "offline": {
+    "bannerOffline": "Vous êtes hors ligne. Les modifications seront synchronisées à la reconnexion.",
+    "bannerPending_one": "{{count}} modification en attente de synchronisation",
+    "bannerPending_other": "{{count}} modifications en attente de synchronisation",
+    "syncNow": "Synchroniser",
+    "syncing": "Synchronisation…"
   },
   "weather": {
     "current": "Météo actuelle",
