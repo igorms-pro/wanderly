@@ -16,6 +16,7 @@ const SignupPage = lazy(() => import('./pages/SignupPage'));
 const DashboardPage = lazy(() => import('./pages/dashboard'));
 const TripDetailPage = lazy(() => import('./pages/TripDetailPage'));
 const AccountPage = lazy(() => import('./pages/AccountPage'));
+const InviteJoinPage = lazy(() => import('./pages/InviteJoinPage'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -60,6 +61,7 @@ function AppShell({ dashboardKey }: { dashboardKey: number }) {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/invite/:inviteCode" element={<InviteJoinPage />} />
             <Route
               path="/dashboard"
               element={

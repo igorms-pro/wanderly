@@ -36,9 +36,12 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (authInitialized && user) {
-      navigate('/dashboard', { replace: true });
+      const redirect = searchParams.get('redirect');
+      const fromState = (location.state as { from?: string } | null)?.from;
+      const target = redirect || fromState;
+      navigate(target && target.startsWith('/') ? target : '/dashboard', { replace: true });
     }
-  }, [authInitialized, user, navigate]);
+  }, [authInitialized, user, navigate, searchParams, location.state]);
 
   // Success message from signup redirect
   useEffect(() => {

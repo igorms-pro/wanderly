@@ -15,6 +15,7 @@ export function mapTripFromDb(raw: any): Trip {
     currency: raw.currency ?? undefined,
     constraints: raw.constraints ?? undefined,
     active_itinerary_id: raw.active_itinerary_id ?? undefined,
+    timezone: raw.timezone ?? 'UTC',
     created_at: raw.created_at,
     updated_at: raw.updated_at,
   };
@@ -62,6 +63,7 @@ export async function createTripInApi(tripData: CreateTripData, userId: string):
       budget_cents: tripData.budget_cents ?? null,
       currency: tripData.currency ?? null,
       constraints: tripData.constraints ?? null,
+      timezone: tripData.timezone ?? 'UTC',
     } as any)
     .select()
     .single();

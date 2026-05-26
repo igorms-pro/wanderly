@@ -86,10 +86,17 @@ export function useTripDetailPermissions({
     return user.id === currentTrip.owner_id && currentTrip.status === 'planned';
   }, [currentTrip, user]);
 
+  const canShare = useCallback((): boolean => {
+    if (!user || !currentTrip) return false;
+    const role = getUserRole();
+    return user.id === currentTrip.owner_id || role === 'moderator';
+  }, [currentTrip, getUserRole, user]);
+
   return {
     getUserRole,
     canEdit,
     canDelete,
+    canShare,
     canCreateActivitiesAndScenarios,
     canManageScenarios,
     canEditActivities,

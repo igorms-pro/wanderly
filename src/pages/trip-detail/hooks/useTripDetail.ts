@@ -63,6 +63,7 @@ function useTripDetailData() {
     budget: '',
     currency: 'EUR',
     has_children: false,
+    timezone: 'UTC',
   }));
   const [isDeleting, setIsDeleting] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);

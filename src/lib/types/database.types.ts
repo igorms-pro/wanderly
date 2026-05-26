@@ -88,6 +88,7 @@ export interface Database {
           currency: string | null;
           constraints: Json | null; // JSONB - use TripConstraints for typed access
           active_itinerary_id?: string | null; // UUID, references itineraries(id)
+          timezone: string;
           created_at: string; // TIMESTAMPTZ
           updated_at?: string; // TIMESTAMPTZ (optional: API may omit)
           deleted_at?: string | null; // TIMESTAMPTZ (optional: API may omit)
@@ -104,6 +105,7 @@ export interface Database {
           currency?: string | null;
           constraints?: Json | null;
           active_itinerary_id?: string | null;
+          timezone?: string;
           created_at?: string;
           updated_at?: string;
           deleted_at?: string | null;
@@ -120,6 +122,7 @@ export interface Database {
           currency?: string | null;
           constraints?: Json | null;
           active_itinerary_id?: string | null;
+          timezone?: string;
           created_at?: string;
           updated_at?: string;
           deleted_at?: string | null;
@@ -531,6 +534,7 @@ export interface Database {
           trip_id: string; // UUID, references trips(id)
           inviter_id: string; // UUID, references auth.users(id)
           invite_code: string;
+          default_role: 'editor' | 'viewer' | 'moderator';
           expires_at: string | null; // TIMESTAMPTZ
           max_uses: number | null; // INTEGER
           used_count: number; // INTEGER
@@ -541,6 +545,7 @@ export interface Database {
           trip_id: string;
           inviter_id: string;
           invite_code: string;
+          default_role?: 'editor' | 'viewer' | 'moderator';
           expires_at?: string | null;
           max_uses?: number | null;
           used_count?: number;
@@ -551,10 +556,50 @@ export interface Database {
           trip_id?: string;
           inviter_id?: string;
           invite_code?: string;
+          default_role?: 'editor' | 'viewer' | 'moderator';
           expires_at?: string | null;
           max_uses?: number | null;
           used_count?: number;
           created_at?: string;
+        };
+        Relationships: [];
+      };
+      trip_templates: {
+        Row: {
+          id: string;
+          owner_id: string;
+          source_trip_id: string | null;
+          title: string;
+          description: string | null;
+          destination_text: string;
+          template_data: Json;
+          is_public: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          source_trip_id?: string | null;
+          title: string;
+          description?: string | null;
+          destination_text: string;
+          template_data?: Json;
+          is_public?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string;
+          source_trip_id?: string | null;
+          title?: string;
+          description?: string | null;
+          destination_text?: string;
+          template_data?: Json;
+          is_public?: boolean;
+          created_at?: string;
+          updated_at?: string;
         };
         Relationships: [];
       };
@@ -671,7 +716,14 @@ export interface Database {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      get_invitation_preview: {
+        Args: { p_invite_code: string };
+        Returns: Json;
+      };
+      accept_trip_invitation: {
+        Args: { p_invite_code: string };
+        Returns: Json;
+      };
     };
     Enums: {
       [_ in never]: never;
@@ -691,6 +743,7 @@ export type ItineraryVote = Database['public']['Tables']['itinerary_votes']['Row
 export type Message = Database['public']['Tables']['messages']['Row'];
 export type MessageReaction = Database['public']['Tables']['message_reactions']['Row'];
 export type Invitation = Database['public']['Tables']['invitations']['Row'];
+export type TripTemplateRow = Database['public']['Tables']['trip_templates']['Row'];
 export type AuditLog = Database['public']['Tables']['audit_logs']['Row'];
 export type Expense = Database['public']['Tables']['expenses']['Row'];
 export type ExpenseParticipant = Database['public']['Tables']['expense_participants']['Row'];

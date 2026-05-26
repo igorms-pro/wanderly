@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { CreateTripModal, DashboardHero } from '@/features/trips';
+import { TemplatePickerModal } from '@/features/trip-sharing';
 import { DashboardHeader } from './DashboardHeader';
 import { DashboardSearchFilters } from './DashboardSearchFilters';
 import { DashboardLoadingState } from './DashboardLoadingState';
@@ -27,6 +28,8 @@ export default function DashboardPage() {
     setOpenMenuId,
     showCreateTripModal,
     setShowCreateTripModal,
+    showTemplatePicker,
+    setShowTemplatePicker,
     filteredAndSortedTrips,
     loadTripsData,
     handleLogout,
@@ -42,7 +45,13 @@ export default function DashboardPage() {
       <DashboardHeader user={user} onLogout={handleLogout} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {user && <DashboardHero user={user} onCreateTrip={() => setShowCreateTripModal(true)} />}
+        {user ? (
+          <DashboardHero
+            user={user}
+            onCreateTrip={() => setShowCreateTripModal(true)}
+            onUseTemplate={() => setShowTemplatePicker(true)}
+          />
+        ) : null}
         <DashboardStatsSummary trips={trips} />
 
         <DashboardSearchFilters
@@ -73,7 +82,20 @@ export default function DashboardPage() {
         )}
       </main>
 
-      {showCreateTripModal && <CreateTripModal onClose={() => setShowCreateTripModal(false)} />}
+      {showCreateTripModal ? (
+        <CreateTripModal onClose={() => setShowCreateTripModal(false)} />
+      ) : null}
+      {showTemplatePicker && user ? (
+        <TemplatePickerModal
+          userId={user.id}
+          onClose={() => setShowTemplatePicker(false)}
+          onCreated={(tripId) => {
+            setShowTemplatePicker(false);
+            void loadTripsData();
+            navigate(`/trip/${tripId}`);
+          }}
+        />
+      ) : null}
     </div>
   );
 }
