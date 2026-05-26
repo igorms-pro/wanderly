@@ -2,7 +2,7 @@
 
 > Goal: Build a complete SaaS travel planning platform with AI-powered itineraries, real-time collaboration, and seamless user experience.
 
-**Last Updated:** May 26, 2026 — **#13** 🟢 [PR #46](https://github.com/igorms-pro/voyagely/pull/46) ; **#17 Premium** 🟢 [PR #44](https://github.com/igorms-pro/voyagely/pull/44) ; **#35/#36 refactor v2** fermés (obsolète) ; **[PR #43](https://github.com/igorms-pro/voyagely/pull/43)** `AGENTS.md` mergée.
+**Last Updated:** May 26, 2026 — **#13** 🟢 MVP [PR #46](https://github.com/igorms-pro/voyagely/pull/46) + post-MVP [PR #48](https://github.com/igorms-pro/voyagely/pull/48) ; **#17 Premium** 🟢 [PR #44](https://github.com/igorms-pro/voyagely/pull/44) ; **#35/#36** fermés ; **[PR #43](https://github.com/igorms-pro/voyagely/pull/43)** `AGENTS.md`.
 
 ## 📋 Status Legend
 
@@ -18,7 +18,7 @@
 ### État repo / code (référence)
 
 - **Vérification GitHub (mai 2026)** : doc **#11** ↔ GitHub **[#40](https://github.com/igorms-pro/voyagely/issues/40)** — **CLOSED**. Doc **#12** (IA Edge) : pas d’issue GitHub dédiée historique ; livré sur **`main`**. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain) — vérifier le dernier run après chaque push.
-- **`main` / `origin/main`** : chat **#11**, IA Edge **#12**, **Context #13** (météo, lieux, timeline, **carte Explore** Leaflet — [PR #46](https://github.com/igorms-pro/voyagely/pull/46)), **Premium #17** ([PR #44](https://github.com/igorms-pro/voyagely/pull/44), migration `019`, `/account`).
+- **`main` / `origin/main`** : chat **#11**, IA Edge **#12**, **Context #13** (météo, lieux, timeline, carte Explore, **détails lieu + add to itinerary** — [PR #46](https://github.com/igorms-pro/voyagely/pull/46), [PR #48](https://github.com/igorms-pro/voyagely/pull/48)), **Premium #17** ([PR #44](https://github.com/igorms-pro/voyagely/pull/44), migration `019`, `/account`).
 - **Monétisation** : GitHub **[#42](https://github.com/igorms-pro/voyagely/issues/42)** — **CLOSED** ; QA billing manuelle (#17 checklist).
 - **Refactor v2** : GitHub **[#35](https://github.com/igorms-pro/voyagely/issues/35)** + **[PR #36](https://github.com/igorms-pro/voyagely/pull/36)** — **CLOSED** (mai 2026) : branche obsolète (36 commits behind `main`) ; fonctionnalités déjà sur `main` ; refactor fichier par fichier en petites PR si besoin.
 
@@ -26,10 +26,10 @@
 
 ## 🚀 IMMEDIATE NEXT ACTION (For AI Agent)
 
-1. **#13 post-MVP** 🟡 — détails lieu + « Add to itinerary » Explore — branche `feature/issue-13-explore-place-details`, GitHub [#47](https://github.com/igorms-pro/voyagely/issues/47).
-2. **QA Premium** (#17) — checklist manuelle Stripe (pas de code).
+1. **QA Premium** (#17) — checklist manuelle Stripe (pas de code).
+2. **Phase 2** : Issue **#14** (dépenses) ou **#15** (PWA) — priorité produit Igor.
 3. **Prod Stripe** : `SITE_URL` + secrets **live** quand domaine final.
-4. **Refactor technique** (optionnel) : splits incrémentaux (`TripDetailPage`, store) — pas de grosse PR type #36.
+4. **Refactor technique** (optionnel) : splits incrémentaux — pas de grosse PR type #36.
 
 ---
 
@@ -206,9 +206,9 @@ Génération IA d’**itinéraires scénarisés** (copie possible vers l’itin�
 
 ## 🎯 Issue #13: Trip Detail Screen - Context & Enrichment
 
-**Status:** 🟢 **COMPLETED (MVP)** — mergé sur `main` via **[PR #46](https://github.com/igorms-pro/voyagely/pull/46)** (mai 2026). Post-MVP : détails lieu + add to itinerary.  
-**GitHub:** [#45](https://github.com/igorms-pro/voyagely/issues/45) — **CLOSED** (`Fixes #45`)  
-**PR:** [#46](https://github.com/igorms-pro/voyagely/pull/46) — merged  
+**Status:** 🟢 **COMPLETED** — MVP [PR #46](https://github.com/igorms-pro/voyagely/pull/46) ; post-MVP détails lieu + add to itinerary [PR #48](https://github.com/igorms-pro/voyagely/pull/48) (mai 2026).  
+**GitHub:** [#45](https://github.com/igorms-pro/voyagely/issues/45) — **CLOSED** ; post-MVP [#47](https://github.com/igorms-pro/voyagely/issues/47) — **CLOSED**  
+**PR:** [#46](https://github.com/igorms-pro/voyagely/pull/46), [#48](https://github.com/igorms-pro/voyagely/pull/48) — merged  
 **Priority:** MEDIUM  
 **Phase:** Screen 4f  
 **Dependencies:** Issue #9 (activities)
@@ -229,8 +229,8 @@ Add weather, places, and travel time context to trip detail screen.
 
 - [x] 🟢 **Google Places** : `VITE_GOOGLE_MAPS_API_KEY` uniquement (sans clé → mock `getMockNearbyPlaces`)
 - [x] 🟢 **POI à proximité** + libellés catégories **i18n** (`tripDetail.explore*`)
-- [x] 🟡 Place details (photos, horaires) — post-MVP — en cours [#47](https://github.com/igorms-pro/voyagely/issues/47)
-- [x] 🟡 "Add to itinerary" — post-MVP — en cours [#47](https://github.com/igorms-pro/voyagely/issues/47)
+- [x] 🟢 Place details (photos, horaires) — post-MVP [PR #48](https://github.com/igorms-pro/voyagely/pull/48)
+- [x] 🟢 "Add to itinerary" — post-MVP [PR #48](https://github.com/igorms-pro/voyagely/pull/48)
 
 #### Travel Time
 
@@ -264,6 +264,9 @@ Add weather, places, and travel time context to trip detail screen.
 - [x] Branche `feature/issue-13-itinerary-map`
 - [x] **PR** [#46](https://github.com/igorms-pro/voyagely/pull/46) (`Fixes #45`) — merged
 - [x] **#45** fermée ; doc **🟢 COMPLETED (MVP)**
+- [x] GitHub **#47** post-MVP ; branche `feature/issue-13-explore-place-details`
+- [x] **PR** [#48](https://github.com/igorms-pro/voyagely/pull/48) (`Fixes #47`) — merged
+- [x] **#47** fermée ; **#13** doc **🟢 COMPLETED**
 
 ---
 
@@ -477,7 +480,7 @@ _Will be tracked here as discovered_
 - **Issue #11 (Chat)**: 🟢 **COMPLETED (MVP)** — sur **`main`** ; GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40) **CLOSED**
 - **Issue #12 (AI Generation)**: 🟢 **COMPLETED (MVP)** — Edge + migration 018 + tier + logs ; optionnel smoke E2E staging / reporting agrégé
 - **Issue #17 (Premium / Stripe)**: 🟢 **COMPLETED** — [PR #44](https://github.com/igorms-pro/voyagely/pull/44) mergée ; [#42](https://github.com/igorms-pro/voyagely/issues/42) fermée
-- **Issue #13 (Context)**: 🟢 **COMPLETED (MVP)** — [PR #46](https://github.com/igorms-pro/voyagely/pull/46) ; [#45](https://github.com/igorms-pro/voyagely/issues/45) fermée ; météo / lieux / timeline / **carte Explore**
+- **Issue #13 (Context)**: 🟢 **COMPLETED** — [PR #46](https://github.com/igorms-pro/voyagely/pull/46) + post-MVP [PR #48](https://github.com/igorms-pro/voyagely/pull/48) ; [#45](https://github.com/igorms-pro/voyagely/issues/45), [#47](https://github.com/igorms-pro/voyagely/issues/47) fermées
 
 ### Phase 2 (Post-MVP)
 
@@ -485,7 +488,7 @@ _Will be tracked here as discovered_
 - **Issue #15 (PWA/Offline)**: 🔴 0% - Phase 2
 - **Issue #16 (Templates)**: 🔴 0% - Phase 2
 
-**Overall MVP Completion: ~90%** — trip detail MVP (#11–#13, #17) sur `main` ; QA billing Premium en attente ; Phase 2 (#14–#16) non démarrée
+**Overall MVP Completion: ~95%** — trip detail (#11–#13 complet, #17 code) sur `main` ; QA billing Premium en attente ; Phase 2 (#14–#16) non démarrée
 
 ---
 
@@ -493,8 +496,8 @@ _Will be tracked here as discovered_
 
 **CRITICAL PATH**:
 
-1. **QA Premium** (#17, checklist section #17).
-2. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain).
-3. **#13** post-MVP : détails lieu + « Add to itinerary » (optionnel).
+1. **QA Premium** (#17, checklist section #17) — manuel.
+2. **Phase 2** : **#14** (dépenses) ou **#15** (PWA) — choix produit.
+3. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain).
 
 **BLOCKER** : aucun bloquant produit.
