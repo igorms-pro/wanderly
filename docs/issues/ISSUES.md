@@ -33,7 +33,7 @@
 
 ## 🚀 IMMEDIATE NEXT ACTION (For AI Agent)
 
-1. **Phase 2 produit** — **#16** (templates) 🟡 **IN PROGRESS** — GitHub [#54](https://github.com/igorms-pro/voyagely/issues/54), branche `feature/issue-16-templates`.
+1. **Phase 2 produit** — **#16** 🟡 — merger [PR #55](https://github.com/igorms-pro/voyagely/pull/55) puis QA smoke (share / duplicate / template).
 2. **QA Premium** (#17) — checklist Stripe — optionnel / post-refactor.
 3. **Prod Stripe** : `SITE_URL` + secrets **live** quand domaine final.
 
@@ -468,10 +468,7 @@ Make Voyagely usable during trips with PWA and offline capabilities.
 
 ## 🎯 Issue #16: Trip Templates & Sharing
 
-**Status:** 🟡 **IN PROGRESS** — GitHub **[#54](https://github.com/igorms-pro/voyagely/issues/54)** ; branche `feature/issue-16-templates`  
-**Priority:** MEDIUM  
-**Phase:** Phase 2 (Month 6)  
-**Dependencies:** Phase 1 MVP complete ; migration `020` appliquée
+**Status:** 🟡 **IN PROGRESS** — GitHub **[#54](https://github.com/igorms-pro/voyagely/issues/54)** ; branche `feature/issue-16-templates` ; [PR #55](https://github.com/igorms-pro/voyagely/pull/55) (migration `021` appliquée prod)
 
 ### Description
 
@@ -568,7 +565,7 @@ _Will be tracked here as discovered_
 
 - **Issue #14 (Expenses)**: 🟢 **COMPLETED (MVP)** — [PR #51](https://github.com/igorms-pro/voyagely/pull/51) ; [#50](https://github.com/igorms-pro/voyagely/issues/50) fermée ; migration `020`
 - **Issue #15 (PWA/Offline)**: 🟢 **COMPLETED (MVP)** — [PR #53](https://github.com/igorms-pro/voyagely/pull/53) ; [#52](https://github.com/igorms-pro/voyagely/issues/52) fermée
-- **Issue #16 (Templates)**: 🟡 **IN PROGRESS** — GitHub [#54](https://github.com/igorms-pro/voyagely/issues/54), branche `feature/issue-16-templates`
+- **Issue #16 (Templates)**: 🟡 **IN PROGRESS** — [#54](https://github.com/igorms-pro/voyagely/issues/54) ; [PR #55](https://github.com/igorms-pro/voyagely/pull/55)
 
 **Overall MVP Completion: ~95%** — Phase 2 #14–#15 livrés ; **#16 templates** prochaine ; QA Premium (#17) en pause
 
