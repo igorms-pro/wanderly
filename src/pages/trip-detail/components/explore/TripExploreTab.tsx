@@ -1,8 +1,9 @@
 import type { TFunction } from 'i18next';
 
-import NearbyPlaces from '@/components/NearbyPlaces';
 import type { Activity } from '@/lib/types/database.types';
+import type { ExplorePlaceActivityImport } from '@/pages/trip-detail/lib/explorePlaceToActivity';
 
+import { ExploreNearbyPlaces } from './ExploreNearbyPlaces';
 import { TripItineraryMapSection } from './TripItineraryMapSection';
 
 type TripExploreTabProps = {
@@ -11,6 +12,8 @@ type TripExploreTabProps = {
   activitiesByDate: Record<string, Activity[]>;
   locale: string;
   t: TFunction;
+  canAddToItinerary: boolean;
+  onImportPlace: (date: string, payload: ExplorePlaceActivityImport) => Promise<void>;
 };
 
 export function TripExploreTab({
@@ -19,6 +22,8 @@ export function TripExploreTab({
   activitiesByDate,
   locale,
   t,
+  canAddToItinerary,
+  onImportPlace,
 }: TripExploreTabProps) {
   return (
     <div className="space-y-8">
@@ -28,7 +33,13 @@ export function TripExploreTab({
         locale={locale}
         t={t}
       />
-      <NearbyPlaces destination={destination} />
+      <ExploreNearbyPlaces
+        destination={destination}
+        sortedDates={sortedDates}
+        locale={locale}
+        canAddToItinerary={canAddToItinerary}
+        onImportPlace={onImportPlace}
+      />
     </div>
   );
 }

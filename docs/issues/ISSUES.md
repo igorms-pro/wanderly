@@ -26,8 +26,8 @@
 
 ## 🚀 IMMEDIATE NEXT ACTION (For AI Agent)
 
-1. **QA Premium** (#17) — checklist section #17 (Stripe test, pas de SQL manuel).
-2. **#13 post-MVP** (optionnel) : détails lieu Google + « Add to itinerary » depuis Explore.
+1. **#13 post-MVP** 🟡 — détails lieu + « Add to itinerary » Explore — branche `feature/issue-13-explore-place-details`, GitHub [#47](https://github.com/igorms-pro/voyagely/issues/47).
+2. **QA Premium** (#17) — checklist manuelle Stripe (pas de code).
 3. **Prod Stripe** : `SITE_URL` + secrets **live** quand domaine final.
 4. **Refactor technique** (optionnel) : splits incrémentaux (`TripDetailPage`, store) — pas de grosse PR type #36.
 
@@ -229,8 +229,8 @@ Add weather, places, and travel time context to trip detail screen.
 
 - [x] 🟢 **Google Places** : `VITE_GOOGLE_MAPS_API_KEY` uniquement (sans clé → mock `getMockNearbyPlaces`)
 - [x] 🟢 **POI à proximité** + libellés catégories **i18n** (`tripDetail.explore*`)
-- [ ] 🔴 Place details (photos, horaires) — post-MVP
-- [ ] 🔴 "Add to itinerary" — post-MVP
+- [x] 🟡 Place details (photos, horaires) — post-MVP — en cours [#47](https://github.com/igorms-pro/voyagely/issues/47)
+- [x] 🟡 "Add to itinerary" — post-MVP — en cours [#47](https://github.com/igorms-pro/voyagely/issues/47)
 
 #### Travel Time
 

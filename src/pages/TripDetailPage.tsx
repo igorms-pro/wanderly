@@ -291,6 +291,22 @@ export default function TripDetailPage() {
             activitiesByDate={activitiesByDate}
             locale={locale}
             t={t}
+            canAddToItinerary={canEditActivities()}
+            onImportPlace={async (date, payload) => {
+              if (!tripId) return;
+              try {
+                await importScenarioActivityToItinerary(tripId, date, payload);
+                addToast({
+                  variant: 'success',
+                  message: t('tripDetail.exploreAddToItinerarySuccess'),
+                });
+              } catch {
+                addToast({
+                  variant: 'error',
+                  message: t('tripDetail.exploreAddToItineraryError'),
+                });
+              }
+            }}
           />
         )}
         {activeTab === 'itinerary' && (
