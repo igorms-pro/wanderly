@@ -588,6 +588,84 @@ export interface Database {
         };
         Relationships: [];
       };
+      expenses: {
+        Row: {
+          id: string;
+          trip_id: string;
+          activity_id: string | null;
+          title: string;
+          amount_cents: number;
+          currency: string;
+          paid_by_user_id: string;
+          split_mode: 'equal' | 'custom';
+          expense_date: string | null;
+          notes: string | null;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+          deleted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          trip_id: string;
+          activity_id?: string | null;
+          title: string;
+          amount_cents: number;
+          currency?: string;
+          paid_by_user_id: string;
+          split_mode?: 'equal' | 'custom';
+          expense_date?: string | null;
+          notes?: string | null;
+          created_by: string;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          trip_id?: string;
+          activity_id?: string | null;
+          title?: string;
+          amount_cents?: number;
+          currency?: string;
+          paid_by_user_id?: string;
+          split_mode?: 'equal' | 'custom';
+          expense_date?: string | null;
+          notes?: string | null;
+          created_by?: string;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Relationships: [];
+      };
+      expense_participants: {
+        Row: {
+          id: string;
+          expense_id: string;
+          trip_id: string;
+          user_id: string;
+          amount_cents: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          expense_id: string;
+          trip_id: string;
+          user_id: string;
+          amount_cents?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          expense_id?: string;
+          trip_id?: string;
+          user_id?: string;
+          amount_cents?: number | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -614,6 +692,8 @@ export type Message = Database['public']['Tables']['messages']['Row'];
 export type MessageReaction = Database['public']['Tables']['message_reactions']['Row'];
 export type Invitation = Database['public']['Tables']['invitations']['Row'];
 export type AuditLog = Database['public']['Tables']['audit_logs']['Row'];
+export type Expense = Database['public']['Tables']['expenses']['Row'];
+export type ExpenseParticipant = Database['public']['Tables']['expense_participants']['Row'];
 
 /** Shape of trip.constraints JSONB (for type-safe access in UI). */
 export type TripConstraints = {
