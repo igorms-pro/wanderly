@@ -4,6 +4,7 @@ import { useToast } from '@/contexts/ToastContext';
 import WeatherWidget from '@/components/WeatherWidget';
 import { TripExploreTab } from '@/pages/trip-detail/components/explore/TripExploreTab';
 import { TripChat } from '@/features/chat';
+import { TripExpensesTab } from '@/features/expenses';
 import { maxAiScenariosForTier } from '@/lib/ai/aiScenarioLimits';
 import { useStore } from '@/lib/store';
 import { DashboardHeader } from '@/pages/dashboard/DashboardHeader';
@@ -270,6 +271,17 @@ export default function TripDetailPage() {
             onAddScenarioActivityToItinerary={pageHandlers.handleAddScenarioActivityToItinerary}
             onEditActivity={pageHandlers.handleEditActivity}
             onDeleteActivity={pageHandlers.handleDeleteActivity}
+          />
+        )}
+        {activeTab === 'expenses' && tripId && (
+          <TripExpensesTab
+            tripId={tripId}
+            tripMembers={tripMembers}
+            memberProfiles={tripDetail.memberProfiles}
+            currency={currentTrip.currency ?? 'EUR'}
+            locale={locale}
+            currentUserId={user?.id}
+            canManageAny={canEdit()}
           />
         )}
         {activeTab === 'chat' && tripId && (

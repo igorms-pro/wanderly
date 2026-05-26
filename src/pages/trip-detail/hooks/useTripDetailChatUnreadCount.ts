@@ -7,7 +7,7 @@ import { readChatLastReadIso, writeChatLastReadIso } from '../lib/chatLastReadSt
 
 const UNREAD_CAP = 999;
 
-type TripDetailTab = 'itinerary' | 'chat' | 'weather' | 'explore';
+type TripDetailTab = 'itinerary' | 'expenses' | 'chat' | 'weather' | 'explore';
 
 export function useTripDetailChatUnreadCount(
   tripId: string | undefined,

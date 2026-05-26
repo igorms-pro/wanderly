@@ -17,7 +17,7 @@ import { useTripDetailActivities } from './useTripDetailActivities';
 import { useTripDetailScenarioVotes } from './useTripDetailScenarioVotes';
 import { insertTripFinalizedChatMessage } from '@/lib/trip-system-chat';
 
-type TripDetailTab = 'itinerary' | 'chat' | 'weather' | 'explore';
+type TripDetailTab = 'itinerary' | 'expenses' | 'chat' | 'weather' | 'explore';
 
 function useTripDetailUiState(tripId: string | undefined) {
   const [activeTab, setActiveTabState] = useState<TripDetailTab>('itinerary');

@@ -1,7 +1,7 @@
 import type { TFunction } from 'i18next';
-import { Cloud, Navigation as NavigationIcon, MessageSquare, Map } from 'lucide-react';
+import { Cloud, Navigation as NavigationIcon, MessageSquare, Map, Wallet } from 'lucide-react';
 
-export type Tab = 'itinerary' | 'chat' | 'weather' | 'explore';
+export type Tab = 'itinerary' | 'expenses' | 'chat' | 'weather' | 'explore';
 
 function formatUnreadBadgeCount(count: number): string {
   if (count > 99) return '99+';
@@ -17,6 +17,7 @@ interface TripDetailTabsProps {
 
 const TABS: { id: Tab; icon: typeof Map; labelKey: string }[] = [
   { id: 'itinerary', icon: Map, labelKey: 'tripDetail.itinerary' },
+  { id: 'expenses', icon: Wallet, labelKey: 'tripDetail.expenses' },
   { id: 'weather', icon: Cloud, labelKey: 'tripDetail.weather' },
   { id: 'explore', icon: NavigationIcon, labelKey: 'tripDetail.explore' },
   { id: 'chat', icon: MessageSquare, labelKey: 'tripDetail.chat' },
