@@ -19,16 +19,17 @@
 
 - **Vérification GitHub (mai 2026)** : doc **#11** ↔ GitHub **[#40](https://github.com/igorms-pro/voyagely/issues/40)** — **CLOSED**. Doc **#12** (IA Edge) : pas d’issue GitHub dédiée historique ; livré sur **`main`**. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain) — vérifier le dernier run après chaque push.
 - **`main` / `origin/main`** : chat **#11**, IA Edge **#12**, **Context #13** (météo, lieux, timeline, **carte Explore** Leaflet — [PR #46](https://github.com/igorms-pro/voyagely/pull/46)), **Premium #17** ([PR #44](https://github.com/igorms-pro/voyagely/pull/44), migration `019`, `/account`).
-- **Monétisation** : GitHub **[#42](https://github.com/igorms-pro/voyagely/issues/42)** — **CLOSED** ; QA billing à faire avec la v2.
+- **Monétisation** : GitHub **[#42](https://github.com/igorms-pro/voyagely/issues/42)** — **CLOSED** ; QA billing manuelle (#17 checklist).
+- **Refactor v2** : GitHub **[#35](https://github.com/igorms-pro/voyagely/issues/35)** + **[PR #36](https://github.com/igorms-pro/voyagely/pull/36)** — **CLOSED** (mai 2026) : branche obsolète (36 commits behind `main`) ; fonctionnalités déjà sur `main` ; refactor fichier par fichier en petites PR si besoin.
 
 ---
 
 ## 🚀 IMMEDIATE NEXT ACTION (For AI Agent)
 
-1. **Priorité produit** : **v2** (scope Igor) ou **QA Premium** (#17) — checklist section #17 (post-v2).
+1. **QA Premium** (#17) — checklist section #17 (Stripe test, pas de SQL manuel).
 2. **#13 post-MVP** (optionnel) : détails lieu Google + « Add to itinerary » depuis Explore.
-3. **PR #36** / GitHub [#35](https://github.com/igorms-pro/voyagely/issues/35) : scenarios v2 — optionnel / peut-être obsolète.
-4. **Prod Stripe** : `SITE_URL` + secrets **live** quand domaine final.
+3. **Prod Stripe** : `SITE_URL` + secrets **live** quand domaine final.
+4. **Refactor technique** (optionnel) : splits incrémentaux (`TripDetailPage`, store) — pas de grosse PR type #36.
 
 ---
 
@@ -409,8 +410,8 @@ Add trip templates and sharing capabilities.
 
 ### En cours / décisions
 
-- [x] 🟢 **Issue #17 (Premium / Stripe)** : **COMPLETED** — [PR #44](https://github.com/igorms-pro/voyagely/pull/44) sur `main` ; [#42](https://github.com/igorms-pro/voyagely/issues/42) fermée ; QA post-v2.
-- [ ] **PR #36** : merger les refactors branche `35-trip-detail-screen---activities-scenarios-v2` dans `main` (ou fermer / rebaser si obsolète) ; GitHub **[#35](https://github.com/igorms-pro/voyagely/issues/35)** encore ouverte.
+- [x] 🟢 **Issue #17 (Premium / Stripe)** : **COMPLETED** — [PR #44](https://github.com/igorms-pro/voyagely/pull/44) sur `main` ; [#42](https://github.com/igorms-pro/voyagely/issues/42) fermée ; QA manuelle en attente.
+- [x] 🟢 **PR #36 / Issue #35 (refactor trip detail v2)** : **CLOSED** (mai 2026) — obsolète vs `main` ; pas de merge.
 - [x] 🟢 **Issue #11 (chat)** : **MVP COMPLETED** — sur **`main`** ; GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40) **CLOSED**.
 - [x] 🟢 **Issues #0–#10** : terminées sur `main` (voir tableau archive ci-dessus).
 - [x] 🟢 **Issue #12 (IA)** : **MVP COMPLETED** — sur **`main`** (voir section #12).
@@ -484,7 +485,7 @@ _Will be tracked here as discovered_
 - **Issue #15 (PWA/Offline)**: 🔴 0% - Phase 2
 - **Issue #16 (Templates)**: 🔴 0% - Phase 2
 
-**Overall MVP Completion: ~90%** — trip detail MVP (#11–#13, #17) sur `main` ; QA billing Premium post-v2 ; Phase 2 (#14–#16) non démarrée
+**Overall MVP Completion: ~90%** — trip detail MVP (#11–#13, #17) sur `main` ; QA billing Premium en attente ; Phase 2 (#14–#16) non démarrée
 
 ---
 
@@ -492,9 +493,8 @@ _Will be tracked here as discovered_
 
 **CRITICAL PATH**:
 
-1. **v2** (priorité Igor) ou **QA Premium** (#17, checklist section #17).
+1. **QA Premium** (#17, checklist section #17).
 2. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain).
 3. **#13** post-MVP : détails lieu + « Add to itinerary » (optionnel).
-4. **PR #36** / GitHub [#35](https://github.com/igorms-pro/voyagely/issues/35) : optionnel.
 
-**BLOCKER** : aucun bloquant produit ; **PR #36** non bloquant.
+**BLOCKER** : aucun bloquant produit.
