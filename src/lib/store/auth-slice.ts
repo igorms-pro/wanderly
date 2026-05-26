@@ -1,20 +1,11 @@
-import type { User, Profile } from '../types/database.types';
+import type { User } from '../types/database.types';
 import { supabase } from '../supabase';
 import { setSentryUser, clearSentryUser } from '../sentry';
 import { Analytics } from '../analytics';
 import type { AppState, SetState, GetState } from './types';
+import { profileToUser } from './auth-utils';
 
-export function profileToUser(profile: Profile): User {
-  return {
-    id: profile.id,
-    email: profile.email,
-    display_name: profile.display_name || profile.email.split('@')[0],
-    avatar_url:
-      profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.email}`,
-    created_at: profile.created_at,
-    ai_tier: profile.ai_tier === 'premium' ? 'premium' : 'free',
-  };
-}
+export { profileToUser };
 
 export function createAuthSlice(set: SetState, get: GetState): Partial<AppState> {
   return {

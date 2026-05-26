@@ -2,7 +2,7 @@
 
 > Goal: Build a complete SaaS travel planning platform with AI-powered itineraries, real-time collaboration, and seamless user experience.
 
-**Last Updated:** May 26, 2026 — **#13** 🟢 MVP [PR #46](https://github.com/igorms-pro/voyagely/pull/46) + post-MVP [PR #48](https://github.com/igorms-pro/voyagely/pull/48) ; **#17 Premium** 🟢 [PR #44](https://github.com/igorms-pro/voyagely/pull/44) ; **#35/#36** fermés ; **[PR #43](https://github.com/igorms-pro/voyagely/pull/43)** `AGENTS.md`.
+**Last Updated:** May 26, 2026 — **#35 refactor v2** 🟡 en cours ; **#13** 🟢 [PR #46](https://github.com/igorms-pro/voyagely/pull/46) + [PR #48](https://github.com/igorms-pro/voyagely/pull/48) ; **#17 Premium** 🟢 [PR #44](https://github.com/igorms-pro/voyagely/pull/44) (QA en pause) ; **[PR #43](https://github.com/igorms-pro/voyagely/pull/43)** `AGENTS.md`.
 
 ## 📋 Status Legend
 
@@ -20,16 +20,25 @@
 - **Vérification GitHub (mai 2026)** : doc **#11** ↔ GitHub **[#40](https://github.com/igorms-pro/voyagely/issues/40)** — **CLOSED**. Doc **#12** (IA Edge) : pas d’issue GitHub dédiée historique ; livré sur **`main`**. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain) — vérifier le dernier run après chaque push.
 - **`main` / `origin/main`** : chat **#11**, IA Edge **#12**, **Context #13** (météo, lieux, timeline, carte Explore, **détails lieu + add to itinerary** — [PR #46](https://github.com/igorms-pro/voyagely/pull/46), [PR #48](https://github.com/igorms-pro/voyagely/pull/48)), **Premium #17** ([PR #44](https://github.com/igorms-pro/voyagely/pull/44), migration `019`, `/account`).
 - **Monétisation** : GitHub **[#42](https://github.com/igorms-pro/voyagely/issues/42)** — **CLOSED** ; QA billing manuelle (#17 checklist).
-- **Refactor v2** : GitHub **[#35](https://github.com/igorms-pro/voyagely/issues/35)** + **[PR #36](https://github.com/igorms-pro/voyagely/pull/36)** — **CLOSED** (mai 2026) : branche obsolète (36 commits behind `main`) ; fonctionnalités déjà sur `main` ; refactor fichier par fichier en petites PR si besoin.
+- **Refactor v2 (doc #35)** : GitHub **[#35](https://github.com/igorms-pro/voyagely/issues/35)** — 🟡 **IN PROGRESS** — réapplication sur `main` des splits gros fichiers (PR #36 jamais mergée ; plan `docs/codebase/SPLIT_*`).
+- **Phase 2 produit** : **#14** → **#15** → **#16** — 🔴 après refactor v2.
+
+### 📌 Terminologie (ne pas confondre)
+
+| Terme                         | Signification                                                                          |
+| ----------------------------- | -------------------------------------------------------------------------------------- |
+| **Refactor v2** (doc **#35**) | Dette technique — découper fichiers > 200–300 lignes. **Pas** une feature utilisateur. |
+| **Phase 2** (doc **#14–#16**) | Features post-MVP — dépenses, PWA, templates. **Ordre : #14 puis #15 puis #16.**       |
+| **post-refactor**             | Après le refactor v2 (#35) — ex. QA Premium #17 reportée à ce moment-là.               |
 
 ---
 
 ## 🚀 IMMEDIATE NEXT ACTION (For AI Agent)
 
-1. **QA Premium** (#17) — checklist manuelle Stripe (pas de code).
-2. **Phase 2** : Issue **#14** (dépenses) ou **#15** (PWA) — priorité produit Igor.
-3. **Prod Stripe** : `SITE_URL` + secrets **live** quand domaine final.
-4. **Refactor technique** (optionnel) : splits incrémentaux — pas de grosse PR type #36.
+1. **Refactor v2** (doc **#35**) — splits incrémentaux sur `main` (13 périmètres, voir section #35). **Priorité actuelle.**
+2. **Phase 2 produit** — **#14** (dépenses) → **#15** (PWA) → **#16** (templates), **après** #35.
+3. **QA Premium** (#17) — checklist Stripe — **en pause** jusqu’à post-refactor.
+4. **Prod Stripe** : `SITE_URL` + secrets **live** quand domaine final.
 
 ---
 
@@ -272,7 +281,7 @@ Add weather, places, and travel time context to trip detail screen.
 
 ## 🎯 Issue #17: Monétisation Premium (`profiles.ai_tier`)
 
-**Status:** 🟢 **COMPLETED** — mergé sur `main` via **[PR #44](https://github.com/igorms-pro/voyagely/pull/44)** (mai 2026). QA manuelle **reportée** (post-v2).  
+**Status:** 🟢 **COMPLETED** — mergé sur `main` via **[PR #44](https://github.com/igorms-pro/voyagely/pull/44)** (mai 2026). QA manuelle **en pause** (post-refactor #35).  
 **GitHub:** [#42](https://github.com/igorms-pro/voyagely/issues/42) — **CLOSED** (`Fixes #42`)  
 **PR:** [#44](https://github.com/igorms-pro/voyagely/pull/44) — merged  
 **Priority:** HIGH (revenu + alignement quotas IA déjà en prod)  
@@ -312,9 +321,9 @@ Passer d’un modèle **100 % gratuit** à des **abonnements ou achats** qui pos
 - [x] Webhook Stripe → `.../functions/v1/stripe-webhook`
 - [x] **Customer Portal** activé côté Stripe (Settings → Billing) + bouton app
 - [ ] **Prod / staging** : repasser `SITE_URL` + secrets **live** quand domaine final connu
-- [ ] **QA manuelle** (Igor, post-v2) — voir checklist ci-dessous
+- [ ] **QA manuelle** (Igor, post-refactor #35) — voir checklist ci-dessous
 
-### QA checklist (reportée post-v2)
+### QA checklist (en pause — post-refactor #35)
 
 - [ ] Free → `/account` → checkout mensuel **4242…** → retour succès → **Premium** sans SQL manuel
 - [ ] Webhook Stripe : delivery **200** sur `checkout.session.completed` / `customer.subscription.updated`
@@ -331,13 +340,59 @@ Passer d’un modèle **100 % gratuit** à des **abonnements ou achats** qui pos
 
 - [x] **PR** [#44](https://github.com/igorms-pro/voyagely/pull/44) mergée (`Fixes #42`, mai 2026)
 - [x] GitHub **#42** fermée
-- [ ] **QA** manuelle (reportée post-v2)
+- [ ] **QA** manuelle (reportée **post-refactor** #35)
 
 ---
 
-## 🎯 PHASE 3: Post-MVP Enhancements
+## 🎯 Issue #35: Refactor v2 — Split large files
 
-These can wait until after MVP launch.
+**Status:** 🟡 **IN PROGRESS** — code sur branche `refactor/issue-35-split-large-files` ; PR à ouvrir.  
+**GitHub:** [#35](https://github.com/igorms-pro/voyagely/issues/35) — **OPEN**  
+**Branche:** `refactor/issue-35-split-large-files`  
+**Priority:** HIGH (dette technique — bloque confort Phase 2)  
+**Phase:** Tech / codebase hygiene  
+**Dependencies:** MVP #11–#13, #17 sur `main`
+
+### Description
+
+Ramener les fichiers au respect des limites projet (**200 lignes** composant/hook/slice, **300 lignes** fichier max) par **extraction et split**, sans changement de comportement. Plan détaillé : `docs/codebase/SPLIT_LARGE_FILES_PLAN.md`, `docs/codebase/SPLIT_PLAN_BY_AGENT.md`.
+
+### Tasks (13 périmètres — parallélisables)
+
+- [x] 🟢 **Agent 1** — `TripDetailPage.tsx` → `tripDetailPageHelpers.ts`, `useTripDetailPageModals.ts`, `useTripDetailPageHandlers.ts`, `TripDetailPageActivityModals.tsx`
+- [x] 🟢 **Agent 2** — `openai-itinerary-service.ts` → types, mock, helpers, service
+- [x] 🟢 **Agent 3** — `useCreateActivityForm.ts` → `activityFormHelpers.ts`
+- [x] 🟢 **Agent 4** — `auth-slice.ts` → `auth-utils.ts`
+- [x] 🟢 **Agent 5** — `useTripChat.ts` → `tripChatApi.ts`
+- [x] 🟢 **Agent 6** — `CreateTripSteps.tsx` → `create-trip-steps/*`
+- [x] 🟢 **Agent 7** — `tripDetailSlice.utils.ts` + alléger `aiScenarioOps` / `scenarios`
+- [x] 🟢 **Agent 8** — `TripDetailItinerary.tsx` → Scenarios + Views
+- [x] 🟢 **Agent 9** — `useItineraryDragAndDrop.ts` → `itinerary-reorder-utils.ts`
+- [x] 🟢 **Agent 10** — `ItineraryActivityDetailsSection.tsx` → sous-composants
+- [x] 🟢 **Agent 11** — `DashboardPage.tsx` → `useDashboardPage.ts`
+- [x] 🟢 **Agent 12** — `trips-slice.ts` → `trips-api.ts`
+- [x] 🟢 **Agent 13** — `places-service.ts` → split search / nearby / details / types
+
+### Acceptance Criteria
+
+- [x] Aucun fichier applicatif > 300 lignes sauf `TripDetailPage.tsx` (~307, proche limite)
+- [x] Composants / hooks / slices ciblés largement < 300 ; plusieurs < 200
+- [x] `pnpm check` vert (lint + typecheck + test:run)
+- [x] Exports publics inchangés (barrels / re-exports si besoin)
+- [x] Docs `docs/codebase/SPLIT_*` + `LARGE_FILES_TOUR.md` à jour sur branche
+
+### Finish (workflow)
+
+- [ ] Branche `refactor/issue-35-split-large-files`
+- [ ] PR ouverte (`Fixes #35`)
+- [ ] Merge → doc **🟢 COMPLETED**
+- [ ] Puis enchaîner **Phase 2** : #14 → #15 → #16
+
+---
+
+## 🎯 Phase 2 — Post-MVP product (#14–#16)
+
+Features utilisateur après refactor v2 (#35). **Ordre strict : #14 → #15 → #16.**
 
 ---
 
@@ -414,7 +469,7 @@ Add trip templates and sharing capabilities.
 ### En cours / décisions
 
 - [x] 🟢 **Issue #17 (Premium / Stripe)** : **COMPLETED** — [PR #44](https://github.com/igorms-pro/voyagely/pull/44) sur `main` ; [#42](https://github.com/igorms-pro/voyagely/issues/42) fermée ; QA manuelle en attente.
-- [x] 🟢 **PR #36 / Issue #35 (refactor trip detail v2)** : **CLOSED** (mai 2026) — obsolète vs `main` ; pas de merge.
+- [ ] 🟡 **Issue #35 (refactor v2 — split large files)** : **IN PROGRESS** — branche `refactor/issue-35-split-large-files` ; PR #36 historique non mergée.
 - [x] 🟢 **Issue #11 (chat)** : **MVP COMPLETED** — sur **`main`** ; GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40) **CLOSED**.
 - [x] 🟢 **Issues #0–#10** : terminées sur `main` (voir tableau archive ci-dessus).
 - [x] 🟢 **Issue #12 (IA)** : **MVP COMPLETED** — sur **`main`** (voir section #12).
@@ -482,13 +537,17 @@ _Will be tracked here as discovered_
 - **Issue #17 (Premium / Stripe)**: 🟢 **COMPLETED** — [PR #44](https://github.com/igorms-pro/voyagely/pull/44) mergée ; [#42](https://github.com/igorms-pro/voyagely/issues/42) fermée
 - **Issue #13 (Context)**: 🟢 **COMPLETED** — [PR #46](https://github.com/igorms-pro/voyagely/pull/46) + post-MVP [PR #48](https://github.com/igorms-pro/voyagely/pull/48) ; [#45](https://github.com/igorms-pro/voyagely/issues/45), [#47](https://github.com/igorms-pro/voyagely/issues/47) fermées
 
-### Phase 2 (Post-MVP)
+### Refactor v2 (doc #35)
 
-- **Issue #14 (Expenses)**: 🔴 0% - Phase 2
-- **Issue #15 (PWA/Offline)**: 🔴 0% - Phase 2
-- **Issue #16 (Templates)**: 🔴 0% - Phase 2
+- **Issue #35 (Split large files)**: 🟡 **IN PROGRESS** — priorité avant Phase 2 produit
 
-**Overall MVP Completion: ~95%** — trip detail (#11–#13 complet, #17 code) sur `main` ; QA billing Premium en attente ; Phase 2 (#14–#16) non démarrée
+### Phase 2 produit (Post-MVP — ordre #14 → #15 → #16)
+
+- **Issue #14 (Expenses)**: 🔴 0% — après #35
+- **Issue #15 (PWA/Offline)**: 🔴 0% — après #14
+- **Issue #16 (Templates)**: 🔴 0% — après #15
+
+**Overall MVP Completion: ~95%** — trip detail (#11–#13 complet, #17 code) sur `main` ; refactor v2 (#35) en cours ; Phase 2 (#14–#16) après #35 ; QA Premium en pause
 
 ---
 
@@ -496,8 +555,9 @@ _Will be tracked here as discovered_
 
 **CRITICAL PATH**:
 
-1. **QA Premium** (#17, checklist section #17) — manuel.
-2. **Phase 2** : **#14** (dépenses) ou **#15** (PWA) — choix produit.
-3. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain).
+1. **Refactor v2** (#35) — split large files sur `main`.
+2. **Phase 2 produit** : **#14** (dépenses) → **#15** (PWA) → **#16** (templates).
+3. **QA Premium** (#17) — post-refactor.
+4. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain).
 
 **BLOCKER** : aucun bloquant produit.
