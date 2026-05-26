@@ -3,90 +3,16 @@ import { useTranslation } from 'react-i18next';
 
 import { useStore } from '@/lib/store';
 import type { Activity } from '@/lib/types/database.types';
+
 import type { ActivityFormData } from '../types';
+import {
+  buildActivityPayload,
+  buildInitialFormData,
+  validateActivityFormData,
+} from './activityFormHelpers';
+import type { UseActivityFormOptions } from './activityFormHelpers';
 
-interface UseCreateActivityFormOptions {
-  tripId: string;
-  onSuccess: () => void;
-}
-
-type ActivityFormMode = 'create' | 'edit';
-
-interface UseActivityFormBaseOptions {
-  tripId: string;
-  onSuccess: (activityId?: string) => void;
-}
-
-interface UseActivityFormCreateOptions extends UseActivityFormBaseOptions {
-  mode: 'create';
-}
-
-interface UseActivityFormEditOptions extends UseActivityFormBaseOptions {
-  mode: 'edit';
-  activity: Activity;
-  date?: string;
-}
-
-type UseActivityFormOptions = UseActivityFormCreateOptions | UseActivityFormEditOptions;
-
-function buildInitialFormData(options: UseActivityFormOptions): ActivityFormData {
-  if (options.mode === 'edit') {
-    const { activity, date } = options;
-    return {
-      title: activity.title,
-      description: activity.description ?? '',
-      category: activity.category ?? '',
-      date: date ?? activity.created_at.split('T')[0],
-      startTime: activity.start_time ? activity.start_time.slice(0, 5) : '',
-      endTime: activity.end_time ? activity.end_time.slice(0, 5) : '',
-      cost:
-        typeof activity.cost_cents === 'number'
-          ? (activity.cost_cents / 100).toFixed(2).replace(/\.00$/, '')
-          : '',
-      costMin:
-        activity.cost_min_cents != null
-          ? (activity.cost_min_cents / 100).toFixed(2).replace(/\.00$/, '')
-          : '',
-      costMax:
-        activity.cost_max_cents != null
-          ? (activity.cost_max_cents / 100).toFixed(2).replace(/\.00$/, '')
-          : '',
-      currency: activity.currency ?? 'USD',
-      lat: activity.lat != null ? String(activity.lat) : '',
-      lon: activity.lon != null ? String(activity.lon) : '',
-      placeName: activity.place_name ?? '',
-      transportType: activity.transport_type ?? '',
-      transportNotes: activity.transport_notes ?? '',
-      transportDurationMinutes:
-        activity.transport_duration_minutes != null
-          ? String(activity.transport_duration_minutes)
-          : '',
-      status: activity.status,
-      organizerNotes: activity.organizer_notes ?? '',
-    };
-  }
-
-  return {
-    title: '',
-    description: '',
-    category: '',
-    date: '',
-    startTime: '',
-    endTime: '',
-    cost: '',
-    costMin: '',
-    costMax: '',
-    currency: 'USD',
-    lat: '',
-    lon: '',
-    placeName: '',
-    transportType: '',
-    transportNotes: '',
-    transportDurationMinutes: '',
-    status: 'proposed',
-    organizerNotes: '',
-  };
-}
+export type { UseActivityFormOptions } from './activityFormHelpers';
 
 export function useActivityForm(options: UseActivityFormOptions) {
   const { tripId, onSuccess } = options;
@@ -107,124 +33,24 @@ export function useActivityForm(options: UseActivityFormOptions) {
     e.preventDefault();
     setError(null);
 
-    if (!formData.title.trim()) {
-      setError(t('activityModal.titleRequired') || 'Title is required');
-      return;
-    }
-
-    if (formData.startTime && formData.endTime) {
-      const start = new Date(`2000-01-01T${formData.startTime}`);
-      const end = new Date(`2000-01-01T${formData.endTime}`);
-      if (end <= start) {
-        setError(t('activityModal.endTimeAfterStart') || 'End time must be after start time');
-        return;
-      }
-    }
-
-    const costMinVal = formData.costMin.trim() ? parseFloat(formData.costMin) : NaN;
-    const costMaxVal = formData.costMax.trim() ? parseFloat(formData.costMax) : NaN;
-    if (formData.costMin.trim() && (Number.isNaN(costMinVal) || costMinVal < 0)) {
-      setError(t('activityModal.invalidCost') || 'Cost must be a positive number');
-      return;
-    }
-    if (formData.costMax.trim() && (Number.isNaN(costMaxVal) || costMaxVal < 0)) {
-      setError(t('activityModal.invalidCost') || 'Cost must be a positive number');
-      return;
-    }
-    if (!Number.isNaN(costMinVal) && !Number.isNaN(costMaxVal) && costMinVal > costMaxVal) {
-      setError(t('activityModal.costMinMaxOrder') || 'Min cost must be less than or equal to max');
-      return;
-    }
-
-    if (
-      formData.lat &&
-      (isNaN(parseFloat(formData.lat)) ||
-        parseFloat(formData.lat) < -90 ||
-        parseFloat(formData.lat) > 90)
-    ) {
-      setError(t('activityModal.invalidLatitude') || 'Latitude must be between -90 and 90');
-      return;
-    }
-    if (
-      formData.lon &&
-      (isNaN(parseFloat(formData.lon)) ||
-        parseFloat(formData.lon) < -180 ||
-        parseFloat(formData.lon) > 180)
-    ) {
-      setError(t('activityModal.invalidLongitude') || 'Longitude must be between -180 and 180');
+    const validationError = validateActivityFormData(formData, t);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
     setLoading(true);
 
     try {
-      let start_time: string | undefined;
-      let end_time: string | undefined;
-
-      if (formData.startTime) {
-        const timeParts = formData.startTime.split(':');
-        start_time = timeParts.length === 2 ? `${formData.startTime}:00` : formData.startTime;
-      }
-      if (formData.endTime) {
-        const timeParts = formData.endTime.split(':');
-        end_time = timeParts.length === 2 ? `${formData.endTime}:00` : formData.endTime;
-      }
-
       const itinerary_day_id =
         currentTrip?.id === tripId && formData.date
           ? (getActiveItineraryDayIdByDate(formData.date) ?? undefined)
           : undefined;
 
-      const transportDuration =
-        formData.transportDurationMinutes.trim() !== ''
-          ? parseInt(formData.transportDurationMinutes, 10)
-          : undefined;
-      const validDuration =
-        transportDuration !== undefined && !isNaN(transportDuration) && transportDuration >= 0
-          ? transportDuration
-          : undefined;
-
-      const hasMin = formData.costMin.trim() !== '' && !Number.isNaN(parseFloat(formData.costMin));
-      const hasMax = formData.costMax.trim() !== '' && !Number.isNaN(parseFloat(formData.costMax));
-      let cost_min_cents: number | undefined;
-      let cost_max_cents: number | undefined;
-      if (hasMin && hasMax) {
-        cost_min_cents = Math.round(parseFloat(formData.costMin) * 100);
-        cost_max_cents = Math.round(parseFloat(formData.costMax) * 100);
-      } else if (hasMin) {
-        const c = Math.round(parseFloat(formData.costMin) * 100);
-        cost_min_cents = c;
-        cost_max_cents = c;
-      } else if (hasMax) {
-        const c = Math.round(parseFloat(formData.costMax) * 100);
-        cost_min_cents = c;
-        cost_max_cents = c;
-      }
+      const payload = buildActivityPayload(formData, itinerary_day_id);
 
       if (options.mode === 'create') {
-        await createActivity({
-          trip_id: tripId,
-          itinerary_day_id,
-          title: formData.title.trim(),
-          description: formData.description.trim() || undefined,
-          category: formData.category || undefined,
-          start_time,
-          end_time,
-          cost_cents: cost_min_cents ?? undefined,
-          cost_min_cents,
-          cost_max_cents,
-          currency: formData.currency,
-          lat: formData.lat ? parseFloat(formData.lat) : undefined,
-          lon: formData.lon ? parseFloat(formData.lon) : undefined,
-          place_name: formData.placeName.trim() || undefined,
-          transport_type: formData.transportType.trim() || undefined,
-          transport_notes: formData.transportNotes.trim() || undefined,
-          transport_duration_minutes: validDuration,
-          status: formData.status,
-          source: 'manual',
-          organizer_notes: formData.organizerNotes.trim() || undefined,
-        });
-
+        await createActivity({ trip_id: tripId, source: 'manual', ...payload });
         setFormData(
           buildInitialFormData({
             mode: 'create',
@@ -234,39 +60,21 @@ export function useActivityForm(options: UseActivityFormOptions) {
         );
         onSuccess();
       } else {
-        await updateActivity(options.activity.id, {
-          title: formData.title.trim(),
-          description: formData.description.trim() || undefined,
-          category: formData.category || undefined,
-          itinerary_day_id,
-          start_time,
-          end_time,
-          cost_cents: cost_min_cents ?? undefined,
-          cost_min_cents,
-          cost_max_cents,
-          currency: formData.currency,
-          lat: formData.lat ? parseFloat(formData.lat) : undefined,
-          lon: formData.lon ? parseFloat(formData.lon) : undefined,
-          place_name: formData.placeName.trim() || undefined,
-          transport_type: formData.transportType.trim() || undefined,
-          transport_notes: formData.transportNotes.trim() || undefined,
-          transport_duration_minutes: validDuration,
-          status: formData.status,
-          organizer_notes: formData.organizerNotes.trim() || undefined,
-        });
+        await updateActivity(options.activity.id, payload);
         onSuccess(options.activity.id);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error saving activity:', err);
+      const anyErr = err as { message?: string; code?: string };
       let errorMessage =
         options.mode === 'create'
           ? t('errors.failedToCreateActivity') || 'Failed to create activity'
           : t('errors.failedToUpdateActivity') || 'Failed to update activity';
-      if (err.message) {
-        errorMessage = err.message;
-      } else if (err.code === '23505') {
+      if (anyErr.message) {
+        errorMessage = anyErr.message;
+      } else if (anyErr.code === '23505') {
         errorMessage = t('errors.duplicateActivity') || 'An activity with this name already exists';
-      } else if (err.code === '23503') {
+      } else if (anyErr.code === '23503') {
         errorMessage = t('errors.invalidTrip') || 'Invalid trip reference';
       }
       setError(errorMessage);
@@ -283,6 +91,11 @@ export function useActivityForm(options: UseActivityFormOptions) {
     handleChange,
     handleSubmit,
   };
+}
+
+interface UseCreateActivityFormOptions {
+  tripId: string;
+  onSuccess: () => void;
 }
 
 export function useCreateActivityForm({ tripId, onSuccess }: UseCreateActivityFormOptions) {

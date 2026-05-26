@@ -4,18 +4,9 @@ import { useToast } from '@/contexts/ToastContext';
 import WeatherWidget from '@/components/WeatherWidget';
 import { TripExploreTab } from '@/pages/trip-detail/components/explore/TripExploreTab';
 import { TripChat } from '@/features/chat';
-import {
-  ActivityDeleteConfirmModal,
-  CreateActivityModal,
-  EditActivityModal,
-} from '@/features/activities';
-import { AiScenarioGenerationError } from '@/lib/ai/aiScenarioGenerationError';
 import { maxAiScenariosForTier } from '@/lib/ai/aiScenarioLimits';
 import { useStore } from '@/lib/store';
-import { supabase } from '@/lib/supabase';
 import { DashboardHeader } from '@/pages/dashboard/DashboardHeader';
-import type { TripConstraints } from '@/lib/types/database.types';
-import type { Activity } from '@/lib/types/database.types';
 import {
   useTripDetail,
   TripDetailHeader,
@@ -27,54 +18,23 @@ import {
   TripDetailDeleteModal,
   TripDetailFinalizeModal,
 } from './trip-detail';
+import { TripDetailPageActivityModals } from './trip-detail/components/TripDetailPageActivityModals';
 import { useTripDetailChatUnreadCount } from './trip-detail/hooks/useTripDetailChatUnreadCount';
-
-function getTripBudgetFromConstraints(
-  currentTrip: { constraints: unknown },
-  membersCount: number,
-): number | null {
-  const constraints = currentTrip.constraints as TripConstraints | null;
-
-  if (!constraints) {
-    return null;
-  }
-
-  if (typeof constraints.budget_total_cents === 'number') {
-    return constraints.budget_total_cents;
-  }
-
-  if (typeof constraints.budget_per_person_cents === 'number' && membersCount > 0) {
-    return constraints.budget_per_person_cents * membersCount;
-  }
-
-  return null;
-}
-
-function getConstraintsSummary(currentTrip: { constraints: unknown }) {
-  const constraints = currentTrip.constraints as TripConstraints | null;
-
-  return constraints
-    ? {
-        pace: constraints.pace,
-        has_children: constraints.has_children,
-        preferences: constraints.preferences,
-      }
-    : null;
-}
+import { useTripDetailPageHandlers } from './trip-detail/hooks/useTripDetailPageHandlers';
+import { useTripDetailPageModals } from './trip-detail/hooks/useTripDetailPageModals';
+import {
+  buildEditFormFromTrip,
+  getTripBudgetFromConstraints,
+  getConstraintsSummary,
+  sumActivityCostsCents,
+} from './trip-detail/utils/tripDetailPageHelpers';
 
 export default function TripDetailPage() {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const signOut = useStore((s) => s.signOut);
   const deleteActivity = useStore((s) => s.deleteActivity);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showFinalizeModal, setShowFinalizeModal] = useState(false);
-  const [activityToEdit, setActivityToEdit] = useState<{
-    activity: Activity;
-    date: string;
-  } | null>(null);
-  const [activityToDelete, setActivityToDelete] = useState<Activity | null>(null);
-  const [lastEditedActivityId, setLastEditedActivityId] = useState<string | null>(null);
 
   const handleLogout = async () => {
     try {
@@ -85,6 +45,7 @@ export default function TripDetailPage() {
     }
   };
 
+  const tripDetail = useTripDetail();
   const {
     t,
     locale,
@@ -101,79 +62,65 @@ export default function TripDetailPage() {
     editForm,
     setEditForm,
     isDeleting,
-    votingActivityId,
-    votingScenarioId,
-    winningScenarioIds,
-    getScenarioVoteCounts,
-    getUserScenarioVote,
-    handleScenarioVote,
     loadTripData,
     handleUpdateTrip,
     handleDeleteTrip,
     getUserRole,
     canEdit,
     canDelete,
-    handleVote,
-    getVoteCounts,
-    getUserVote,
-    activitiesByDate,
-    sortedDates,
-    itineraryDayIdByDate,
-    activityParticipantsMap,
-    memberProfiles,
-    refreshActivityParticipants,
     showAddActivityModal,
     setShowAddActivityModal,
-    scenarios,
-    scenariosLoading,
-    scenariosError,
-    canCreateActivitiesAndScenarios,
-    canManageScenarios,
     userAiTier,
     canEditActivities,
     canReorderActivities,
-    canDeleteActivities,
+    canCreateActivitiesAndScenarios,
+    canManageScenarios,
     canFinalizeItinerary,
     handleFinalizeItinerary,
     isFinalizing,
-    createScenario,
-    deleteScenario,
     generateAiScenario,
     applyScenarioAsBase,
     importScenarioActivityToItinerary,
-  } = useTripDetail();
+    activityParticipantsMap,
+    refreshActivityParticipants,
+    activitiesByDate,
+    sortedDates,
+  } = tripDetail;
+
+  const {
+    showDeleteModal,
+    setShowDeleteModal,
+    activityToEdit,
+    setActivityToEdit,
+    activityToDelete,
+    setActivityToDelete,
+    lastEditedActivityId,
+    handleAddMeToActivity,
+    handleRemoveMeFromActivity,
+    handleEditActivitySaveSuccess,
+  } = useTripDetailPageModals({
+    tripId,
+    user,
+    tripMembers,
+    activityParticipantsMap,
+    refreshActivityParticipants,
+  });
+
+  const pageHandlers = useTripDetailPageHandlers({
+    tripId,
+    currentTrip,
+    tripMembersCount: tripMembers.length,
+    locale,
+    t,
+    addToast,
+    generateAiScenario,
+    applyScenarioAsBase,
+    importScenarioActivityToItinerary,
+    setActivityToEdit,
+    setActivityToDelete,
+  });
 
   const chatUnreadCount = useTripDetailChatUnreadCount(tripId, user?.id, activeTab);
-
-  const handleAddMeToActivity = async (activityId: string) => {
-    if (!user?.id) return;
-    const table = supabase.from('activity_participants') as unknown as {
-      insert: (v: { activity_id: string; user_id: string }) => Promise<unknown>;
-    };
-    await table.insert({ activity_id: activityId, user_id: user.id });
-    await refreshActivityParticipants();
-  };
-
-  const handleRemoveMeFromActivity = async (activityId: string) => {
-    if (!user?.id) return;
-    const hasExplicit =
-      activityParticipantsMap[activityId] != null && activityParticipantsMap[activityId].length > 0;
-    const table = supabase.from('activity_participants') as unknown as {
-      delete: () => {
-        eq: (col: string, val: string) => { eq: (col: string, val: string) => Promise<unknown> };
-      };
-      insert: (v: { activity_id: string; user_id: string }[]) => Promise<unknown>;
-    };
-    if (hasExplicit) {
-      await table.delete().eq('activity_id', activityId).eq('user_id', user.id);
-    } else {
-      const otherIds = tripMembers.filter((m) => m.user_id !== user.id).map((m) => m.user_id);
-      if (otherIds.length > 0) {
-        await table.insert(otherIds.map((uid) => ({ activity_id: activityId, user_id: uid })));
-      }
-    }
-    await refreshActivityParticipants();
-  };
 
   if (loading) {
     return (
@@ -225,22 +172,7 @@ export default function TripDetailPage() {
         onStartEdit={() => setIsEditing(true)}
         onCancelEdit={() => {
           setIsEditing(false);
-          const c = currentTrip.constraints as
-            | import('@/lib/types/database.types').TripConstraints
-            | null;
-          setEditForm({
-            title: currentTrip.title,
-            destination_text: currentTrip.destination_text,
-            start_date: currentTrip.start_date,
-            end_date: currentTrip.end_date,
-            status: currentTrip.status,
-            pace: (c?.pace as 'relaxed' | 'balanced' | 'packed') || 'balanced',
-            budget: c?.budget_per_person_cents
-              ? String(Math.round(c.budget_per_person_cents / 100))
-              : '',
-            currency: currentTrip.currency || 'EUR',
-            has_children: !!c?.has_children,
-          });
+          setEditForm(buildEditFormFromTrip(currentTrip));
         }}
         onSave={handleUpdateTrip}
         onDelete={() => setShowDeleteModal(true)}
@@ -292,21 +224,7 @@ export default function TripDetailPage() {
             locale={locale}
             t={t}
             canAddToItinerary={canEditActivities()}
-            onImportPlace={async (date, payload) => {
-              if (!tripId) return;
-              try {
-                await importScenarioActivityToItinerary(tripId, date, payload);
-                addToast({
-                  variant: 'success',
-                  message: t('tripDetail.exploreAddToItinerarySuccess'),
-                });
-              } catch {
-                addToast({
-                  variant: 'error',
-                  message: t('tripDetail.exploreAddToItineraryError'),
-                });
-              }
-            }}
+            onImportPlace={pageHandlers.handleImportPlace}
           />
         )}
         {activeTab === 'itinerary' && (
@@ -317,66 +235,41 @@ export default function TripDetailPage() {
             canReorder={canReorderActivities()}
             canVote={!!user}
             canVoteScenario={!!user}
-            votingScenarioId={votingScenarioId}
-            winningScenarioIds={winningScenarioIds}
-            getScenarioVoteCounts={getScenarioVoteCounts}
-            getUserScenarioVote={getUserScenarioVote}
-            onScenarioVote={handleScenarioVote}
+            votingScenarioId={tripDetail.votingScenarioId}
+            winningScenarioIds={tripDetail.winningScenarioIds}
+            getScenarioVoteCounts={tripDetail.getScenarioVoteCounts}
+            getUserScenarioVote={tripDetail.getUserScenarioVote}
+            onScenarioVote={tripDetail.handleScenarioVote}
             lastEditedActivityId={lastEditedActivityId}
             activitiesByDate={activitiesByDate}
             sortedDates={sortedDates}
-            itineraryDayIdByDate={itineraryDayIdByDate}
-            votingActivityId={votingActivityId}
-            getVoteCounts={getVoteCounts}
-            getUserVote={getUserVote}
-            onVote={handleVote}
+            itineraryDayIdByDate={tripDetail.itineraryDayIdByDate}
+            votingActivityId={tripDetail.votingActivityId}
+            getVoteCounts={tripDetail.getVoteCounts}
+            getUserVote={tripDetail.getUserVote}
+            onVote={tripDetail.handleVote}
             onAddActivity={() => setShowAddActivityModal(true)}
             t={t}
-            totalSpentCents={Object.values(activitiesByDate)
-              .flat()
-              .reduce((s, a) => s + (a.cost_max_cents ?? a.cost_min_cents ?? a.cost_cents ?? 0), 0)}
+            totalSpentCents={sumActivityCostsCents(activitiesByDate)}
             budgetCents={getTripBudgetFromConstraints(currentTrip, tripMembers.length)}
             currency={currentTrip.currency ?? 'EUR'}
             constraintsSummary={getConstraintsSummary(currentTrip)}
             membersCount={tripMembers.length}
             activityParticipantsMap={activityParticipantsMap}
             tripMembers={tripMembers}
-            memberProfiles={memberProfiles}
-            scenarios={scenarios}
+            memberProfiles={tripDetail.memberProfiles}
+            scenarios={tripDetail.scenarios}
             canCreateScenarios={canCreateActivitiesAndScenarios()}
             canGenerateAiScenario={canManageScenarios()}
             maxAiScenariosPerTrip={maxAiScenariosPerTrip}
             canManageScenarios={canManageScenarios()}
-            onGenerateAiScenario={async () => {
-              if (!currentTrip) return;
-              try {
-                await generateAiScenario(currentTrip, tripMembers.length, locale);
-                addToast({ variant: 'success', message: t('tripDetail.aiGenerateSuccess') });
-              } catch (e) {
-                if (e instanceof AiScenarioGenerationError) {
-                  addToast({ variant: 'error', message: t(e.i18nKey()) });
-                  return;
-                }
-                addToast({ variant: 'error', message: t('tripDetail.aiGenerateErrorGeneric') });
-              }
-            }}
-            onCreateScenario={createScenario}
-            onDeleteScenario={deleteScenario}
-            onUseScenarioAsBase={async (scenarioId) => {
-              if (!tripId) return;
-              await applyScenarioAsBase(tripId, scenarioId);
-            }}
-            onAddScenarioActivityToItinerary={async (date, activity) => {
-              if (!tripId) return;
-              await importScenarioActivityToItinerary(tripId, date, activity);
-            }}
-            onEditActivity={(activity, date) => {
-              if (!date) return;
-              setActivityToEdit({ activity, date });
-            }}
-            onDeleteActivity={(activity) => {
-              setActivityToDelete(activity);
-            }}
+            onGenerateAiScenario={pageHandlers.handleGenerateAiScenario}
+            onCreateScenario={tripDetail.createScenario}
+            onDeleteScenario={tripDetail.deleteScenario}
+            onUseScenarioAsBase={pageHandlers.handleUseScenarioAsBase}
+            onAddScenarioActivityToItinerary={pageHandlers.handleAddScenarioActivityToItinerary}
+            onEditActivity={pageHandlers.handleEditActivity}
+            onDeleteActivity={pageHandlers.handleDeleteActivity}
           />
         )}
         {activeTab === 'chat' && tripId && (
@@ -384,43 +277,30 @@ export default function TripDetailPage() {
             tripId={tripId}
             userRole={getUserRole()}
             tripMembers={tripMembers}
-            memberProfiles={memberProfiles}
+            memberProfiles={tripDetail.memberProfiles}
           />
         )}
       </main>
 
-      {showAddActivityModal && tripId && (
-        <CreateActivityModal tripId={tripId} onClose={() => setShowAddActivityModal(false)} />
-      )}
-
-      {activityToEdit && tripId && (
-        <EditActivityModal
-          tripId={tripId}
-          activity={activityToEdit.activity}
-          date={activityToEdit.date}
-          onClose={() => setActivityToEdit(null)}
-          onSaveSuccess={(activityId) => {
-            setLastEditedActivityId(activityId);
-            setActivityToEdit(null);
-            setTimeout(() => setLastEditedActivityId(null), 2500);
-          }}
-          currentUserId={user?.id ?? null}
-          activityParticipantsMap={activityParticipantsMap}
-          tripMembers={tripMembers}
-          memberProfiles={memberProfiles}
-          onAddMe={handleAddMeToActivity}
-          onRemoveMe={handleRemoveMeFromActivity}
-        />
-      )}
-
-      <ActivityDeleteConfirmModal
-        activity={activityToDelete}
-        isOpen={!!activityToDelete}
-        onClose={() => setActivityToDelete(null)}
-        onConfirm={async (activityId) => {
+      <TripDetailPageActivityModals
+        tripId={tripId}
+        userId={user?.id}
+        showAddActivityModal={showAddActivityModal}
+        onCloseAddActivity={() => setShowAddActivityModal(false)}
+        activityToEdit={activityToEdit}
+        onCloseEditActivity={() => setActivityToEdit(null)}
+        onEditSaveSuccess={handleEditActivitySaveSuccess}
+        activityToDelete={activityToDelete}
+        onCloseDeleteActivity={() => setActivityToDelete(null)}
+        onConfirmDeleteActivity={async (activityId) => {
           await deleteActivity(activityId);
           setActivityToDelete(null);
         }}
+        activityParticipantsMap={activityParticipantsMap}
+        tripMembers={tripMembers}
+        memberProfiles={tripDetail.memberProfiles}
+        onAddMe={handleAddMeToActivity}
+        onRemoveMe={handleRemoveMeFromActivity}
       />
     </div>
   );

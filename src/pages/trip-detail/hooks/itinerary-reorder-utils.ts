@@ -1,5 +1,7 @@
 import type { Activity } from '@/lib/types/database.types';
 
+type ActivityReorderUpdate = { order_index?: number; itinerary_day_id?: string };
+
 /** Sort activities by order_index (persisted drag order), then start_time, then created_at. */
 function sortByDayOrder(activities: Activity[]): Activity[] {
   return [...activities].sort((a, b) => {
@@ -57,4 +59,94 @@ export function moveActivityToOtherDay(
     [sourceDate]: nextSource,
     [targetDate]: nextTarget,
   };
+}
+
+export function computeNextByDateForDrop(
+  activitiesByDate: Record<string, Activity[]>,
+  sourceDate: string,
+  targetDate: string,
+  activityId: string,
+  targetIndex: number,
+  itineraryDayIdByDate: Record<string, string>,
+): { nextByDate: Record<string, Activity[]>; sameDay: boolean } {
+  const sameDay = sourceDate === targetDate;
+  let nextByDate = sameDay
+    ? moveActivityWithinDay(activitiesByDate, targetDate, activityId, targetIndex)
+    : moveActivityToOtherDay(activitiesByDate, sourceDate, targetDate, activityId, targetIndex);
+  if (!sameDay) {
+    nextByDate = patchMovedActivityDayId(nextByDate, targetDate, activityId, itineraryDayIdByDate);
+  }
+  return { nextByDate, sameDay };
+}
+
+export function patchMovedActivityDayId(
+  nextByDate: Record<string, Activity[]>,
+  targetDate: string,
+  activityId: string,
+  itineraryDayIdByDate: Record<string, string>,
+): Record<string, Activity[]> {
+  const targetDayId = itineraryDayIdByDate[targetDate];
+  const targetList = nextByDate[targetDate] ?? [];
+  const movedIndex = targetList.findIndex((a) => a.id === activityId);
+  if (movedIndex === -1 || !targetDayId) return nextByDate;
+  const patched = [...targetList];
+  patched[movedIndex] = { ...patched[movedIndex], itinerary_day_id: targetDayId };
+  return { ...nextByDate, [targetDate]: patched };
+}
+
+export async function commitDrop(
+  nextByDate: Record<string, Activity[]>,
+  activityId: string,
+  targetDate: string,
+  sortedDates: string[],
+  activitiesByDate: Record<string, Activity[]>,
+  itineraryDayIdByDate: Record<string, string>,
+  isSameDay: boolean,
+  setActivities: (activities: Activity[]) => void,
+  updateActivity: (id: string, updates: ActivityReorderUpdate) => Promise<void>,
+): Promise<void> {
+  const flat = sortedDates.flatMap((d) => nextByDate[d] ?? []);
+  const newOrderForDay = (nextByDate[targetDate] ?? []).map((a) => a.id);
+  setActivities(flat);
+  await persistReorder(
+    activityId,
+    targetDate,
+    itineraryDayIdByDate,
+    activitiesByDate,
+    sortedDates,
+    updateActivity,
+    newOrderForDay.length > 0 ? newOrderForDay : undefined,
+    isSameDay,
+  );
+}
+
+export async function persistReorder(
+  activityId: string,
+  newDate: string,
+  itineraryDayIdByDate: Record<string, string>,
+  activitiesByDate: Record<string, Activity[]>,
+  sortedDates: string[],
+  updateActivity: (id: string, updates: ActivityReorderUpdate) => Promise<void>,
+  newOrderedIdsForDay?: string[],
+  isSameDay?: boolean,
+): Promise<void> {
+  const targetDayId = itineraryDayIdByDate[newDate];
+  if (!targetDayId) return;
+
+  if (newOrderedIdsForDay != null && newOrderedIdsForDay.length > 0) {
+    for (let i = 0; i < newOrderedIdsForDay.length; i++) {
+      const id = newOrderedIdsForDay[i];
+      const updates: ActivityReorderUpdate = { order_index: i };
+      if (!isSameDay && id === activityId) {
+        updates.itinerary_day_id = targetDayId;
+      }
+      await updateActivity(id, updates);
+    }
+    return;
+  }
+
+  const all = sortedDates.flatMap((d) => activitiesByDate[d] ?? []);
+  const activity = all.find((a) => a.id === activityId);
+  if (!activity || activity.itinerary_day_id === targetDayId) return;
+  await updateActivity(activityId, { itinerary_day_id: targetDayId });
 }
