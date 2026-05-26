@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/contexts/ToastContext';
 import WeatherWidget from '@/components/WeatherWidget';
-import NearbyPlaces from '@/components/NearbyPlaces';
+import { TripExploreTab } from '@/pages/trip-detail/components/explore/TripExploreTab';
 import { TripChat } from '@/features/chat';
 import {
   ActivityDeleteConfirmModal,
@@ -284,7 +284,15 @@ export default function TripDetailPage() {
             endDate={currentTrip.end_date}
           />
         )}
-        {activeTab === 'explore' && <NearbyPlaces destination={currentTrip.destination_text} />}
+        {activeTab === 'explore' && (
+          <TripExploreTab
+            destination={currentTrip.destination_text}
+            sortedDates={sortedDates}
+            activitiesByDate={activitiesByDate}
+            locale={locale}
+            t={t}
+          />
+        )}
         {activeTab === 'itinerary' && (
           <TripDetailItinerary
             startDate={currentTrip.start_date}
