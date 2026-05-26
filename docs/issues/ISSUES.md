@@ -2,7 +2,7 @@
 
 > Goal: Build a complete SaaS travel planning platform with AI-powered itineraries, real-time collaboration, and seamless user experience.
 
-**Last Updated:** May 26, 2026 — **#15 PWA** 🟢 [PR #53](https://github.com/igorms-pro/voyagely/pull/53) ; **#14 dépenses** 🟢 [PR #51](https://github.com/igorms-pro/voyagely/pull/51) ; **#35 refactor v2** 🟢 [PR #49](https://github.com/igorms-pro/voyagely/pull/49) ; **#13** 🟢 [PR #46](https://github.com/igorms-pro/voyagely/pull/46) + [PR #48](https://github.com/igorms-pro/voyagely/pull/48) ; **#17 Premium** 🟢 [PR #44](https://github.com/igorms-pro/voyagely/pull/44) (QA en pause).
+**Last Updated:** May 26, 2026 — **#16 templates** 🟢 [PR #55](https://github.com/igorms-pro/voyagely/pull/55) ; **#15 PWA** 🟢 [PR #53](https://github.com/igorms-pro/voyagely/pull/53) ; **#14 dépenses** 🟢 [PR #51](https://github.com/igorms-pro/voyagely/pull/51) ; **#35 refactor v2** 🟢 [PR #49](https://github.com/igorms-pro/voyagely/pull/49) ; **#17 Premium** 🟢 [PR #44](https://github.com/igorms-pro/voyagely/pull/44) (QA manuelle en attente).
 
 ## 📋 Status Legend
 
@@ -19,7 +19,7 @@
 
 - **Vérification GitHub (mai 2026)** : doc **#11** ↔ GitHub **[#40](https://github.com/igorms-pro/voyagely/issues/40)** — **CLOSED**. Doc **#12** (IA Edge) : pas d’issue GitHub dédiée historique ; livré sur **`main`**. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain) — vérifier le dernier run après chaque push.
 - **`main` / `origin/main`** : chat **#11**, IA Edge **#12**, **Context #13**, **Premium #17** ([PR #44](https://github.com/igorms-pro/voyagely/pull/44), migration `019`), **Dépenses #14** ([PR #51](https://github.com/igorms-pro/voyagely/pull/51), migration `020`, onglet Expenses).
-- **Phase 2 produit** : **#15** 🟢 → **#16** 🟡 — templates en cours ([GitHub #54](https://github.com/igorms-pro/voyagely/issues/54), branche `feature/issue-16-templates`).
+- **Phase 2 produit** : **#14–#16** 🟢 — dépenses, PWA, templates ([#54](https://github.com/igorms-pro/voyagely/issues/54) fermée, [PR #55](https://github.com/igorms-pro/voyagely/pull/55) mergée).
 
 ### 📌 Terminologie (ne pas confondre)
 
@@ -33,9 +33,9 @@
 
 ## 🚀 IMMEDIATE NEXT ACTION (For AI Agent)
 
-1. **Phase 2 produit** — **#16** 🟡 — merger [PR #55](https://github.com/igorms-pro/voyagely/pull/55) puis QA smoke (share / duplicate / template).
-2. **QA Premium** (#17) — checklist Stripe — optionnel / post-refactor.
-3. **Prod Stripe** : `SITE_URL` + secrets **live** quand domaine final.
+1. **QA Premium** (#17) — checklist Stripe **test mode** manuelle sur `/account` (4242…).
+2. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain) — vérifier après merge [PR #55](https://github.com/igorms-pro/voyagely/pull/55).
+3. **🟣 Stripe live prod** : **reporté** — pas de `sk_live_` / `SITE_URL` prod pour l’instant ; rester en **test** (`localhost:5173` + secrets test Supabase Edge).
 
 ---
 
@@ -317,16 +317,33 @@ Passer d’un modèle **100 % gratuit** à des **abonnements ou achats** qui pos
 - [x] Produit / prix Stripe test (mensuel + annuel)
 - [x] Webhook Stripe → `.../functions/v1/stripe-webhook`
 - [x] **Customer Portal** activé côté Stripe (Settings → Billing) + bouton app
-- [ ] **Prod / staging** : repasser `SITE_URL` + secrets **live** quand domaine final connu
-- [ ] **QA manuelle** (Igor, post-refactor #35) — voir checklist ci-dessous
+- [ ] **🟣 Prod / staging live** : **hors scope pour l’instant** — `SITE_URL` + secrets **live** seulement quand domaine final + décision explicite (mai 2026 : **test only**)
+- [ ] **QA manuelle** (Igor, post-refactor #35 + Phase 2 #16) — voir checklist ci-dessous
 
-### QA checklist (en pause — post-refactor #35)
+### QA checklist (en attente — post-refactor #35, Phase 2 #16 livrée)
 
-- [ ] Free → `/account` → checkout mensuel **4242…** → retour succès → **Premium** sans SQL manuel
-- [ ] Webhook Stripe : delivery **200** sur `checkout.session.completed` / `customer.subscription.updated`
-- [ ] Premium → **Gérer l’abonnement** → portail → retour `/account` (même onglet)
-- [ ] Annulation abo test → webhook → **Free** + quotas IA free sur un trip
-- [ ] Refresh `/account` : badge plan cohérent avec `profiles`
+**Prérequis (local)** : `pnpm dev` → `http://localhost:5173` ; Supabase Edge secrets `STRIPE_*` + `SITE_URL=http://localhost:5173` ; Stripe **test mode** ; compte test **Free** (`profiles.ai_tier = free`, pas d’abo actif).
+
+| #   | Étape                                                               | Attendu                                                                                  |
+| --- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| 1   | Login (magic link / Google) → **`/account`**                        | Badge **Free** ; cartes mensuel / annuel visibles                                        |
+| 2   | **Subscribe monthly** → Checkout Stripe                             | Carte `4242 4242 4242 4242` · exp. `12/34` · CVC `123` · nom libre                       |
+| 3   | Paiement OK → redirect `?checkout=success`                          | Bannière sync puis **Premium** ; **Gérer l’abonnement** visible ; **pas** de SQL manuel  |
+| 4   | Stripe Dashboard → **Webhooks** → endpoint `stripe-webhook`         | Derniers events `checkout.session.completed` / `customer.subscription.updated` → **200** |
+| 5   | **Manage subscription** → portail Stripe → retour app               | Même onglet → `/account` ; plan toujours Premium                                         |
+| 6   | Portail : **Cancel subscription** (fin de période ou immédiat test) | Webhook `customer.subscription.deleted` → **200** ; profil **Free**                      |
+| 7   | Trip existant → génération scénario IA                              | Cap **free** (3 scénarios / trip) vs **premium** (10) — voir `aiScenarioLimits.ts`       |
+| 8   | Bouton **Refresh** sur `/account`                                   | Badge aligné avec `profiles` (Supabase Table Editor si doute)                            |
+
+**Carte test Stripe** : `4242 4242 4242 4242` (succès). Déclin test : `4000 0000 0000 0002`.
+
+**E2E headless (optionnel)** : ajouter `SUPABASE_SERVICE_ROLE_KEY` dans `.env.local` → `authenticateWithMagicLink` (`e2e/helpers/auth.ts`) puis enchaîner les étapes 1–3 en Playwright.
+
+- [ ] **1–3** Free → checkout mensuel **4242…** → retour succès → **Premium** sans SQL manuel
+- [ ] **4** Webhook Stripe : delivery **200** sur `checkout.session.completed` / `customer.subscription.updated`
+- [ ] **5** Premium → **Gérer l’abonnement** → portail → retour `/account` (même onglet)
+- [ ] **6–7** Annulation abo test → webhook → **Free** + quotas IA free sur un trip
+- [ ] **8** Refresh `/account` : badge plan cohérent avec `profiles`
 
 ### Reste optionnel (post-merge)
 
@@ -337,7 +354,7 @@ Passer d’un modèle **100 % gratuit** à des **abonnements ou achats** qui pos
 
 - [x] **PR** [#44](https://github.com/igorms-pro/voyagely/pull/44) mergée (`Fixes #42`, mai 2026)
 - [x] GitHub **#42** fermée
-- [ ] **QA** manuelle (reportée **post-refactor** #35)
+- [ ] **QA** manuelle (reportée **post-refactor** #35 — **débloquée** mai 2026)
 
 ---
 
@@ -468,7 +485,8 @@ Make Voyagely usable during trips with PWA and offline capabilities.
 
 ## 🎯 Issue #16: Trip Templates & Sharing
 
-**Status:** 🟡 **IN PROGRESS** — GitHub **[#54](https://github.com/igorms-pro/voyagely/issues/54)** ; branche `feature/issue-16-templates` ; [PR #55](https://github.com/igorms-pro/voyagely/pull/55) (migration `021` appliquée prod)
+**Status:** 🟢 **COMPLETED** — mergé sur `main` via **[PR #55](https://github.com/igorms-pro/voyagely/pull/55)** (mai 2026). Migration `021` appliquée prod.  
+**GitHub:** [#54](https://github.com/igorms-pro/voyagely/issues/54) — **CLOSED** (`Fixes #54`)
 
 ### Description
 
@@ -479,8 +497,22 @@ Add trip templates and sharing capabilities.
 - [x] 🟡 Template system — `trip_templates` + save / create from template
 - [x] 🟡 Duplicate trip — modal + clone itinerary
 - [x] 🟡 Sharing links — invite UI + `/invite/:code` + RPC join
-- [x] 🟡 Timezone support — `trips.timezone` + edit form
-- [x] 🟡 Tests — `shiftTripDates`, `buildTemplateSnapshot`
+- [x] 🟢 Timezone support — `trips.timezone` + edit form
+- [x] 🟢 Tests — `shiftTripDates`, `buildTemplateSnapshot`
+
+### QA smoke (mai 2026)
+
+- [x] `pnpm check` vert sur `main` post-merge
+- [x] Tests unitaires `trip-sharing` (5/5)
+- [x] Route `/invite/:code` — page « Join trip » + message lien invalide (code test)
+- [ ] Flows authentifiés (template picker dashboard, duplicate/share modals) — **manuel Igor** (login magic link / Google)
+
+### Finish (workflow)
+
+- [x] **PR** [#55](https://github.com/igorms-pro/voyagely/pull/55) mergée (`Fixes #54`, mai 2026)
+- [x] GitHub **#54** fermée
+- [x] Migration **`021`** appliquée prod
+- [x] **QA smoke** automatisée + route invite
 
 ---
 
@@ -565,9 +597,9 @@ _Will be tracked here as discovered_
 
 - **Issue #14 (Expenses)**: 🟢 **COMPLETED (MVP)** — [PR #51](https://github.com/igorms-pro/voyagely/pull/51) ; [#50](https://github.com/igorms-pro/voyagely/issues/50) fermée ; migration `020`
 - **Issue #15 (PWA/Offline)**: 🟢 **COMPLETED (MVP)** — [PR #53](https://github.com/igorms-pro/voyagely/pull/53) ; [#52](https://github.com/igorms-pro/voyagely/issues/52) fermée
-- **Issue #16 (Templates)**: 🟡 **IN PROGRESS** — [#54](https://github.com/igorms-pro/voyagely/issues/54) ; [PR #55](https://github.com/igorms-pro/voyagely/pull/55)
+- **Issue #16 (Templates)**: 🟢 **COMPLETED (MVP)** — [PR #55](https://github.com/igorms-pro/voyagely/pull/55) ; [#54](https://github.com/igorms-pro/voyagely/issues/54) fermée ; migration `021`
 
-**Overall MVP Completion: ~95%** — Phase 2 #14–#15 livrés ; **#16 templates** prochaine ; QA Premium (#17) en pause
+**Overall MVP Completion: ~98%** — Phase 2 **#14–#16** livrés ; QA Premium (#17) manuelle en attente
 
 ---
 
@@ -575,8 +607,8 @@ _Will be tracked here as discovered_
 
 **CRITICAL PATH**:
 
-1. **Phase 2 produit** : **#16** (templates).
-2. **QA Premium** (#17) — optionnel / post-refactor.
-3. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain).
+1. **QA Premium** (#17) — checklist Stripe **test mode** manuelle.
+2. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain).
+3. **🟣 Stripe live prod** : reporté (test only pour l’instant).
 
 **BLOCKER** : aucun bloquant produit.
