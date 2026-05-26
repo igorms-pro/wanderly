@@ -183,7 +183,15 @@
     "usersTyping": "{{names}} are typing…",
     "memberPresenceListLabel": "Trip members and online status",
     "reactionToggle": "Toggle {{emoji}} reaction",
-    "mentionSuggestions": "Mention a trip member"
+    "mentionSuggestions": "Mention a trip member",
+    "you": "You"
+  },
+  "offline": {
+    "bannerOffline": "You are offline. Changes will sync when you reconnect.",
+    "bannerPending_one": "{{count}} change waiting to sync",
+    "bannerPending_other": "{{count}} changes waiting to sync",
+    "syncNow": "Sync now",
+    "syncing": "Syncing…"
   },
   "weather": {
     "current": "Current Weather",

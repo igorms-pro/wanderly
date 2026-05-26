@@ -7,6 +7,8 @@ import { ToastProvider } from './contexts/ToastContext';
 import { AuthProvider } from './lib/AuthProvider';
 import { useStore } from './lib/store';
 import { Spinner } from './components/ui/Spinner';
+import { OfflineBanner } from './components/OfflineBanner';
+import { useOfflineSync } from './lib/offline/useOfflineSync';
 import LandingPage from './pages/LandingPage';
 
 const LoginPage = lazy(() => import('./pages/LoginPage'));
@@ -15,7 +17,20 @@ const DashboardPage = lazy(() => import('./pages/dashboard'));
 const TripDetailPage = lazy(() => import('./pages/TripDetailPage'));
 const AccountPage = lazy(() => import('./pages/AccountPage'));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+      retry: 2,
+      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
+      refetchOnWindowFocus: false,
+    },
+    mutations: {
+      retry: 1,
+    },
+  },
+});
 
 function PageLoader() {
   return (
@@ -31,6 +46,50 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   if (!authInitialized) return <PageLoader />;
   if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;
+}
+
+function AppShell({ dashboardKey }: { dashboardKey: number }) {
+  useOfflineSync();
+
+  return (
+    <>
+      <OfflineBanner />
+      <Router>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <DashboardPage key={dashboardKey} />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/trip/:tripId"
+              element={
+                <ProtectedRoute>
+                  <TripDetailPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/account"
+              element={
+                <ProtectedRoute>
+                  <AccountPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </Router>
+    </>
+  );
 }
 
 function App() {
@@ -61,40 +120,7 @@ function App() {
         <ToastProvider>
           <AuthProvider>
             <QueryClientProvider client={queryClient}>
-              <Router>
-                <Suspense fallback={<PageLoader />}>
-                  <Routes>
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/signup" element={<SignupPage />} />
-                    <Route
-                      path="/dashboard"
-                      element={
-                        <ProtectedRoute>
-                          <DashboardPage key={dashboardKey} />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/trip/:tripId"
-                      element={
-                        <ProtectedRoute>
-                          <TripDetailPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/account"
-                      element={
-                        <ProtectedRoute>
-                          <AccountPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                  </Routes>
-                </Suspense>
-              </Router>
+              <AppShell dashboardKey={dashboardKey} />
             </QueryClientProvider>
           </AuthProvider>
         </ToastProvider>

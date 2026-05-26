@@ -65,6 +65,7 @@ export async function sendChatMessage(
   tripId: string,
   userId: string,
   text: string,
+  clientMsgId?: string,
 ): Promise<Message> {
   const { data: message, error } = await supabase
     .from('messages')
@@ -73,6 +74,7 @@ export async function sendChatMessage(
       user_id: userId,
       content: text,
       message_type: 'text',
+      client_msg_id: clientMsgId ?? null,
     })
     .select()
     .single();
