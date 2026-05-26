@@ -2,7 +2,7 @@
 
 > Goal: Build a complete SaaS travel planning platform with AI-powered itineraries, real-time collaboration, and seamless user experience.
 
-**Last Updated:** May 26, 2026 — **#13 Context / carte Explore** 🟢 **COMPLETED (MVP)** — mergé via **[PR #46](https://github.com/igorms-pro/voyagely/pull/46)** ; GitHub [#45](https://github.com/igorms-pro/voyagely/issues/45) **CLOSED**. **#17 Premium** 🟢 [PR #44](https://github.com/igorms-pro/voyagely/pull/44).
+**Last Updated:** May 26, 2026 — **#13** 🟢 [PR #46](https://github.com/igorms-pro/voyagely/pull/46) ; **#17 Premium** 🟢 [PR #44](https://github.com/igorms-pro/voyagely/pull/44) ; **#35/#36 refactor v2** fermés (obsolète) ; **[PR #43](https://github.com/igorms-pro/voyagely/pull/43)** `AGENTS.md` mergée.
 
 ## 📋 Status Legend
 
