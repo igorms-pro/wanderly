@@ -1,614 +1,145 @@
 # Voyagely Issues & Tasks Tracker
 
-> Goal: Build a complete SaaS travel planning platform with AI-powered itineraries, real-time collaboration, and seamless user experience.
+> Group travel planning — constraints, votes, chat, AI scenarios, expenses, PWA.
 
-**Last Updated:** May 26, 2026 — **#16 templates** 🟢 [PR #55](https://github.com/igorms-pro/voyagely/pull/55) ; **#15 PWA** 🟢 [PR #53](https://github.com/igorms-pro/voyagely/pull/53) ; **#14 dépenses** 🟢 [PR #51](https://github.com/igorms-pro/voyagely/pull/51) ; **#35 refactor v2** 🟢 [PR #49](https://github.com/igorms-pro/voyagely/pull/49) ; **#17 Premium** 🟢 [PR #44](https://github.com/igorms-pro/voyagely/pull/44) (QA manuelle en attente).
+**Last Updated:** May 26, 2026 — fichier réaligné : **QA manuelle** en tête ; issues livrées **archivées** (tableau compact).
 
 ## 📋 Status Legend
 
-- 🔴 **Not Started** - Task identified but not begun
-- 🟡 **In Progress** - Actively being worked on
-- 🟢 **Completed** - Task finished and tested
-- ⏸️ **Blocked** - Waiting on dependencies or decisions
-- 🔵 **Testing** - In QA or testing phase
-- 🟣 **On Hold** - Deferred for later
+| Symbole | Signification                          |
+| ------- | -------------------------------------- |
+| 🔵      | **Testing** — QA / validation manuelle |
+| 🔴      | **Not started** — à planifier          |
+| 🟡      | **In progress**                        |
+| 🟢      | **Completed** — code mergé sur `main`  |
+| 🟣      | **On hold** — reporté explicitement    |
+
+**Repo :** `main` = MVP (#0–#13) + Premium code (#17) + refactor (#35) + Phase 2 (#14–#16). **CI :** [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain).
+
+| Terme           | Signification                                             |
+| --------------- | --------------------------------------------------------- |
+| **Doc #**       | Numéro dans ce fichier (≠ toujours le numéro GitHub)      |
+| **Phase 2**     | #14 dépenses, #15 PWA, #16 templates — **tous livrés**    |
+| **Refactor v2** | Doc #35 — split fichiers, **pas** une feature utilisateur |
 
 ---
 
-### État repo / code (référence)
+## 🚀 IMMEDIATE NEXT ACTION
 
-- **Vérification GitHub (mai 2026)** : doc **#11** ↔ GitHub **[#40](https://github.com/igorms-pro/voyagely/issues/40)** — **CLOSED**. Doc **#12** (IA Edge) : pas d’issue GitHub dédiée historique ; livré sur **`main`**. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain) — vérifier le dernier run après chaque push.
-- **`main` / `origin/main`** : chat **#11**, IA Edge **#12**, **Context #13**, **Premium #17** ([PR #44](https://github.com/igorms-pro/voyagely/pull/44), migration `019`), **Dépenses #14** ([PR #51](https://github.com/igorms-pro/voyagely/pull/51), migration `020`, onglet Expenses).
-- **Phase 2 produit** : **#14–#16** 🟢 — dépenses, PWA, templates ([#54](https://github.com/igorms-pro/voyagely/issues/54) fermée, [PR #55](https://github.com/igorms-pro/voyagely/pull/55) mergée).
-
-### 📌 Terminologie (ne pas confondre)
-
-| Terme                         | Signification                                                                          |
-| ----------------------------- | -------------------------------------------------------------------------------------- |
-| **Refactor v2** (doc **#35**) | Dette technique — découper fichiers > 200–300 lignes. **Pas** une feature utilisateur. |
-| **Phase 2** (doc **#14–#16**) | Features post-MVP — dépenses, PWA, templates. **Ordre : #14 puis #15 puis #16.**       |
-| **post-refactor**             | Après le refactor v2 (#35) — ex. QA Premium #17 reportée à ce moment-là.               |
+1. **🔵 QA manuelle — Premium #17** (Stripe **test mode**, `/account`, carte `4242…`) — checklist ci-dessous.
+2. **🔵 QA manuelle — Templates #16** (login requis) : picker dashboard, duplicate trip, modals share/invite.
+3. **CI** — dernier run `main` vert après [PR #56](https://github.com/igorms-pro/voyagely/pull/56).
+4. **🟣 Stripe live prod** — reporté (`sk_live_`, `SITE_URL` prod) ; rester en test.
 
 ---
 
-## 🚀 IMMEDIATE NEXT ACTION (For AI Agent)
+## 📑 Registre des issues
 
-1. **QA Premium** (#17) — checklist Stripe **test mode** manuelle sur `/account` (4242…).
-2. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain) — vérifier après merge [PR #55](https://github.com/igorms-pro/voyagely/pull/55).
-3. **🟣 Stripe live prod** : **reporté** — pas de `sk_live_` / `SITE_URL` prod pour l’instant ; rester en **test** (`localhost:5173` + secrets test Supabase Edge).
+### Actives (à faire maintenant)
 
----
+| Doc #     | Sujet                                      | Statut     | Détail                                                                                    |
+| --------- | ------------------------------------------ | ---------- | ----------------------------------------------------------------------------------------- |
+| **QA-17** | Premium Stripe — validation bout en bout   | 🔵 Testing | Code 🟢 [PR #44](https://github.com/igorms-pro/voyagely/pull/44) ; checklist § ci-dessous |
+| **QA-16** | Templates & sharing — parcours authentifié | 🔵 Testing | Code 🟢 [PR #55](https://github.com/igorms-pro/voyagely/pull/55) ; 3 flows manuels        |
 
-## ✅ Issues #0–#10 (archivées — terminées)
+### Backlog produit (pas encore issue GitHub #18+)
 
-Les sections détaillées **#0 à #10** ont été retirées pour limiter la maintenance de ce fichier. État : **tout est livré sur `main`** (sauf notes optionnelles dans les anciennes AC).
+| Idée                              | Priorité | Notes                                                                         |
+| --------------------------------- | -------- | ----------------------------------------------------------------------------- |
+| Dépenses avancées (#14 suite)     | MEDIUM   | Multi-devises, export CSV/PDF ; offline expenses non fait                     |
+| Test auto webhook Stripe          | LOW      | Payload signé mock                                                            |
+| E2E chemins critiques             | MEDIUM   | Expenses, `/account`, templates (besoin `SUPABASE_SERVICE_ROLE_KEY` en local) |
+| i18n locales `account.*`          | LOW      | EN/FR OK ; autres locales strings obsolètes                                   |
+| Chat reply threads                | LOW      | Optionnel, hors MVP                                                           |
+| Dashboard coûts IA admin          | LOW      | Optionnel (#12)                                                               |
+| Facebook login                    | 🟣       | App FB à vérifier                                                             |
+| Stripe live prod                  | 🟣       | Quand domaine + décision                                                      |
+| Phase 3 (B2B, audit UI, booking…) | 🔴       | À découper — voir `docs/architecture_design.md` § Roadmap                     |
 
-| #      | Sujet                                          | Réf. rapide            |
-| ------ | ---------------------------------------------- | ---------------------- |
-| 0      | Tooling / CI / tests / Sentry / PostHog        | ✅ `main`              |
-| 1      | Schéma Supabase, RLS, migrations               | ✅ `main`              |
-| 2      | i18n                                           | ✅ `main`              |
-| 3 / 3b | Archi doc + dossiers `features/`               | ✅ `main`              |
-| 4      | Design system                                  | ✅ `main`              |
-| 5–7    | Landing, auth, dashboard                       | ✅ `main`              |
-| 8      | Trip detail core (tabs, itinéraire, recherche) | ✅ `main`              |
-| 9      | Activités & scénarios IA                       | ✅ PR **#34**          |
-| 10     | Votes, décision, finaliser, notifs chat        | ✅ PR **#38**, **#39** |
+### Archive — livré sur `main` (ne plus maintenir le détail ici)
 
-### 📌 Terminologie (itinéraire vs scénarios)
+| Doc # | Sujet                        | PR / GitHub                                                                                                                                                                                                                           |
+| ----- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0–10  | Foundation, écrans MVP       | `main` — PR #34, #38, #39                                                                                                                                                                                                             |
+| 11    | Chat & collaboration         | [#40](https://github.com/igorms-pro/voyagely/issues/40) CLOSED                                                                                                                                                                        |
+| 12    | IA Edge + quotas tier        | `main`, migration `018`                                                                                                                                                                                                               |
+| 13    | Explore, météo, carte        | [#45](https://github.com/igorms-pro/voyagely/issues/45), [#47](https://github.com/igorms-pro/voyagely/issues/47) — [PR #46](https://github.com/igorms-pro/voyagely/pull/46), [PR #48](https://github.com/igorms-pro/voyagely/pull/48) |
+| 17    | Premium Stripe (impl.)       | [#42](https://github.com/igorms-pro/voyagely/issues/42) — [PR #44](https://github.com/igorms-pro/voyagely/pull/44), migration `019`                                                                                                   |
+| 35    | Refactor v2 split fichiers   | [#35](https://github.com/igorms-pro/voyagely/issues/35) — [PR #49](https://github.com/igorms-pro/voyagely/pull/49)                                                                                                                    |
+| 14    | Dépenses Tricount-like MVP   | [#50](https://github.com/igorms-pro/voyagely/issues/50) — [PR #51](https://github.com/igorms-pro/voyagely/pull/51), `020`                                                                                                             |
+| 15    | PWA & offline (chat + votes) | [#52](https://github.com/igorms-pro/voyagely/issues/52) — [PR #53](https://github.com/igorms-pro/voyagely/pull/53)                                                                                                                    |
+| 16    | Templates, duplicate, invite | [#54](https://github.com/igorms-pro/voyagely/issues/54) — [PR #55](https://github.com/igorms-pro/voyagely/pull/55), `021`                                                                                                             |
 
-- **Itinéraire actif** : vérité du voyage (activités par jour, statuts, votes).
-- **Scénarios** : options (souvent IA) ; choisir une base ou importer = **copie** vers l’itinéraire actif — une seule timeline « réelle ».
+**Détail historique supprimé** (mai 2026) pour alléger ce fichier. Plans techniques refactor : `docs/codebase/SPLIT_*.md`.
 
----
+### Itinéraire vs scénarios (rappel)
 
-## 🎯 Issue #11: Trip Detail Screen - Chat & Collaboration
-
-**Status:** 🟢 **COMPLETED (MVP)** — non-lus onglet, réactions (`017`), mentions, typings Postgrest ; présence / frappe. Sur **`main`** (merge `feature/issue-11-chat-unread-tab`). Réfs GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40) / PR [#41](https://github.com/igorms-pro/voyagely/pull/41) si applicable. **Hors MVP :** `last_seen` SQL, reply threads, non-lus multi-device.  
-**Priority:** HIGH  
-**Phase:** Screen 4d  
-**Dependencies:** Issues #0–#10 (archivées — `main`)
-
-### Description
-
-Complete chat with presence, typing indicators, and collaboration features.
-
-### Tasks
-
-#### Basic Chat
-
-- [x] 🟢 **Chat already implemented**:
-  - [x] Message sending/receiving
-  - [x] Message history loading
-  - [x] Real-time messages
-  - [x] User avatars
-
-#### Presence Tracking
-
-- [x] 🟢 **Add presence tracking** (MVP — Supabase Realtime Presence, pas de `last_seen` SQL) :
-  - [x] Show who's online in trip (pastilles + compteur dans l’en-tête chat)
-  - [x] Online/offline indicator on avatars (messages des autres)
-  - [x] **Décision produit** : pas de **last seen** par membre ni d’**accusés de lecture** type WhatsApp (« tout le monde a vu ») sur le fil trip — trop bruyant / peu utile à ~20 personnes ; présence **live** + **non-lus** + mentions suffisent.
-  - [x] Active users count (compteur « membres en ligne »)
-
-#### Typing Indicators
-
-- [x] 🟢 **Add typing indicators**:
-  - [x] Broadcast typing state (canal Realtime `trip:{id}:chat-collab`, debounce ~450 ms)
-  - [x] Display "User is typing..." (ligne sous le titre du chat, `aria-live="polite"`)
-  - [x] Debounce typing events
-
-#### Enhanced Chat Features
-
-- [x] 🟢 **Chat enhancements (MVP)** :
-  - [x] Message reactions (👍 👎 ❤️ 😂) — `message_reactions` + barre sous chaque bulle (`017_message_reactions.sql`)
-  - [x] @mentions — slugs stables + surbrillance + suggestions à la frappe (pas de notif / pas de threads)
-  - [ ] Reply to message - optional
-  - [x] Message timestamps (déjà affichés sur chaque bulle — `TripChatMessageList`)
-  - [x] Unread message counter (badge onglet Chat — `localStorage` + Realtime INSERT, sans migration)
-
-#### i18n
-
-- [x] 🟡 **Verify all chat text is internationalized**:
-  - [x] Input placeholder
-  - [x] Send button (`aria-label`)
-  - [x] Empty state
-  - [x] Presence indicators (compteur + liste membres + points en ligne)
-  - [x] Typing indicators
-  - [x] Réactions + mentions (MVP léger) + libellés `chat.reactionToggle`, `chat.mentionSuggestions`
-  - [x] Tab unread badge + `aria-label` / libellé navigation onglets (`tripDetail.chatTabAriaUnread` avec `{{display}}`, `tripDetail.tabsNavAria`)
-
-### Acceptance Criteria
-
-- [x] Chat works fully (envoi / réception / édition / suppression, temps réel messages)
-- [x] Presence tracking works (MVP Realtime — sans last_seen persistant)
-- [x] Typing indicators work
-- [x] Real-time updates work
-- [x] Texte chat couvert par i18n (y compris présence / frappe / badge non-lus onglet / réactions / mentions) — extensions futures possibles : **reply threads** (optionnel), réactions custom — **pas** last seen / relevés de lecture massifs sur le fil.
-- [x] Tests unitaires ciblés (presence helper) ; E2E chat optionnel
+- **Itinéraire actif** = vérité du voyage (activités par jour, votes).
+- **Scénarios** = options (souvent IA) ; import = copie vers l’itinéraire actif.
 
 ---
 
-## 🎯 Issue #12: Trip Detail Screen - AI Itinerary Generation
+## 🔵 QA manuelle — Premium (#17)
 
-**Status:** 🟢 **COMPLETED (MVP)** — sur **`main` / `origin`** (mai 2026) : Edge **`ai-generate-itinerary`** / **`ai-generate-activity-suggestions`**, migration **`018`**, quotas **tier** + RBAC, client **`edge`** par défaut, E2E + tests unitaires. Optionnel : reporting coûts agrégé admin, **Stripe** → `ai_tier` premium.  
-**GitHub (doc #11)** : [#40](https://github.com/igorms-pro/voyagely/issues/40) **CLOSED**. **GitHub (doc #12)** : pas d’issue numérotée ; suivi = cette section + code sur `main`. **Suite monétisation** : **Issue #17** + [#42](https://github.com/igorms-pro/voyagely/issues/42).  
-**Branche historique (livraison #11 + #12)** : `feature/issue-11-chat-unread-tab` (fast-forward → `main`).  
-**Priority:** HIGH  
-**Phase:** Screen 4e  
-**Dependencies:** Issues #0–#10 (archivées — `main`)
+**Prérequis :** `pnpm dev` → `http://localhost:5173` ; Edge secrets `STRIPE_*` + `SITE_URL=http://localhost:5173` ; Stripe **test mode** ; compte **Free** (`profiles.ai_tier = free`).
 
-### Pourquoi c’est pertinent (business / produit)
+| #   | Étape                                      | Attendu                                                                  |
+| --- | ------------------------------------------ | ------------------------------------------------------------------------ |
+| 1   | Login → **`/account`**                     | Badge **Free** ; cartes mensuel / annuel                                 |
+| 2   | **Subscribe monthly** → Checkout           | `4242 4242 4242 4242` · `12/34` · CVC `123`                              |
+| 3   | Retour `?checkout=success`                 | Sync → **Premium** ; **Gérer l’abonnement** ; pas de SQL manuel          |
+| 4   | Stripe Dashboard → Webhooks                | `checkout.session.completed` / `customer.subscription.updated` → **200** |
+| 5   | **Manage subscription** → portail → retour | Même onglet, `/account`, toujours Premium                                |
+| 6   | Annuler abo (portail test)                 | `customer.subscription.deleted` → **200** → **Free**                     |
+| 7   | Trip → génération scénario IA              | Free **3**/trip vs Premium **10** (`aiScenarioLimits.ts`)                |
+| 8   | **Refresh** sur `/account`                 | Badge = `profiles` en base                                               |
 
-- **Temps de cadrage** : un groupe part rarement d’une page blanche efficace. Des scénarios IA comparables réduisent le « blanc » et donnent un **premier langage commun** (jours, ordre de grandeur budget, rythme).
-- **Décision collective** : Voyagely n’est pas un planner solo — l’IA alimente des **options** que le groupe vote / finalise (#10). La valeur vendable est la **convergence** (moins de allers-retours WhatsApp).
-- **Contrôle des coûts & confiance** : sans observabilité (tokens, taux d’échec) et sans UX d’erreur claire, l’IA devient un risque **support + facture**. La #12 technique sécurise une future **monétisation** (crédits de génération, plans payants).
-- **Positionnement** : « humains décident, l’IA accélère » — différenciation vs outils purement génératifs où personne ne vote.
+**Carte test :** `4242 4242 4242 4242`. Déclin : `4000 0000 0000 0002`.
 
-### Description
-
-Génération IA d’**itinéraires scénarisés** (copie possible vers l’itinéraire actif), suggestions d’activités, prompts alignés sur les **contraintes** du trip, robustesse réseau/API.
-
-### État code (mai 2026)
-
-- **Livré** : `openai-itinerary-service.ts` (mode **`edge`** par défaut → `aiEdgeClient` → fonctions **`ai-generate-itinerary`** / **`ai-generate-activity-suggestions`**), Zod + prompts, **`018`** `profiles.ai_tier` + **`ai_generation_logs`** (serveur), quotas alignés **`aiScenarioLimits`** / `_shared/limits.ts`, **Generate with AI** réservé aux **organisateurs** (owner/editor/moderator), suggestions modal + quota mensuel, retry client (`openai-client`), votes scénarios (#10), analytics **trip_id** + tokens + coût approx., **E2E** `ai-scenario-generation.spec.ts` (à valider contre projet avec Edge déployé).
-- **Suite #12** : **Issue #17** — monétisation `premium` (Stripe / webhook) ; optionnel — dashboards admin coûts agrégés ; E2E smoke **`VITE_AI_GENERATION_MODE=edge`** sur staging.
-
-### Tasks
-
-#### AI Service
-
-- [x] 🟢 Structured JSON + **Zod** (`openai-itinerary-service.ts`)
-- [x] 🟢 **Constraint-aware** prompts (rythme, budget, préférences + **enfants**, **must_dos**, **no_gos**)
-- [x] 🟢 **Prompt version** (`ITINERARY_PROMPT_VERSION` → événement analytics)
-- [x] 🟢 **Retry** exponentiel sur erreurs transitoires (`openai-client` + `openaiRetry.ts`)
-- [x] 🟢 **Token usage** dans events PostHog (itinéraire + suggestions)
-- [x] 🟢 **Edge Functions** — OpenAI **uniquement serveur** (`OPENAI_API_KEY` Secret Supabase), **`verify_jwt`**, logs **`ai_generation_logs`** (tokens / durée)
-- [x] 🟢 **Cost / quotas métier** — par **tier** `free` / `premium` (`profiles.ai_tier`) : plafonds scénarios / trip + suggestions / mois (Edge + client alignés), comptage DB `itineraries.generated_by_ai`, bouton désactivé + toast quota
-- [x] 🟢 **RBAC IA** — seuls **owner / editor / moderator** peuvent lancer la génération (403 `forbidden_ai` + i18n)
-- [x] 🟢 **Erreurs** génération scénario → **Sentry** (`captureFeatureError` dans `tripDetailSlice.aiScenarioOps`)
-- [x] 🟢 **Merge `main`** — fast-forward depuis `feature/issue-11-chat-unread-tab` → poussé sur **`origin/main`** (mai 2026)
-
-#### AI Generation UI
-
-- [x] 🟢 Bouton **Generate with AI** (itinéraire / scénarios)
-- [x] 🟢 Indicateur de progression + **aria-busy** pendant la génération (`TripScenariosSection`)
-- [x] 🟢 Loading sur l’action de génération (composant scénarios)
-- [x] 🟢 Toasts **succès / échec** (codes `AiScenarioGenerationError` → i18n) + **prod** : plus de fallback mock silencieux sur erreur API (mock seulement clé démo / **DEV**)
-
-#### Constraint Collection
-
-- [x] 🟢 Contraintes du trip injectées dans le prompt quand présentes
-- [x] 🟡 Parcours léger : **encart** « de meilleurs résultats » si contraintes faibles (`getAiConstraintsHintLevel`) — édition trip reste le flux existant (hero)
-- [x] 🟢 Message **« meilleurs résultats avec contraintes »** (copy + i18n EN/FR)
-
-#### AI Scenario Generation
-
-- [x] 🟢 Scénario IA jour par jour persisté (`itineraries` + `itinerary_days` + `activities` source `ai`)
-- [x] 🟢 Affichage aux côtés des scénarios humains + votes (#10)
-
-#### AI Activity Suggestions
-
-- [x] 🟢 `generateActivitySuggestions` branché sur le **modal activité** (EN/FR + mock si clé démo)
-
-#### AI Workflow
-
-- [x] 🟢 Humains + IA + votes + finalisation (parcours global #9–#10–#11)
-
-#### i18n
-
-- [x] 🟢 Libellés bouton / section scénarios (clés `tripDetail.*`)
-- [x] 🟢 Messages d’erreur / quota / succès génération — **i18n** `tripDetail.ai*` (EN/FR)
-
-### Acceptance Criteria
-
-- [x] L’IA produit un scénario cohérent avec les dates et la destination
-- [x] Les scénarios IA apparaissent avec les autres ; le groupe peut voter
-- [x] Erreurs API : retry + **erreurs typées** en prod (plus de mock silencieux hors DEV / clé démo)
-- [x] Messages utilisateur IA (succès / erreurs / quota / hints) via **i18n**
-- [x] Tests unitaires : **retry** (`openaiRetry`) + **hint contraintes** (`tripConstraintsHint`) + **parse suggestions** (`openai-activity-suggestions-parse`) ; E2E `e2e/ai-scenario-generation.spec.ts` (auth + trip seed ; sinon skip)
+- [ ] **1–3** Checkout → Premium sans SQL
+- [ ] **4** Webhooks **200**
+- [ ] **5** Portail → retour `/account`
+- [ ] **6–7** Annulation → Free + quotas free
+- [ ] **8** Refresh cohérent
 
 ---
 
-## 🎯 Issue #13: Trip Detail Screen - Context & Enrichment
+## 🔵 QA manuelle — Templates (#16)
 
-**Status:** 🟢 **COMPLETED** — MVP [PR #46](https://github.com/igorms-pro/voyagely/pull/46) ; post-MVP détails lieu + add to itinerary [PR #48](https://github.com/igorms-pro/voyagely/pull/48) (mai 2026).  
-**GitHub:** [#45](https://github.com/igorms-pro/voyagely/issues/45) — **CLOSED** ; post-MVP [#47](https://github.com/igorms-pro/voyagely/issues/47) — **CLOSED**  
-**PR:** [#46](https://github.com/igorms-pro/voyagely/pull/46), [#48](https://github.com/igorms-pro/voyagely/pull/48) — merged  
-**Priority:** MEDIUM  
-**Phase:** Screen 4f  
-**Dependencies:** Issue #9 (activities)
-
-### Description
-
-Add weather, places, and travel time context to trip detail screen.
-
-### Tasks
-
-#### Weather Widget
-
-- [x] 🟢 **Weather API** : `VITE_OPENWEATHER_API_KEY` (sans clé → mock) ; pas de clé en dur
-- [x] 🟢 **Forecast** pour les dates du voyage (comportement inchangé + fallback mock)
-- [x] 🟢 **Icônes / température / vent / humidité** (affichage existant + i18n)
-
-#### Places Widget
-
-- [x] 🟢 **Google Places** : `VITE_GOOGLE_MAPS_API_KEY` uniquement (sans clé → mock `getMockNearbyPlaces`)
-- [x] 🟢 **POI à proximité** + libellés catégories **i18n** (`tripDetail.explore*`)
-- [x] 🟢 Place details (photos, horaires) — post-MVP [PR #48](https://github.com/igorms-pro/voyagely/pull/48)
-- [x] 🟢 "Add to itinerary" — post-MVP [PR #48](https://github.com/igorms-pro/voyagely/pull/48)
-
-#### Travel Time
-
-- [x] 🟢 **Temps entre activités** — préfère `transport_duration_minutes` sur l’activité **suivante** ; sinon estimation **Haversine** + vitesse moyenne (affichage « approximatif ») si `lat`/`lon` sur les deux
-- [x] 🟢 Affichage sur la **timeline** (connecteur entre cartes)
-- [x] 🟢 **Route visualization** (polyline carte Explore, ordre itinéraire)
-
-#### Maps
-
-- [x] 🟢 **Itinerary map** (onglet Explore) :
-  - [x] Display activities on map (jour sélectionné, coordonnées `lat`/`lon`)
-  - [x] Activity markers (ordre itinéraire + liste accessible)
-  - [x] Route between activities (polyline OSM / Leaflet)
-
-#### i18n
-
-- [x] 🟢 Libellés météo / lieux / carte (`tripDetail.explore*`)
-
-### Acceptance Criteria
-
-- [x] Weather displays correctly (API or mock)
-- [x] Places display correctly (API or mock)
-- [x] Travel time between consecutive activities (stored duration or coordinate estimate)
-- [x] Weather and places labels internationalized (`tripDetail.explore*`)
-- [x] Itinerary map on Explore: markers + route for activities with `lat`/`lon` (jour sélectionnable)
-- [x] Tests pass (`itineraryMapModel` + suite existante)
-
-### Finish (workflow)
-
-- [x] GitHub **#45** ouverte
-- [x] Branche `feature/issue-13-itinerary-map`
-- [x] **PR** [#46](https://github.com/igorms-pro/voyagely/pull/46) (`Fixes #45`) — merged
-- [x] **#45** fermée ; doc **🟢 COMPLETED (MVP)**
-- [x] GitHub **#47** post-MVP ; branche `feature/issue-13-explore-place-details`
-- [x] **PR** [#48](https://github.com/igorms-pro/voyagely/pull/48) (`Fixes #47`) — merged
-- [x] **#47** fermée ; **#13** doc **🟢 COMPLETED**
+- [ ] Dashboard → créer trip **from template** (picker)
+- [ ] Trip → **Duplicate trip** (itinéraire cloné)
+- [ ] Trip → **Share / invite** → lien → `/invite/:code` → rejoindre (2e compte ou session)
 
 ---
 
-## 🎯 Issue #17: Monétisation Premium (`profiles.ai_tier`)
+## 💡 Idées backlog (non issues)
 
-**Status:** 🟢 **COMPLETED** — mergé sur `main` via **[PR #44](https://github.com/igorms-pro/voyagely/pull/44)** (mai 2026). QA manuelle **en pause** (post-refactor #35).  
-**GitHub:** [#42](https://github.com/igorms-pro/voyagely/issues/42) — **CLOSED** (`Fixes #42`)  
-**PR:** [#44](https://github.com/igorms-pro/voyagely/pull/44) — merged  
-**Priority:** HIGH (revenu + alignement quotas IA déjà en prod)  
-**Phase:** Revenue / Screen compte  
-**Dependencies:** Issue **#12** (MVP IA + `018` sur `main`)
-
-### Description
-
-Passer d’un modèle **100 % gratuit** à des **abonnements ou achats** qui positionnent `profiles.ai_tier` à **`premium`**, débloquant les plafonds déjà appliqués côté **Edge Functions** et côté **client** (`aiScenarioLimits`, `useTripDetail.userAiTier`).
-
-### Pourquoi maintenant
-
-- Les **quotas différenciés** `free` / `premium` sont déjà en base et dans les fonctions ; sans paiement, `premium` ne s’active jamais.
-- **Stripe** (ou équivalent) reste le chemin standard : Checkout, webhooks, annulations.
-
-### Tasks
-
-- [x] **Stripe (code + doc)** : Edge `create-checkout-session` ; secrets **uniquement** côté Supabase (voir `.env.example`) — **reste ops** : deux prix Stripe (`STRIPE_PRICE_ID_MONTHLY`, `STRIPE_PRICE_ID_YEARLY`) + clés / webhook.
-- [x] **Webhook** : Edge `stripe-webhook` — signature `constructEvent`, idempotence via table `stripe_webhook_events`, mise à jour `profiles` (`ai_tier`, ids Stripe).
-- [x] **RLS / DB** : migration **`019_stripe_billing_and_ai_tier_lock.sql`** — colonnes facturation + trigger empêchant les clients JWT de modifier `ai_tier` / champs Stripe.
-- [x] **UI** : route **`/account`**, plan actuel, picker mensuel/annuel, **Gérer l’abonnement** (portail Stripe, même onglet), retours checkout, états loading / erreur / disabled.
-- [x] **i18n** : **EN** + **FR** pour le flux compte ; autres fichiers `locales/*.json` : clés `account.*` présentes (fallback aligné EN où besoin).
-- [ ] **Tests** : test automatisé **webhook** (payload signé mock) — **non fait** ; régression : `TripDetailPage.test` + `User.ai_tier` ajusté.
-
-### Acceptance Criteria
-
-- [x] Comportement **implémenté** : après `checkout.session.completed` (abonnement) le profil passe **`premium`** côté service ; plafonds **Edge** inchangés côté règles — **à valider** sur projet avec secrets + migration appliqués.
-- [x] **`customer.subscription.deleted`** → repasse **`free`** et nettoie `stripe_subscription_id` (impl. webhook).
-- [x] Aucune clé secrète Stripe dans le bundle Vite (uniquement `invoke` vers Edge avec JWT utilisateur).
-
-### Ops / Déploiement (projet `blangvuphxumbhggxsze` — mai 2026)
-
-- [x] Edge Functions déployées : `create-checkout-session`, `stripe-webhook`, `create-billing-portal-session`
-- [x] Migration **`019`** appliquée (SQL Editor)
-- [x] Secrets Edge : `STRIPE_*`, `SITE_URL` (local `http://localhost:5173` pour dev)
-- [x] Produit / prix Stripe test (mensuel + annuel)
-- [x] Webhook Stripe → `.../functions/v1/stripe-webhook`
-- [x] **Customer Portal** activé côté Stripe (Settings → Billing) + bouton app
-- [ ] **🟣 Prod / staging live** : **hors scope pour l’instant** — `SITE_URL` + secrets **live** seulement quand domaine final + décision explicite (mai 2026 : **test only**)
-- [ ] **QA manuelle** (Igor, post-refactor #35 + Phase 2 #16) — voir checklist ci-dessous
-
-### QA checklist (en attente — post-refactor #35, Phase 2 #16 livrée)
-
-**Prérequis (local)** : `pnpm dev` → `http://localhost:5173` ; Supabase Edge secrets `STRIPE_*` + `SITE_URL=http://localhost:5173` ; Stripe **test mode** ; compte test **Free** (`profiles.ai_tier = free`, pas d’abo actif).
-
-| #   | Étape                                                               | Attendu                                                                                  |
-| --- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| 1   | Login (magic link / Google) → **`/account`**                        | Badge **Free** ; cartes mensuel / annuel visibles                                        |
-| 2   | **Subscribe monthly** → Checkout Stripe                             | Carte `4242 4242 4242 4242` · exp. `12/34` · CVC `123` · nom libre                       |
-| 3   | Paiement OK → redirect `?checkout=success`                          | Bannière sync puis **Premium** ; **Gérer l’abonnement** visible ; **pas** de SQL manuel  |
-| 4   | Stripe Dashboard → **Webhooks** → endpoint `stripe-webhook`         | Derniers events `checkout.session.completed` / `customer.subscription.updated` → **200** |
-| 5   | **Manage subscription** → portail Stripe → retour app               | Même onglet → `/account` ; plan toujours Premium                                         |
-| 6   | Portail : **Cancel subscription** (fin de période ou immédiat test) | Webhook `customer.subscription.deleted` → **200** ; profil **Free**                      |
-| 7   | Trip existant → génération scénario IA                              | Cap **free** (3 scénarios / trip) vs **premium** (10) — voir `aiScenarioLimits.ts`       |
-| 8   | Bouton **Refresh** sur `/account`                                   | Badge aligné avec `profiles` (Supabase Table Editor si doute)                            |
-
-**Carte test Stripe** : `4242 4242 4242 4242` (succès). Déclin test : `4000 0000 0000 0002`.
-
-**E2E headless (optionnel)** : ajouter `SUPABASE_SERVICE_ROLE_KEY` dans `.env.local` → `authenticateWithMagicLink` (`e2e/helpers/auth.ts`) puis enchaîner les étapes 1–3 en Playwright.
-
-- [ ] **1–3** Free → checkout mensuel **4242…** → retour succès → **Premium** sans SQL manuel
-- [ ] **4** Webhook Stripe : delivery **200** sur `checkout.session.completed` / `customer.subscription.updated`
-- [ ] **5** Premium → **Gérer l’abonnement** → portail → retour `/account` (même onglet)
-- [ ] **6–7** Annulation abo test → webhook → **Free** + quotas IA free sur un trip
-- [ ] **8** Refresh `/account` : badge plan cohérent avec `profiles`
-
-### Reste optionnel (post-merge)
-
-- [ ] **Test automatisé webhook** (payload signé mock)
-- [ ] `VITE_STRIPE_PUBLISHABLE_KEY` si un jour Stripe Elements côté client (hors scope actuel : tout via Edge)
-
-### Finish (workflow)
-
-- [x] **PR** [#44](https://github.com/igorms-pro/voyagely/pull/44) mergée (`Fixes #42`, mai 2026)
-- [x] GitHub **#42** fermée
-- [ ] **QA** manuelle (reportée **post-refactor** #35 — **débloquée** mai 2026)
+- [ ] Multi-language trip planning
+- [ ] Météo alertes + ajustements itinéraire
+- [ ] Intégrations booking
+- [ ] Photos dans trips
+- [ ] Voice / AR-VR
 
 ---
 
-## 🎯 Issue #35: Refactor v2 — Split large files
+## 📝 Décisions (rappel)
 
-**Status:** 🟢 **COMPLETED** — mergé sur `main` via **[PR #49](https://github.com/igorms-pro/voyagely/pull/49)** (mai 2026).  
-**GitHub:** [#35](https://github.com/igorms-pro/voyagely/issues/35) — **CLOSED**  
-**PR:** [#49](https://github.com/igorms-pro/voyagely/pull/49) — merged  
-**Branche:** `main` (merged)  
-**Priority:** HIGH (dette technique — bloque confort Phase 2)  
-**Phase:** Tech / codebase hygiene  
-**Dependencies:** MVP #11–#13, #17 sur `main`
-
-### Description
-
-Ramener les fichiers au respect des limites projet (**200 lignes** composant/hook/slice, **300 lignes** fichier max) par **extraction et split**, sans changement de comportement. Plan détaillé : `docs/codebase/SPLIT_LARGE_FILES_PLAN.md`, `docs/codebase/SPLIT_PLAN_BY_AGENT.md`.
-
-### Tasks (13 périmètres — parallélisables)
-
-- [x] 🟢 **Agent 1** — `TripDetailPage.tsx` → `tripDetailPageHelpers.ts`, `useTripDetailPageModals.ts`, `useTripDetailPageHandlers.ts`, `TripDetailPageActivityModals.tsx`
-- [x] 🟢 **Agent 2** — `openai-itinerary-service.ts` → types, mock, helpers, service
-- [x] 🟢 **Agent 3** — `useCreateActivityForm.ts` → `activityFormHelpers.ts`
-- [x] 🟢 **Agent 4** — `auth-slice.ts` → `auth-utils.ts`
-- [x] 🟢 **Agent 5** — `useTripChat.ts` → `tripChatApi.ts`
-- [x] 🟢 **Agent 6** — `CreateTripSteps.tsx` → `create-trip-steps/*`
-- [x] 🟢 **Agent 7** — `tripDetailSlice.utils.ts` + alléger `aiScenarioOps` / `scenarios`
-- [x] 🟢 **Agent 8** — `TripDetailItinerary.tsx` → Scenarios + Views
-- [x] 🟢 **Agent 9** — `useItineraryDragAndDrop.ts` → `itinerary-reorder-utils.ts`
-- [x] 🟢 **Agent 10** — `ItineraryActivityDetailsSection.tsx` → sous-composants
-- [x] 🟢 **Agent 11** — `DashboardPage.tsx` → `useDashboardPage.ts`
-- [x] 🟢 **Agent 12** — `trips-slice.ts` → `trips-api.ts`
-- [x] 🟢 **Agent 13** — `places-service.ts` → split search / nearby / details / types
-
-### Acceptance Criteria
-
-- [x] Aucun fichier applicatif > 300 lignes sauf `TripDetailPage.tsx` (~307, proche limite)
-- [x] Composants / hooks / slices ciblés largement < 300 ; plusieurs < 200
-- [x] `pnpm check` vert (lint + typecheck + test:run)
-- [x] Exports publics inchangés (barrels / re-exports si besoin)
-- [x] Docs `docs/codebase/SPLIT_*` + `LARGE_FILES_TOUR.md` sur `main`
-
-### Finish (workflow)
-
-- [x] Branche `refactor/issue-35-split-large-files`
-- [x] **PR** [#49](https://github.com/igorms-pro/voyagely/pull/49) (`Fixes #35`) — merged
-- [x] GitHub **#35** fermée
-- [x] Doc **🟢 COMPLETED**
-- [x] **Suite** : Phase 2 **#14** 🟢 → **#15** (prochaine) → #16
+- Planification + décision groupe **avant** monétisation ; Premium = quotas IA (`ai_tier`).
+- Pas de moteur de réservation ; pas de réseau social.
+- Dépenses MVP livrées ; paiements réels hors scope.
+- Humains proposent, IA suggère, le groupe **vote** et peut **finaliser** l’itinéraire.
 
 ---
 
-## 🎯 Phase 2 — Post-MVP product (#14–#16)
+## 📊 Synthèse
 
-Features utilisateur après refactor v2 (#35). **Ordre strict : #14 → #15 → #16.**
+| Zone                         | État                                      |
+| ---------------------------- | ----------------------------------------- |
+| Code MVP + Phase 2 + Premium | 🟢 sur `main`                             |
+| Validation (QA)              | 🔵 en cours — **bloque « done » produit** |
+| Stripe live                  | 🟣 reporté                                |
+| Prochaine issue dev          | 🔴 à créer (#18+ après QA)                |
 
----
+**CRITICAL PATH :** QA #17 → QA #16 → CI → (plus tard) backlog / roadmap Phase 3.
 
-## 🎯 Issue #14: Group Expense Tracking (Tricount-like)
-
-**Status:** 🟢 **COMPLETED (MVP)** — GitHub **[#50](https://github.com/igorms-pro/voyagely/issues/50)** **CLOSED** ; [PR #51](https://github.com/igorms-pro/voyagely/pull/51) ; migration **`020_trip_expenses.sql`** ; onglet **Expenses** dans trip detail.  
-**Priority:** MEDIUM  
-**Phase:** Phase 2 (Month 4)  
-**Dependencies:** Phase 1 MVP complete
-
-### Description
-
-Implement group expense tracking. Simple split calculation, no payment processing.
-
-### Tasks
-
-- [x] 🟢 Expense data model (tables, RLS) — `expenses`, `expense_participants`, Realtime
-- [x] 🟢 Expense CRUD — service + hook + modal
-- [x] 🟢 Expense splitting algorithm — equal + custom
-- [x] 🟢 "Who owes whom" calculation — balances + simplified settlements
-- [x] 🟢 Expense UI in trip detail — onglet Expenses
-- [ ] 🔴 Currency conversion — **reporté post-MVP**
-- [ ] 🔴 Export CSV/PDF — **reporté post-MVP**
-- [x] 🟢 i18n — EN + FR (`expenses.*`, `tripDetail.expenses`)
-- [x] 🟢 Tests — `expenseSplits.test.ts`
-
-### Acceptance criteria (MVP)
-
-- [x] Trip members can add/edit/delete expenses (creator or admin)
-- [x] Equal and custom splits
-- [x] Balance summary + suggested settlements
-- [x] RLS trip-scoped
-- [x] Unit tests for split/settlement algorithms
-
----
-
-## 🎯 Issue #15: PWA & Offline Support
-
-**Status:** 🟢 **COMPLETED (MVP)** — GitHub **[#52](https://github.com/igorms-pro/voyagely/issues/52)** **CLOSED** ; [PR #53](https://github.com/igorms-pro/voyagely/pull/53)  
-**Priority:** HIGH  
-**Phase:** Phase 2 (Month 5)  
-**Dependencies:** Phase 1 MVP complete
-
-### Description
-
-Make Voyagely usable during trips with PWA and offline capabilities.
-
-### Tasks
-
-- [x] 🟢 Service worker + caching (vite-plugin-pwa + Workbox)
-- [x] 🟢 Offline queue (IndexedDB outbox — chat + votes)
-- [x] 🟢 PWA manifest + icons
-- [x] 🟢 Background sync (SyncManager + SW → client flush)
-- [x] 🟢 Mobile performance tuning (QueryClient defaults, manualChunks)
-- [x] 🟢 Tests (`offlineQueueHelpers`, `networkStatus`)
-- [x] 🟢 i18n EN + FR (`offline.*`)
-
-### Acceptance criteria (MVP)
-
-- [x] App installable as PWA (manifest + service worker)
-- [x] App shell cached for offline navigation
-- [x] Chat messages and votes queued offline, synced on reconnect
-- [x] Offline banner with pending count + manual sync
-- [x] Unit tests for queue helpers
-
-### Finish (workflow)
-
-- [x] GitHub **#52** ouverte
-- [x] Branche `feature/issue-15-pwa`
-- [x] **PR** [#53](https://github.com/igorms-pro/voyagely/pull/53) (`Fixes #52`) — merged
-- [x] **#52** fermée ; doc **🟢 COMPLETED (MVP)**
-
----
-
-## 🎯 Issue #16: Trip Templates & Sharing
-
-**Status:** 🟢 **COMPLETED** — mergé sur `main` via **[PR #55](https://github.com/igorms-pro/voyagely/pull/55)** (mai 2026). Migration `021` appliquée prod.  
-**GitHub:** [#54](https://github.com/igorms-pro/voyagely/issues/54) — **CLOSED** (`Fixes #54`)
-
-### Description
-
-Add trip templates and sharing capabilities.
-
-### Tasks
-
-- [x] 🟡 Template system — `trip_templates` + save / create from template
-- [x] 🟡 Duplicate trip — modal + clone itinerary
-- [x] 🟡 Sharing links — invite UI + `/invite/:code` + RPC join
-- [x] 🟢 Timezone support — `trips.timezone` + edit form
-- [x] 🟢 Tests — `shiftTripDates`, `buildTemplateSnapshot`
-
-### QA smoke (mai 2026)
-
-- [x] `pnpm check` vert sur `main` post-merge
-- [x] Tests unitaires `trip-sharing` (5/5)
-- [x] Route `/invite/:code` — page « Join trip » + message lien invalide (code test)
-- [ ] Flows authentifiés (template picker dashboard, duplicate/share modals) — **manuel Igor** (login magic link / Google)
-
-### Finish (workflow)
-
-- [x] **PR** [#55](https://github.com/igorms-pro/voyagely/pull/55) mergée (`Fixes #54`, mai 2026)
-- [x] GitHub **#54** fermée
-- [x] Migration **`021`** appliquée prod
-- [x] **QA smoke** automatisée + route invite
-
----
-
-## 🎯 Current Sprint / Active Tasks
-
-### En cours / décisions
-
-- [x] 🟢 **Issue #17 (Premium / Stripe)** : **COMPLETED** — [PR #44](https://github.com/igorms-pro/voyagely/pull/44) sur `main` ; [#42](https://github.com/igorms-pro/voyagely/issues/42) fermée ; QA manuelle en attente.
-- [x] 🟢 **Issue #35 (refactor v2 — split large files)** : **COMPLETED** — [PR #49](https://github.com/igorms-pro/voyagely/pull/49) ; [#35](https://github.com/igorms-pro/voyagely/issues/35) fermée.
-- [x] 🟢 **Issue #11 (chat)** : **MVP COMPLETED** — sur **`main`** ; GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40) **CLOSED**.
-- [x] 🟢 **Issues #0–#10** : terminées sur `main` (voir tableau archive ci-dessus).
-- [x] 🟢 **Issue #12 (IA)** : **MVP COMPLETED** — sur **`main`** (voir section #12).
-
----
-
-## 🐛 Known Issues / Bugs
-
-### High Priority
-
-_None yet_
-
-### Medium Priority
-
-_None yet_
-
-### Low Priority
-
-_None yet_
-
----
-
-## 💡 Feature Requests / Ideas (Backlog)
-
-- [x] 🌟 ~~**Recherche dans l’itinéraire**~~ — **livré** (voir vues itinéraire + hook recherche).
-- [ ] 🌟 Multi-language trip planning
-- [ ] 🌟 AR/VR destination previews
-- [ ] 🌟 Voice assistant integration
-- [ ] 🌟 Photo sharing in trips
-- [ ] 🌟 Integration with travel booking sites
-- [ ] 🌟 Weather alerts and trip adjustments
-
----
-
-## 📝 Notes
-
-### Decisions Made
-
-- Using Supabase for backend, auth, and real-time
-- OpenAI for AI itinerary generation (not minimax)
-- Vite + React + TypeScript for frontend
-- PostHog for analytics
-- Sentry for error tracking
-- **Focus: Planification first, expenses in Phase 2**
-- **MVP planning was free-first** ; **monétisation Premium** = Issue **#17** + GitHub [#42](https://github.com/igorms-pro/voyagely/issues/42) (`profiles.ai_tier`, Stripe, webhooks sécurisés)
-- **Humans can create activities/scenarios, AI assists**
-- **Screen-by-screen approach: Complete each screen before moving to next**
-
-### Technical Debt
-
-_Will be tracked here as discovered_
-
----
-
-## 📊 Progress Tracking
-
-### Foundation & écrans #5–#10 (terminés)
-
-- **Issues #0–#10** : 🟢 **100%** sur `main` — détail retiré ; PR clés **#34**, **#38**, **#39** ; GitHub [#37](https://github.com/igorms-pro/voyagely/issues/37) fermée.
-
-### Trip detail — suite MVP
-
-- **Issue #11 (Chat)**: 🟢 **COMPLETED (MVP)** — sur **`main`** ; GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40) **CLOSED**
-- **Issue #12 (AI Generation)**: 🟢 **COMPLETED (MVP)** — Edge + migration 018 + tier + logs ; optionnel smoke E2E staging / reporting agrégé
-- **Issue #17 (Premium / Stripe)**: 🟢 **COMPLETED** — [PR #44](https://github.com/igorms-pro/voyagely/pull/44) mergée ; [#42](https://github.com/igorms-pro/voyagely/issues/42) fermée
-- **Issue #13 (Context)**: 🟢 **COMPLETED** — [PR #46](https://github.com/igorms-pro/voyagely/pull/46) + post-MVP [PR #48](https://github.com/igorms-pro/voyagely/pull/48) ; [#45](https://github.com/igorms-pro/voyagely/issues/45), [#47](https://github.com/igorms-pro/voyagely/issues/47) fermées
-
-### Refactor v2 (doc #35)
-
-- **Issue #35 (Split large files)**: 🟢 **COMPLETED** — [PR #49](https://github.com/igorms-pro/voyagely/pull/49)
-
-### Phase 2 produit (Post-MVP — ordre #14 → #15 → #16)
-
-- **Issue #14 (Expenses)**: 🟢 **COMPLETED (MVP)** — [PR #51](https://github.com/igorms-pro/voyagely/pull/51) ; [#50](https://github.com/igorms-pro/voyagely/issues/50) fermée ; migration `020`
-- **Issue #15 (PWA/Offline)**: 🟢 **COMPLETED (MVP)** — [PR #53](https://github.com/igorms-pro/voyagely/pull/53) ; [#52](https://github.com/igorms-pro/voyagely/issues/52) fermée
-- **Issue #16 (Templates)**: 🟢 **COMPLETED (MVP)** — [PR #55](https://github.com/igorms-pro/voyagely/pull/55) ; [#54](https://github.com/igorms-pro/voyagely/issues/54) fermée ; migration `021`
-
-**Overall MVP Completion: ~98%** — Phase 2 **#14–#16** livrés ; QA Premium (#17) manuelle en attente
-
----
-
-**Next Review:** Weekly
-
-**CRITICAL PATH**:
-
-1. **QA Premium** (#17) — checklist Stripe **test mode** manuelle.
-2. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain).
-3. **🟣 Stripe live prod** : reporté (test only pour l’instant).
-
-**BLOCKER** : aucun bloquant produit.
+**BLOCKER :** aucun bloquant code ; **QA manuelle** = gate principal.
