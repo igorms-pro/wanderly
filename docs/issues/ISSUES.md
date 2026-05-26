@@ -2,7 +2,7 @@
 
 > Goal: Build a complete SaaS travel planning platform with AI-powered itineraries, real-time collaboration, and seamless user experience.
 
-**Last Updated:** May 26, 2026 — **#35 refactor v2** 🟢 [PR #49](https://github.com/igorms-pro/voyagely/pull/49) ; **#13** 🟢 [PR #46](https://github.com/igorms-pro/voyagely/pull/46) + [PR #48](https://github.com/igorms-pro/voyagely/pull/48) ; **#17 Premium** 🟢 [PR #44](https://github.com/igorms-pro/voyagely/pull/44) (QA en pause) ; **[PR #43](https://github.com/igorms-pro/voyagely/pull/43)** `AGENTS.md`.
+**Last Updated:** May 26, 2026 — **#14 dépenses** 🟢 [PR #51](https://github.com/igorms-pro/voyagely/pull/51) ; **#35 refactor v2** 🟢 [PR #49](https://github.com/igorms-pro/voyagely/pull/49) ; **#13** 🟢 [PR #46](https://github.com/igorms-pro/voyagely/pull/46) + [PR #48](https://github.com/igorms-pro/voyagely/pull/48) ; **#17 Premium** 🟢 [PR #44](https://github.com/igorms-pro/voyagely/pull/44) (QA en pause).
 
 ## 📋 Status Legend
 
@@ -18,10 +18,8 @@
 ### État repo / code (référence)
 
 - **Vérification GitHub (mai 2026)** : doc **#11** ↔ GitHub **[#40](https://github.com/igorms-pro/voyagely/issues/40)** — **CLOSED**. Doc **#12** (IA Edge) : pas d’issue GitHub dédiée historique ; livré sur **`main`**. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain) — vérifier le dernier run après chaque push.
-- **`main` / `origin/main`** : chat **#11**, IA Edge **#12**, **Context #13** (météo, lieux, timeline, carte Explore, **détails lieu + add to itinerary** — [PR #46](https://github.com/igorms-pro/voyagely/pull/46), [PR #48](https://github.com/igorms-pro/voyagely/pull/48)), **Premium #17** ([PR #44](https://github.com/igorms-pro/voyagely/pull/44), migration `019`, `/account`).
-- **Monétisation** : GitHub **[#42](https://github.com/igorms-pro/voyagely/issues/42)** — **CLOSED** ; QA billing manuelle (#17 checklist).
-- **Refactor v2 (doc #35)** : GitHub **[#35](https://github.com/igorms-pro/voyagely/issues/35)** — 🟢 **COMPLETED** — [PR #49](https://github.com/igorms-pro/voyagely/pull/49) ; plan `docs/codebase/SPLIT_*`.
-- **Phase 2 produit** : **#14** → **#15** → **#16** — 🔴 **prochaine priorité** (#14 dépenses).
+- **`main` / `origin/main`** : chat **#11**, IA Edge **#12**, **Context #13**, **Premium #17** ([PR #44](https://github.com/igorms-pro/voyagely/pull/44), migration `019`), **Dépenses #14** ([PR #51](https://github.com/igorms-pro/voyagely/pull/51), migration `020`, onglet Expenses).
+- **Phase 2 produit** : **#15** → **#16** — 🔴 **prochaine priorité** (#15 PWA).
 
 ### 📌 Terminologie (ne pas confondre)
 
@@ -35,7 +33,7 @@
 
 ## 🚀 IMMEDIATE NEXT ACTION (For AI Agent)
 
-1. **Phase 2 produit** — **#14** (dépenses Tricount-like) → **#15** (PWA) → **#16** (templates). **Priorité actuelle.**
+1. **Phase 2 produit** — **#15** (PWA) → **#16** (templates). **Priorité actuelle.**
 2. **QA Premium** (#17) — checklist Stripe — optionnel / post-refactor.
 3. **Prod Stripe** : `SITE_URL` + secrets **live** quand domaine final.
 
@@ -387,7 +385,7 @@ Ramener les fichiers au respect des limites projet (**200 lignes** composant/hoo
 - [x] **PR** [#49](https://github.com/igorms-pro/voyagely/pull/49) (`Fixes #35`) — merged
 - [x] GitHub **#35** fermée
 - [x] Doc **🟢 COMPLETED**
-- [ ] **Suite** : Phase 2 **#14** → #15 → #16
+- [x] **Suite** : Phase 2 **#14** 🟢 → **#15** (prochaine) → #16
 
 ---
 
@@ -399,7 +397,7 @@ Features utilisateur après refactor v2 (#35). **Ordre strict : #14 → #15 → 
 
 ## 🎯 Issue #14: Group Expense Tracking (Tricount-like)
 
-**Status:** 🔴 **NOT STARTED**  
+**Status:** 🟢 **COMPLETED (MVP)** — GitHub **[#50](https://github.com/igorms-pro/voyagely/issues/50)** **CLOSED** ; [PR #51](https://github.com/igorms-pro/voyagely/pull/51) ; migration **`020_trip_expenses.sql`** ; onglet **Expenses** dans trip detail.  
 **Priority:** MEDIUM  
 **Phase:** Phase 2 (Month 4)  
 **Dependencies:** Phase 1 MVP complete
@@ -410,15 +408,23 @@ Implement group expense tracking. Simple split calculation, no payment processin
 
 ### Tasks
 
-- [ ] 🔴 Expense data model (tables, RLS)
-- [ ] 🔴 Expense CRUD
-- [ ] 🔴 Expense splitting algorithm
-- [ ] 🔴 "Who owes whom" calculation
-- [ ] 🔴 Expense UI in trip detail
-- [ ] 🔴 Currency conversion
-- [ ] 🔴 Export CSV/PDF
-- [ ] 🔴 i18n
-- [ ] 🔴 Tests
+- [x] 🟢 Expense data model (tables, RLS) — `expenses`, `expense_participants`, Realtime
+- [x] 🟢 Expense CRUD — service + hook + modal
+- [x] 🟢 Expense splitting algorithm — equal + custom
+- [x] 🟢 "Who owes whom" calculation — balances + simplified settlements
+- [x] 🟢 Expense UI in trip detail — onglet Expenses
+- [ ] 🔴 Currency conversion — **reporté post-MVP**
+- [ ] 🔴 Export CSV/PDF — **reporté post-MVP**
+- [x] 🟢 i18n — EN + FR (`expenses.*`, `tripDetail.expenses`)
+- [x] 🟢 Tests — `expenseSplits.test.ts`
+
+### Acceptance criteria (MVP)
+
+- [x] Trip members can add/edit/delete expenses (creator or admin)
+- [x] Equal and custom splits
+- [x] Balance summary + suggested settlements
+- [x] RLS trip-scoped
+- [x] Unit tests for split/settlement algorithms
 
 ---
 
@@ -544,11 +550,11 @@ _Will be tracked here as discovered_
 
 ### Phase 2 produit (Post-MVP — ordre #14 → #15 → #16)
 
-- **Issue #14 (Expenses)**: 🔴 0% — **prochaine**
-- **Issue #15 (PWA/Offline)**: 🔴 0% — après #14
+- **Issue #14 (Expenses)**: 🟢 **COMPLETED (MVP)** — [PR #51](https://github.com/igorms-pro/voyagely/pull/51) ; [#50](https://github.com/igorms-pro/voyagely/issues/50) fermée ; migration `020`
+- **Issue #15 (PWA/Offline)**: 🔴 0% — **prochaine**
 - **Issue #16 (Templates)**: 🔴 0% — après #15
 
-**Overall MVP Completion: ~95%** — refactor v2 (#35) sur `main` ; Phase 2 (#14–#16) à démarrer ; QA Premium (#17) en pause
+**Overall MVP Completion: ~95%** — Phase 2 #14 livré ; **#15 PWA** prochaine ; QA Premium (#17) en pause
 
 ---
 
@@ -556,7 +562,7 @@ _Will be tracked here as discovered_
 
 **CRITICAL PATH**:
 
-1. **Phase 2 produit** : **#14** (dépenses) → **#15** (PWA) → **#16** (templates).
+1. **Phase 2 produit** : **#15** (PWA) → **#16** (templates).
 2. **QA Premium** (#17) — optionnel / post-refactor.
 3. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain).
 
