@@ -2,7 +2,7 @@
 
 > Goal: Build a complete SaaS travel planning platform with AI-powered itineraries, real-time collaboration, and seamless user experience.
 
-**Last Updated:** May 26, 2026 — **#17 Premium** (GitHub [#42](https://github.com/igorms-pro/voyagely/issues/42)) 🟢 **COMPLETED** — mergé via **[PR #44](https://github.com/igorms-pro/voyagely/pull/44)** sur `main` ; **QA manuelle** reportée post-v2.
+**Last Updated:** May 26, 2026 — **#13 carte itinéraire** (GitHub [#45](https://github.com/igorms-pro/voyagely/issues/45)) 🟡 **IN PROGRESS** — branche `feature/issue-13-itinerary-map`. **#17 Premium** 🟢 [PR #44](https://github.com/igorms-pro/voyagely/pull/44).
 
 ## 📋 Status Legend
 
@@ -25,7 +25,7 @@
 
 ## 🚀 IMMEDIATE NEXT ACTION (For AI Agent)
 
-1. **Issue #13** : suite optionnelle — carte activités / route (ou priorité **v2** selon Igor).
+1. **Issue #13** : 🟡 carte itinéraire Explore — [#45](https://github.com/igorms-pro/voyagely/issues/45), branche `feature/issue-13-itinerary-map` (PR à ouvrir).
 2. **QA Premium** (#17) : reportée post-v2 — checklist section #17.
 3. **PR #36** / GitHub [#35](https://github.com/igorms-pro/voyagely/issues/35) : optionnel.
 4. **Prod Stripe** : `SITE_URL` + secrets **live** quand domaine final.
@@ -205,7 +205,9 @@ Génération IA d’**itinéraires scénarisés** (copie possible vers l’itin�
 
 ## 🎯 Issue #13: Trip Detail Screen - Context & Enrichment
 
-**Status:** 🟡 **IN PROGRESS**  
+**Status:** 🟡 **IN PROGRESS** — carte Explore livrée en code ; merge PR en attente.  
+**GitHub:** [#45](https://github.com/igorms-pro/voyagely/issues/45)  
+**Branche:** `feature/issue-13-itinerary-map`  
 **Priority:** MEDIUM  
 **Phase:** Screen 4f  
 **Dependencies:** Issue #9 (activities)
@@ -233,18 +235,18 @@ Add weather, places, and travel time context to trip detail screen.
 
 - [x] 🟢 **Temps entre activités** — préfère `transport_duration_minutes` sur l’activité **suivante** ; sinon estimation **Haversine** + vitesse moyenne (affichage « approximatif ») si `lat`/`lon` sur les deux
 - [x] 🟢 Affichage sur la **timeline** (connecteur entre cartes)
-- [ ] 🔴 **Route visualization** (optional)
+- [x] 🟢 **Route visualization** (polyline carte Explore, ordre itinéraire)
 
 #### Maps
 
-- [ ] 🔴 **Add maps view** (optional for MVP):
-  - [ ] Display activities on map
-  - [ ] Activity markers
-  - [ ] Route between activities
+- [x] 🟢 **Itinerary map** (onglet Explore) :
+  - [x] Display activities on map (jour sélectionné, coordonnées `lat`/`lon`)
+  - [x] Activity markers (ordre itinéraire + liste accessible)
+  - [x] Route between activities (polyline OSM / Leaflet)
 
 #### i18n
 
-- [x] 🟢 Libellés météo / lieux (`tripDetail.explore*`)
+- [x] 🟢 Libellés météo / lieux / carte (`tripDetail.explore*`)
 
 ### Acceptance Criteria
 
@@ -252,7 +254,8 @@ Add weather, places, and travel time context to trip detail screen.
 - [x] Places display correctly (API or mock)
 - [x] Travel time between consecutive activities (stored duration or coordinate estimate)
 - [x] Weather and places labels internationalized (`tripDetail.explore*`)
-- [x] Tests pass
+- [x] Itinerary map on Explore: markers + route for activities with `lat`/`lon` (jour sélectionnable)
+- [x] Tests pass (`itineraryMapModel` + suite existante)
 
 ---
 
@@ -466,7 +469,7 @@ _Will be tracked here as discovered_
 - **Issue #11 (Chat)**: 🟢 **COMPLETED (MVP)** — sur **`main`** ; GitHub [#40](https://github.com/igorms-pro/voyagely/issues/40) **CLOSED**
 - **Issue #12 (AI Generation)**: 🟢 **COMPLETED (MVP)** — Edge + migration 018 + tier + logs ; optionnel smoke E2E staging / reporting agrégé
 - **Issue #17 (Premium / Stripe)**: 🟢 **COMPLETED** — [PR #44](https://github.com/igorms-pro/voyagely/pull/44) mergée ; [#42](https://github.com/igorms-pro/voyagely/issues/42) fermée
-- **Issue #13 (Context)**: 🟡 **partiel** — météo / lieux / i18n ; **temps entre activités** sur timeline livré ; carte / route post-MVP (voir section #13)
+- **Issue #13 (Context)**: 🟡 **PR en cours** — [#45](https://github.com/igorms-pro/voyagely/issues/45) ; météo / lieux / timeline / **carte Explore** (Leaflet) sur branche `feature/issue-13-itinerary-map`
 
 ### Phase 2 (Post-MVP)
 
@@ -474,7 +477,7 @@ _Will be tracked here as discovered_
 - **Issue #15 (PWA/Offline)**: 🔴 0% - Phase 2
 - **Issue #16 (Templates)**: 🔴 0% - Phase 2
 
-**Overall MVP Completion: ~85%** — **#17** livré sur `main` ; suite **#13** / **v2** ; QA billing post-v2
+**Overall MVP Completion: ~88%** — **#17** sur `main` ; **#13** carte → PR [#45](https://github.com/igorms-pro/voyagely/issues/45) ; QA billing post-v2
 
 ---
 
@@ -482,9 +485,9 @@ _Will be tracked here as discovered_
 
 **CRITICAL PATH**:
 
-1. **v2** ou **Issue #13** (carte / route) — priorité Igor.
+1. Merger **PR #13 / [#45](https://github.com/igorms-pro/voyagely/issues/45)** (carte Explore) puis **v2** ou QA Premium.
 2. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain).
-3. **#13** : carte activités / route (optionnel).
+3. **#13** post-MVP : détails lieu + « Add to itinerary » (optionnel).
 4. **PR #36** / GitHub [#35](https://github.com/igorms-pro/voyagely/issues/35) : optionnel.
 
 **BLOCKER** : aucun bloquant produit ; **PR #36** non bloquant.
