@@ -1,5 +1,5 @@
 ---
-description: Enforce per-issue GitHub + git workflow (merge → issue → branch → dev → PR → docs)
+description: Enforce per-issue GitHub + git workflow (merge → issue → branch → dev → PR → docs → handoff)
 alwaysApply: true
 ---
 
@@ -10,7 +10,7 @@ When starting or finishing work tied to an Issue, follow this exact sequence.
 ## Start an Issue (before coding)
 
 - **Merge previous work**: ensure the previous Issue is merged to `main` (or explicitly acknowledged as not needed).
-- **Create GitHub Issue**: create/confirm the Issue exists on GitHub and capture its number (e.g. `#25`).
+- **Create GitHub Issue**: create/confirm the Issue exists on GitHub and capture its number (e.g. `#45`). Doc issue number (e.g. **#13**) ≠ GitHub number — always record both in `ISSUES.md`.
 - **Create branch**: `feature/issue-XX-short-slug` (or `fix/...`, `chore/...`, etc. per `git-workflow.mdc`).
 - **Update docs**: in `docs/issues/ISSUES.md`, set the Issue status to **🟡 IN PROGRESS** and note:
   - GitHub Issue number
@@ -21,19 +21,63 @@ When starting or finishing work tied to an Issue, follow this exact sequence.
 
 - Keep changes scoped to the current Issue.
 - Ensure all interactive states exist: loading / empty / error / default / disabled.
-- Keep i18n keys up to date for any new user-facing copy.
+- Keep i18n keys up to date for any new user-facing copy (at minimum **EN + FR**).
 
-## Finish an Issue (before moving on)
+## Finish an Issue (agent executes end-to-end)
 
-- **Open PR**: create a PR referencing the GitHub Issue number in title/body.
-- **Update docs**: in `docs/issues/ISSUES.md`:
-  - mark tasks + AC checkboxes
-  - add PR link
-  - set status to **🟢 COMPLETED** when AC is OK
-- Only then start the next Issue.
+Unless the user explicitly says otherwise (e.g. “ne merge pas”), the agent **owns the full close-out**:
+
+1. **PR**: open with `Fixes #<github-n>` in body; CI green.
+2. **Merge**: `gh pr merge <n> --merge --delete-branch` (or squash per repo habit).
+3. **Local `main`**: `git checkout main && git pull`.
+4. **GitHub Issue**: confirm **CLOSED** (auto via `Fixes` or `gh issue close`).
+5. **`docs/issues/ISSUES.md`**:
+   - mark tasks + AC checkboxes
+   - add merged PR link
+   - set status **🟢 COMPLETED** (or **COMPLETED (MVP)** if post-MVP items remain)
+   - update **IMMEDIATE NEXT ACTION** and **Progress Tracking**
+   - check all **Finish (workflow)** boxes
+6. **Commit doc** on `main` if the merge did not already include the final doc state: `docs(issues): mark #XX completed after PR #YY`.
+
+Only then start the next Issue.
+
+## Handoff — résumé pour changement de chat (obligatoire)
+
+After each Issue completion, the agent **must** end the conversation with a **Handoff** block the user can paste into a new chat. Use this structure:
+
+```markdown
+## Handoff Voyagely — [doc Issue #XX] — [titre court]
+
+### Livré
+- [1–3 bullets : quoi, où dans l’app, PR/issue]
+
+### Liens
+- PR : https://github.com/igorms-pro/voyagely/pull/…
+- GitHub : https://github.com/igorms-pro/voyagely/issues/…
+- Branche : `main` (merged)
+
+### Pas fait / reporté
+- …
+
+### Suite (voir `docs/issues/ISSUES.md` → IMMEDIATE NEXT ACTION)
+1. …
+2. …
+
+### Brief pour prochaine conv
+## Contexte
+Repo voyagely, `main`. [Issue précédente] mergée (PR #…).
+
+## Tâche
+Issue #YY / [nom] — [une phrase objectif]
+
+## Ne pas toucher
+…
+```
+
+Pull **IMMEDIATE NEXT ACTION** and **CRITICAL PATH** from `ISSUES.md` — do not invent priorities.
 
 ## If the user says “on en a déjà”
 
 - Do **not** recreate Issues/branches/PRs.
 - Instead: verify current branch + local git status, then update `docs/issues/ISSUES.md` to reflect reality.
-
+- Still produce a **Handoff** if the Issue is already done but the user is switching chats.
