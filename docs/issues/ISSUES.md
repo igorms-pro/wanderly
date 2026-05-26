@@ -19,7 +19,7 @@
 
 - **Vérification GitHub (mai 2026)** : doc **#11** ↔ GitHub **[#40](https://github.com/igorms-pro/voyagely/issues/40)** — **CLOSED**. Doc **#12** (IA Edge) : pas d’issue GitHub dédiée historique ; livré sur **`main`**. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain) — vérifier le dernier run après chaque push.
 - **`main` / `origin/main`** : chat **#11**, IA Edge **#12**, **Context #13**, **Premium #17** ([PR #44](https://github.com/igorms-pro/voyagely/pull/44), migration `019`), **Dépenses #14** ([PR #51](https://github.com/igorms-pro/voyagely/pull/51), migration `020`, onglet Expenses).
-- **Phase 2 produit** : **#15** 🟢 → **#16** — templates prochaine.
+- **Phase 2 produit** : **#15** 🟢 → **#16** 🟡 — templates en cours ([GitHub #54](https://github.com/igorms-pro/voyagely/issues/54), branche `feature/issue-16-templates`).
 
 ### 📌 Terminologie (ne pas confondre)
 
@@ -33,7 +33,7 @@
 
 ## 🚀 IMMEDIATE NEXT ACTION (For AI Agent)
 
-1. **Phase 2 produit** — **#16** (templates). **Priorité actuelle.**
+1. **Phase 2 produit** — **#16** 🟡 — merger [PR #55](https://github.com/igorms-pro/voyagely/pull/55) puis QA smoke (share / duplicate / template).
 2. **QA Premium** (#17) — checklist Stripe — optionnel / post-refactor.
 3. **Prod Stripe** : `SITE_URL` + secrets **live** quand domaine final.
 
@@ -468,10 +468,7 @@ Make Voyagely usable during trips with PWA and offline capabilities.
 
 ## 🎯 Issue #16: Trip Templates & Sharing
 
-**Status:** 🔴 **NOT STARTED**  
-**Priority:** MEDIUM  
-**Phase:** Phase 2 (Month 6)  
-**Dependencies:** Phase 1 MVP complete
+**Status:** 🟡 **IN PROGRESS** — GitHub **[#54](https://github.com/igorms-pro/voyagely/issues/54)** ; branche `feature/issue-16-templates` ; [PR #55](https://github.com/igorms-pro/voyagely/pull/55) (migration `021` appliquée prod)
 
 ### Description
 
@@ -479,11 +476,11 @@ Add trip templates and sharing capabilities.
 
 ### Tasks
 
-- [ ] 🔴 Template system
-- [ ] 🔴 Duplicate trip
-- [ ] 🔴 Sharing links
-- [ ] 🔴 Timezone support
-- [ ] 🔴 Tests
+- [x] 🟡 Template system — `trip_templates` + save / create from template
+- [x] 🟡 Duplicate trip — modal + clone itinerary
+- [x] 🟡 Sharing links — invite UI + `/invite/:code` + RPC join
+- [x] 🟡 Timezone support — `trips.timezone` + edit form
+- [x] 🟡 Tests — `shiftTripDates`, `buildTemplateSnapshot`
 
 ---
 
@@ -568,7 +565,7 @@ _Will be tracked here as discovered_
 
 - **Issue #14 (Expenses)**: 🟢 **COMPLETED (MVP)** — [PR #51](https://github.com/igorms-pro/voyagely/pull/51) ; [#50](https://github.com/igorms-pro/voyagely/issues/50) fermée ; migration `020`
 - **Issue #15 (PWA/Offline)**: 🟢 **COMPLETED (MVP)** — [PR #53](https://github.com/igorms-pro/voyagely/pull/53) ; [#52](https://github.com/igorms-pro/voyagely/issues/52) fermée
-- **Issue #16 (Templates)**: 🔴 0% — **prochaine**
+- **Issue #16 (Templates)**: 🟡 **IN PROGRESS** — [#54](https://github.com/igorms-pro/voyagely/issues/54) ; [PR #55](https://github.com/igorms-pro/voyagely/pull/55)
 
 **Overall MVP Completion: ~95%** — Phase 2 #14–#15 livrés ; **#16 templates** prochaine ; QA Premium (#17) en pause
 

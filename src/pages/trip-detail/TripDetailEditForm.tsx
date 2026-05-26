@@ -1,5 +1,6 @@
 import { Coffee, Zap, Gauge, DollarSign, Baby, Save, X } from 'lucide-react';
 import type { EditFormState } from './components/layout/TripDetailHero';
+import { TRIP_TIMEZONE_OPTIONS } from '@/features/trip-sharing';
 
 const PACE_ICONS = { relaxed: Coffee, balanced: Gauge, packed: Zap };
 const PACE_OPTIONS: ('relaxed' | 'balanced' | 'packed')[] = ['relaxed', 'balanced', 'packed'];
@@ -122,6 +123,22 @@ export function TripDetailEditForm({
             aria-label={t('tripModal.budgetPerPerson')}
           />
         </div>
+      </div>
+
+      <div>
+        <p className="text-white/90 text-sm font-medium mb-2">{t('sharing.tripTimezone')}</p>
+        <select
+          value={editForm.timezone}
+          onChange={(e) => setEditForm({ ...editForm, timezone: e.target.value })}
+          className={inputClass}
+          aria-label={t('sharing.tripTimezone')}
+        >
+          {TRIP_TIMEZONE_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {t(option.labelKey)}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* With children */}

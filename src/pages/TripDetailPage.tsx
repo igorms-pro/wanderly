@@ -5,6 +5,7 @@ import WeatherWidget from '@/components/WeatherWidget';
 import { TripExploreTab } from '@/pages/trip-detail/components/explore/TripExploreTab';
 import { TripChat } from '@/features/chat';
 import { TripExpensesTab } from '@/features/expenses';
+import { DuplicateTripModal, SaveTemplateModal, TripShareModal } from '@/features/trip-sharing';
 import { maxAiScenariosForTier } from '@/lib/ai/aiScenarioLimits';
 import { useStore } from '@/lib/store';
 import { DashboardHeader } from '@/pages/dashboard/DashboardHeader';
@@ -36,6 +37,9 @@ export default function TripDetailPage() {
   const signOut = useStore((s) => s.signOut);
   const deleteActivity = useStore((s) => s.deleteActivity);
   const [showFinalizeModal, setShowFinalizeModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [showSaveTemplateModal, setShowSaveTemplateModal] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -69,6 +73,7 @@ export default function TripDetailPage() {
     getUserRole,
     canEdit,
     canDelete,
+    canShare,
     showAddActivityModal,
     setShowAddActivityModal,
     userAiTier,
@@ -168,6 +173,7 @@ export default function TripDetailPage() {
         isDeleting={isDeleting}
         canEdit={canEdit}
         canDelete={canDelete}
+        canShare={canShare}
         showFinalizeButton={canFinalizeItinerary()}
         onFinalizeClick={() => setShowFinalizeModal(true)}
         onStartEdit={() => setIsEditing(true)}
@@ -177,8 +183,44 @@ export default function TripDetailPage() {
         }}
         onSave={handleUpdateTrip}
         onDelete={() => setShowDeleteModal(true)}
+        onShare={() => setShowShareModal(true)}
+        onDuplicate={() => setShowDuplicateModal(true)}
+        onSaveTemplate={() => setShowSaveTemplateModal(true)}
         t={t}
       />
+
+      {showShareModal && user && tripId ? (
+        <TripShareModal
+          tripId={tripId}
+          inviterId={user.id}
+          onClose={() => setShowShareModal(false)}
+        />
+      ) : null}
+
+      {showDuplicateModal && user && tripId ? (
+        <DuplicateTripModal
+          sourceTripId={tripId}
+          sourceTitle={currentTrip.title}
+          sourceStartDate={currentTrip.start_date}
+          sourceEndDate={currentTrip.end_date}
+          userId={user.id}
+          onClose={() => setShowDuplicateModal(false)}
+          onDuplicated={(newTripId) => {
+            setShowDuplicateModal(false);
+            addToast({ variant: 'success', message: t('sharing.duplicateSuccess') });
+            navigate(`/trip/${newTripId}`);
+          }}
+        />
+      ) : null}
+
+      {showSaveTemplateModal && user ? (
+        <SaveTemplateModal
+          trip={currentTrip}
+          userId={user.id}
+          onClose={() => setShowSaveTemplateModal(false)}
+          onSaved={() => addToast({ variant: 'success', message: t('templates.saveSuccess') })}
+        />
+      ) : null}
 
       <TripDetailDeleteModal
         isOpen={showDeleteModal}

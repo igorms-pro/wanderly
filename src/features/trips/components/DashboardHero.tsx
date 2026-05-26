@@ -1,13 +1,14 @@
 import { useTranslation } from 'react-i18next';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, LayoutTemplate } from 'lucide-react';
 import type { User } from '@/lib/types/database.types';
 
 interface DashboardHeroProps {
   user: User;
   onCreateTrip: () => void;
+  onUseTemplate: () => void;
 }
 
-export default function DashboardHero({ user, onCreateTrip }: DashboardHeroProps) {
+export default function DashboardHero({ user, onCreateTrip, onUseTemplate }: DashboardHeroProps) {
   const { t } = useTranslation();
 
   return (
@@ -19,13 +20,22 @@ export default function DashboardHero({ user, onCreateTrip }: DashboardHeroProps
           {t('trip.welcomeBack', { name: user.display_name?.split(' ')[0] })}
         </h2>
         <p className="text-violet-200 text-lg mb-6">{t('trip.planAdventure')}</p>
-        <button
-          onClick={onCreateTrip}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-white text-violet-700 rounded-xl font-semibold hover:bg-violet-50 transition shadow-lg hover:shadow-xl"
-        >
-          <Sparkles className="w-5 h-5" />
-          {t('trip.createTripWithAI')}
-        </button>
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={onCreateTrip}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-white text-violet-700 rounded-xl font-semibold hover:bg-violet-50 transition shadow-lg hover:shadow-xl min-h-[44px]"
+          >
+            <Sparkles className="w-5 h-5" />
+            {t('trip.createTripWithAI')}
+          </button>
+          <button
+            onClick={onUseTemplate}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-white/15 text-white border border-white/30 rounded-xl font-semibold hover:bg-white/25 transition min-h-[44px]"
+          >
+            <LayoutTemplate className="w-5 h-5" />
+            {t('templates.createFromTemplate')}
+          </button>
+        </div>
       </div>
     </div>
   );

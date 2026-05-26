@@ -60,6 +60,7 @@ export function createTripsSlice(set: SetState, get: GetState): Partial<AppState
         if (updates.constraints !== undefined) updateData.constraints = updates.constraints ?? null;
         if (updates.active_itinerary_id !== undefined)
           updateData.active_itinerary_id = updates.active_itinerary_id ?? null;
+        if (updates.timezone !== undefined) updateData.timezone = updates.timezone;
 
         const mappedTrip = await updateTripInApi(tripId, updateData);
         get().updateTripInState(tripId, mappedTrip);

@@ -23,6 +23,7 @@ export function useDashboardPage() {
   const [sortBy, setSortBy] = useState<SortOption>('date-desc');
   const [tripMemberCounts, setTripMemberCounts] = useState<Record<string, number>>({});
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
   const tripsSubscriptionRef = useRef<RealtimeChannel | null>(null);
 
   const user = useStore((state) => state.user);
@@ -97,6 +98,7 @@ export function useDashboardPage() {
           budget_cents: (raw.budget_cents as number) ?? undefined,
           currency: (raw.currency as string) ?? undefined,
           constraints: (raw.constraints as Trip['constraints']) ?? undefined,
+          timezone: (raw.timezone as string) ?? 'UTC',
           created_at: raw.created_at as string,
           updated_at: raw.updated_at as string,
         };
@@ -199,6 +201,8 @@ export function useDashboardPage() {
     setOpenMenuId,
     showCreateTripModal,
     setShowCreateTripModal,
+    showTemplatePicker,
+    setShowTemplatePicker,
     filteredAndSortedTrips,
     loadTripsData,
     handleLogout,

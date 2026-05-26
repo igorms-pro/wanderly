@@ -40,6 +40,7 @@ export async function updateTripHandler(params: UpdateTripParams): Promise<void>
       currency: editForm.currency || undefined,
       budget_cents: budgetCents ?? undefined,
       constraints,
+      timezone: editForm.timezone,
     });
     setIsEditing(false);
     await loadTripData();

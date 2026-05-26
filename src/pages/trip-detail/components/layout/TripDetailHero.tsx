@@ -1,8 +1,8 @@
-import { Edit, Lock, Trash2 } from 'lucide-react';
 import type { Trip } from '@/lib/types/database.types';
 import type { TripMember } from '@/lib/types/database.types';
 import { TripDetailHeroView } from './TripDetailHeroView';
 import { TripDetailEditForm } from '@/pages/trip-detail/TripDetailEditForm';
+import { TripDetailHeroActions } from './TripDetailHeroActions';
 
 export type EditFormState = {
   title: string;
@@ -14,6 +14,7 @@ export type EditFormState = {
   budget: string;
   currency: string;
   has_children: boolean;
+  timezone: string;
 };
 
 interface TripDetailHeroProps {
@@ -25,12 +26,16 @@ interface TripDetailHeroProps {
   isDeleting: boolean;
   canEdit: () => boolean;
   canDelete: () => boolean;
+  canShare: () => boolean;
   showFinalizeButton?: boolean;
   onFinalizeClick?: () => void;
   onStartEdit: () => void;
   onCancelEdit: () => void;
   onSave: () => Promise<void>;
   onDelete: () => void;
+  onShare: () => void;
+  onDuplicate: () => void;
+  onSaveTemplate: () => void;
   t: (key: string) => string;
 }
 
@@ -43,12 +48,16 @@ export function TripDetailHero({
   isDeleting,
   canEdit,
   canDelete,
+  canShare,
   showFinalizeButton = false,
   onFinalizeClick,
   onStartEdit,
   onCancelEdit,
   onSave,
   onDelete,
+  onShare,
+  onDuplicate,
+  onSaveTemplate,
   t,
 }: TripDetailHeroProps) {
   return (
@@ -68,40 +77,22 @@ export function TripDetailHero({
               <TripDetailHeroView currentTrip={currentTrip} tripMembers={tripMembers} t={t} />
             )}
           </div>
-          {!isEditing && (
-            <div className="flex flex-shrink-0 gap-2">
-              {canEdit() && (
-                <button
-                  onClick={onStartEdit}
-                  className="px-4 py-2.5 min-h-[44px] bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white hover:bg-white/30 transition flex items-center"
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  {t('tripDetail.edit')}
-                </button>
-              )}
-              {showFinalizeButton && onFinalizeClick && (
-                <button
-                  type="button"
-                  onClick={onFinalizeClick}
-                  className="px-4 py-2.5 min-h-[44px] bg-emerald-500/90 backdrop-blur-sm border border-emerald-400/40 rounded-lg text-white hover:bg-emerald-600/90 transition flex items-center"
-                  aria-label={t('tripDetail.finalizeItinerary')}
-                >
-                  <Lock className="w-4 h-4 mr-2" aria-hidden />
-                  {t('tripDetail.finalizeItinerary')}
-                </button>
-              )}
-              {canDelete() && (
-                <button
-                  onClick={onDelete}
-                  disabled={isDeleting}
-                  className="px-4 py-2.5 min-h-[44px] bg-red-500/80 backdrop-blur-sm border border-red-400/30 rounded-lg text-white hover:bg-red-600/80 transition flex items-center disabled:opacity-50"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  {isDeleting ? t('tripDetail.deleting') : t('tripDetail.delete')}
-                </button>
-              )}
-            </div>
-          )}
+          {!isEditing ? (
+            <TripDetailHeroActions
+              canEdit={canEdit}
+              canDelete={canDelete}
+              canShare={canShare}
+              showFinalizeButton={showFinalizeButton}
+              isDeleting={isDeleting}
+              onStartEdit={onStartEdit}
+              onFinalizeClick={onFinalizeClick}
+              onDelete={onDelete}
+              onShare={onShare}
+              onDuplicate={onDuplicate}
+              onSaveTemplate={onSaveTemplate}
+              t={t}
+            />
+          ) : null}
         </div>
       </div>
     </div>

@@ -42,6 +42,7 @@ type TripEditSource = {
   status: EditFormState['status'];
   currency: string | null;
   constraints: unknown;
+  timezone?: string | null;
 };
 
 export function buildEditFormFromTrip(currentTrip: TripEditSource): EditFormState {
@@ -56,6 +57,7 @@ export function buildEditFormFromTrip(currentTrip: TripEditSource): EditFormStat
     budget: c?.budget_per_person_cents ? String(Math.round(c.budget_per_person_cents / 100)) : '',
     currency: currentTrip.currency || 'EUR',
     has_children: !!c?.has_children,
+    timezone: currentTrip.timezone ?? 'UTC',
   };
 }
 

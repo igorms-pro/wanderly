@@ -91,6 +91,7 @@ export async function loadTripDataForDetail(params: LoadTripDataParams): Promise
       currency: tripData.currency ?? null,
       constraints: tripData.constraints ?? null,
       active_itinerary_id: tripData.active_itinerary_id ?? null,
+      timezone: tripData.timezone ?? 'UTC',
       created_at: tripData.created_at,
       updated_at: tripData.updated_at,
       deleted_at: tripData.deleted_at ?? null,
@@ -107,6 +108,7 @@ export async function loadTripDataForDetail(params: LoadTripDataParams): Promise
       budget: c?.budget_per_person_cents ? String(Math.round(c.budget_per_person_cents / 100)) : '',
       currency: mappedTrip.currency || 'EUR',
       has_children: !!c?.has_children,
+      timezone: mappedTrip.timezone ?? 'UTC',
     }));
     try {
       const saved = sessionStorage.getItem(`tripDetail:tab:${tripId}`);

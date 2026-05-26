@@ -80,6 +80,7 @@ export function useTripDetailRealtime(tripId: string | undefined) {
           budget_cents: d.budget_cents ?? undefined,
           currency: d.currency ?? undefined,
           constraints: d.constraints ?? undefined,
+          timezone: d.timezone ?? 'UTC',
           created_at: d.created_at,
           updated_at: d.updated_at,
         };

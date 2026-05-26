@@ -127,6 +127,7 @@ export interface CreateTripData {
   budget_cents?: number;
   currency?: string;
   constraints?: Record<string, unknown>;
+  timezone?: string;
 }
 
 export interface CreateActivityData {
