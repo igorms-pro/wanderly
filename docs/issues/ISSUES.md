@@ -26,10 +26,9 @@
 
 ## 🚀 IMMEDIATE NEXT ACTION
 
-1. **🔵 QA manuelle — Premium #17** (Stripe **test mode**, `/account`, carte `4242…`) — checklist ci-dessous.
-2. **🔵 QA manuelle — Templates #16** (login requis) : picker dashboard, duplicate trip, modals share/invite.
-3. **CI** — dernier run `main` vert après [PR #56](https://github.com/igorms-pro/voyagely/pull/56).
-4. **🟣 Stripe live prod** — reporté (`sk_live_`, `SITE_URL` prod) ; rester en test.
+1. **🔵 QA manuelle — Premium #17 + Templates #16** — GitHub [#57](https://github.com/igorms-pro/voyagely/issues/57) ; checklists ci-dessous.
+2. **CI** — dernier run `main` vert sur `main`.
+3. **🟣 Stripe live prod** — reporté (`sk_live_`, `SITE_URL` prod) ; rester en test.
 
 ---
 
@@ -37,10 +36,10 @@
 
 ### Actives (à faire maintenant)
 
-| Doc #     | Sujet                                      | Statut     | Détail                                                                                    |
-| --------- | ------------------------------------------ | ---------- | ----------------------------------------------------------------------------------------- |
-| **QA-17** | Premium Stripe — validation bout en bout   | 🔵 Testing | Code 🟢 [PR #44](https://github.com/igorms-pro/voyagely/pull/44) ; checklist § ci-dessous |
-| **QA-16** | Templates & sharing — parcours authentifié | 🔵 Testing | Code 🟢 [PR #55](https://github.com/igorms-pro/voyagely/pull/55) ; 3 flows manuels        |
+| Doc #     | Sujet                                      | Statut     | Détail                                                                                                                                 |
+| --------- | ------------------------------------------ | ---------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **QA-17** | Premium Stripe — validation bout en bout   | 🔵 Testing | Code 🟢 [PR #44](https://github.com/igorms-pro/voyagely/pull/44) ; suivi [#57](https://github.com/igorms-pro/voyagely/issues/57)       |
+| **QA-16** | Templates & sharing — parcours authentifié | 🔵 Testing | Code 🟢 [PR #55](https://github.com/igorms-pro/voyagely/pull/55) ; inclus dans [#57](https://github.com/igorms-pro/voyagely/issues/57) |
 
 ### Backlog produit (pas encore issue GitHub #18+)
 
