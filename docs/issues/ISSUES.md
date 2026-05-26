@@ -26,9 +26,10 @@
 
 ## 🚀 IMMEDIATE NEXT ACTION
 
-1. **🔵 QA manuelle — Premium #17 + Templates #16** — GitHub [#57](https://github.com/igorms-pro/voyagely/issues/57) ; checklists ci-dessous.
-2. **CI** — dernier run `main` vert sur `main`.
-3. **🟣 Stripe live prod** — reporté (`sk_live_`, `SITE_URL` prod) ; rester en test.
+1. **🔵 QA Premium #17 — webhook sync** — checkout test `4242…` OK (26 mai) ; `profiles.ai_tier` reste `free` → vérifier Stripe Dashboard → Webhooks → endpoint Supabase `stripe-webhook` (**200** sur `checkout.session.completed`).
+2. **🟢 Templates #16** — QA validée (26 mai) ; voir PR [#58](https://github.com/igorms-pro/voyagely/pull/58).
+3. **CI** — dernier run `main` vert sur `main`.
+4. **🟣 Stripe live prod** — reporté (`sk_live_`, `SITE_URL` prod) ; rester en test.
 
 ---
 
@@ -36,10 +37,10 @@
 
 ### Actives (à faire maintenant)
 
-| Doc #     | Sujet                                      | Statut     | Détail                                                                                                                                 |
-| --------- | ------------------------------------------ | ---------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| **QA-17** | Premium Stripe — validation bout en bout   | 🔵 Testing | Code 🟢 [PR #44](https://github.com/igorms-pro/voyagely/pull/44) ; suivi [#57](https://github.com/igorms-pro/voyagely/issues/57)       |
-| **QA-16** | Templates & sharing — parcours authentifié | 🔵 Testing | Code 🟢 [PR #55](https://github.com/igorms-pro/voyagely/pull/55) ; inclus dans [#57](https://github.com/igorms-pro/voyagely/issues/57) |
+| Doc #     | Sujet                                      | Statut     | Détail                                                                                                                       |
+| --------- | ------------------------------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **QA-17** | Premium Stripe — validation bout en bout   | 🔵 Testing | Checkout + portail OK (26 mai) ; **webhook → Premium** à confirmer — [#57](https://github.com/igorms-pro/voyagely/issues/57) |
+| **QA-16** | Templates & sharing — parcours authentifié | 🟢 Done    | QA validée 26 mai — [PR #58](https://github.com/igorms-pro/voyagely/pull/58)                                                 |
 
 ### Backlog produit (pas encore issue GitHub #18+)
 
@@ -95,9 +96,9 @@
 
 **Carte test :** `4242 4242 4242 4242`. Déclin : `4000 0000 0000 0002`.
 
-- [ ] **1–3** Checkout → Premium sans SQL
+- [ ] **1–3** Checkout → Premium sans SQL _(checkout `4242…` + retour `?checkout=success` OK ; tier reste Free — webhook)_
 - [ ] **4** Webhooks **200**
-- [ ] **5** Portail → retour `/account`
+- [x] **5** Portail → retour `/account` _(session portail créée)_
 - [ ] **6–7** Annulation → Free + quotas free
 - [ ] **8** Refresh cohérent
 
@@ -105,9 +106,9 @@
 
 ## 🔵 QA manuelle — Templates (#16)
 
-- [ ] Dashboard → créer trip **from template** (picker)
-- [ ] Trip → **Duplicate trip** (itinéraire cloné)
-- [ ] Trip → **Share / invite** → lien → `/invite/:code` → rejoindre (2e compte ou session)
+- [x] Dashboard → créer trip **from template** (picker)
+- [x] Trip → **Duplicate trip** (itinéraire cloné)
+- [x] Trip → **Share / invite** → lien → `/invite/:code` → preview + join _(preview OK ; join si 2e compte dispo)_
 
 ---
 
@@ -132,13 +133,13 @@
 
 ## 📊 Synthèse
 
-| Zone                         | État                                      |
-| ---------------------------- | ----------------------------------------- |
-| Code MVP + Phase 2 + Premium | 🟢 sur `main`                             |
-| Validation (QA)              | 🔵 en cours — **bloque « done » produit** |
-| Stripe live                  | 🟣 reporté                                |
-| Prochaine issue dev          | 🔴 à créer (#18+ après QA)                |
+| Zone                         | État                                    |
+| ---------------------------- | --------------------------------------- |
+| Code MVP + Phase 2 + Premium | 🟢 sur `main`                           |
+| Validation (QA)              | 🔵 QA-17 webhook Premium ; **QA-16 🟢** |
+| Stripe live                  | 🟣 reporté                              |
+| Prochaine issue dev          | 🔴 à créer (#18+ après QA)              |
 
-**CRITICAL PATH :** QA #17 → QA #16 → CI → (plus tard) backlog / roadmap Phase 3.
+**CRITICAL PATH :** QA #17 webhook → Premium → CI → (plus tard) backlog / roadmap Phase 3.
 
 **BLOCKER :** aucun bloquant code ; **QA manuelle** = gate principal.
