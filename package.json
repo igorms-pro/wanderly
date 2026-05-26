@@ -129,5 +129,13 @@
     "*.{json,md,css,scss}": [
       "prettier --write"
     ]
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "core-js",
+      "esbuild",
+      "msw",
+      "protobufjs"
+    ]
   }
 }
