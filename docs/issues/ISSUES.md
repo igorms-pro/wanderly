@@ -33,9 +33,9 @@
 
 ## 🚀 IMMEDIATE NEXT ACTION (For AI Agent)
 
-1. **QA Premium** (#17) — checklist Stripe manuelle (post-refactor #35, code sur `main`).
-2. **Prod Stripe** : `SITE_URL` + secrets **live** quand domaine final.
-3. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain) — vérifier après merge [PR #55](https://github.com/igorms-pro/voyagely/pull/55).
+1. **QA Premium** (#17) — checklist Stripe **test mode** manuelle sur `/account` (4242…).
+2. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain) — vérifier après merge [PR #55](https://github.com/igorms-pro/voyagely/pull/55).
+3. **🟣 Stripe live prod** : **reporté** — pas de `sk_live_` / `SITE_URL` prod pour l’instant ; rester en **test** (`localhost:5173` + secrets test Supabase Edge).
 
 ---
 
@@ -317,16 +317,33 @@ Passer d’un modèle **100 % gratuit** à des **abonnements ou achats** qui pos
 - [x] Produit / prix Stripe test (mensuel + annuel)
 - [x] Webhook Stripe → `.../functions/v1/stripe-webhook`
 - [x] **Customer Portal** activé côté Stripe (Settings → Billing) + bouton app
-- [ ] **Prod / staging** : repasser `SITE_URL` + secrets **live** quand domaine final connu
+- [ ] **🟣 Prod / staging live** : **hors scope pour l’instant** — `SITE_URL` + secrets **live** seulement quand domaine final + décision explicite (mai 2026 : **test only**)
 - [ ] **QA manuelle** (Igor, post-refactor #35 + Phase 2 #16) — voir checklist ci-dessous
 
 ### QA checklist (en attente — post-refactor #35, Phase 2 #16 livrée)
 
-- [ ] Free → `/account` → checkout mensuel **4242…** → retour succès → **Premium** sans SQL manuel
-- [ ] Webhook Stripe : delivery **200** sur `checkout.session.completed` / `customer.subscription.updated`
-- [ ] Premium → **Gérer l’abonnement** → portail → retour `/account` (même onglet)
-- [ ] Annulation abo test → webhook → **Free** + quotas IA free sur un trip
-- [ ] Refresh `/account` : badge plan cohérent avec `profiles`
+**Prérequis (local)** : `pnpm dev` → `http://localhost:5173` ; Supabase Edge secrets `STRIPE_*` + `SITE_URL=http://localhost:5173` ; Stripe **test mode** ; compte test **Free** (`profiles.ai_tier = free`, pas d’abo actif).
+
+| #   | Étape                                                               | Attendu                                                                                  |
+| --- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| 1   | Login (magic link / Google) → **`/account`**                        | Badge **Free** ; cartes mensuel / annuel visibles                                        |
+| 2   | **Subscribe monthly** → Checkout Stripe                             | Carte `4242 4242 4242 4242` · exp. `12/34` · CVC `123` · nom libre                       |
+| 3   | Paiement OK → redirect `?checkout=success`                          | Bannière sync puis **Premium** ; **Gérer l’abonnement** visible ; **pas** de SQL manuel  |
+| 4   | Stripe Dashboard → **Webhooks** → endpoint `stripe-webhook`         | Derniers events `checkout.session.completed` / `customer.subscription.updated` → **200** |
+| 5   | **Manage subscription** → portail Stripe → retour app               | Même onglet → `/account` ; plan toujours Premium                                         |
+| 6   | Portail : **Cancel subscription** (fin de période ou immédiat test) | Webhook `customer.subscription.deleted` → **200** ; profil **Free**                      |
+| 7   | Trip existant → génération scénario IA                              | Cap **free** (3 scénarios / trip) vs **premium** (10) — voir `aiScenarioLimits.ts`       |
+| 8   | Bouton **Refresh** sur `/account`                                   | Badge aligné avec `profiles` (Supabase Table Editor si doute)                            |
+
+**Carte test Stripe** : `4242 4242 4242 4242` (succès). Déclin test : `4000 0000 0000 0002`.
+
+**E2E headless (optionnel)** : ajouter `SUPABASE_SERVICE_ROLE_KEY` dans `.env.local` → `authenticateWithMagicLink` (`e2e/helpers/auth.ts`) puis enchaîner les étapes 1–3 en Playwright.
+
+- [ ] **1–3** Free → checkout mensuel **4242…** → retour succès → **Premium** sans SQL manuel
+- [ ] **4** Webhook Stripe : delivery **200** sur `checkout.session.completed` / `customer.subscription.updated`
+- [ ] **5** Premium → **Gérer l’abonnement** → portail → retour `/account` (même onglet)
+- [ ] **6–7** Annulation abo test → webhook → **Free** + quotas IA free sur un trip
+- [ ] **8** Refresh `/account` : badge plan cohérent avec `profiles`
 
 ### Reste optionnel (post-merge)
 
@@ -590,8 +607,8 @@ _Will be tracked here as discovered_
 
 **CRITICAL PATH**:
 
-1. **QA Premium** (#17) — checklist Stripe manuelle.
-2. **Prod Stripe** : `SITE_URL` + secrets **live** quand domaine final.
-3. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain).
+1. **QA Premium** (#17) — checklist Stripe **test mode** manuelle.
+2. **CI** : [Actions `main`](https://github.com/igorms-pro/voyagely/actions?query=branch%3Amain).
+3. **🟣 Stripe live prod** : reporté (test only pour l’instant).
 
 **BLOCKER** : aucun bloquant produit.
