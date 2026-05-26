@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { Menu, X, LogOut } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -75,6 +76,13 @@ export function DashboardHeaderMobile({
               </span>
               <ThemeToggle />
             </div>
+            <Link
+              to="/account"
+              onClick={onClose}
+              className="block w-full py-2.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition text-sm font-medium text-stone-800 dark:text-stone-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500"
+            >
+              {t('account.title')}
+            </Link>
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-2 py-2.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition text-left"

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Plane, LogOut } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -77,6 +78,13 @@ export function DashboardHeader({ user, onLogout }: DashboardHeaderProps) {
           <div className="hidden md:flex items-center gap-3">
             <LanguageSwitcher variant="dropdown" size="md" />
             <ThemeToggle />
+            <div className="h-6 w-px bg-stone-200 dark:bg-stone-700" />
+            <Link
+              to="/account"
+              className="text-sm font-medium text-stone-700 dark:text-stone-300 hover:text-orange-600 dark:hover:text-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500 rounded-md px-1"
+            >
+              {t('account.title')}
+            </Link>
             <div className="h-6 w-px bg-stone-200 dark:bg-stone-700" />
             <div className="flex items-center gap-2 min-w-0">
               <img

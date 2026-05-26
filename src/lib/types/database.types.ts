@@ -24,6 +24,8 @@ export interface Database {
           timezone: string | null;
           /** AI quota tier: free (default) or premium (higher caps). */
           ai_tier: 'free' | 'premium';
+          stripe_customer_id: string | null;
+          stripe_subscription_id: string | null;
           created_at: string; // TIMESTAMPTZ
           updated_at: string; // TIMESTAMPTZ
           deleted_at: string | null; // TIMESTAMPTZ
@@ -36,6 +38,8 @@ export interface Database {
           locale?: string | null;
           timezone?: string | null;
           ai_tier?: 'free' | 'premium';
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
           created_at?: string;
           updated_at?: string;
           deleted_at?: string | null;
@@ -48,9 +52,26 @@ export interface Database {
           locale?: string | null;
           timezone?: string | null;
           ai_tier?: 'free' | 'premium';
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
           created_at?: string;
           updated_at?: string;
           deleted_at?: string | null;
+        };
+        Relationships: [];
+      };
+      stripe_webhook_events: {
+        Row: {
+          id: string;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
         };
         Relationships: [];
       };
@@ -612,4 +633,5 @@ export type User = {
   display_name: string;
   avatar_url: string;
   created_at: string;
+  ai_tier: 'free' | 'premium';
 };

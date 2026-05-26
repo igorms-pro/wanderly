@@ -12,6 +12,7 @@ export function profileToUser(profile: Profile): User {
     avatar_url:
       profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.email}`,
     created_at: profile.created_at,
+    ai_tier: profile.ai_tier === 'premium' ? 'premium' : 'free',
   };
 }
 
@@ -156,7 +157,8 @@ export function createAuthSlice(set: SetState, get: GetState): Partial<AppState>
           current.id === newUser.id &&
           current.email === newUser.email &&
           current.display_name === newUser.display_name &&
-          current.avatar_url === newUser.avatar_url
+          current.avatar_url === newUser.avatar_url &&
+          current.ai_tier === newUser.ai_tier
         )
           return;
         set({ user: newUser });
@@ -243,6 +245,7 @@ export function createAuthSlice(set: SetState, get: GetState): Partial<AppState>
             avatar_url:
               avatarUrl ?? `https://api.dicebear.com/7.x/avataaars/svg?seed=${authUser.id}`,
             created_at: authUser.created_at ?? new Date().toISOString(),
+            ai_tier: 'free',
           };
           setUserIfChanged(fallbackUser);
           setSentryUser({

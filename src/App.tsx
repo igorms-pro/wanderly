@@ -13,6 +13,7 @@ const LoginPage = lazy(() => import('./pages/LoginPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
 const DashboardPage = lazy(() => import('./pages/dashboard'));
 const TripDetailPage = lazy(() => import('./pages/TripDetailPage'));
+const AccountPage = lazy(() => import('./pages/AccountPage'));
 
 const queryClient = new QueryClient();
 
@@ -79,6 +80,14 @@ function App() {
                       element={
                         <ProtectedRoute>
                           <TripDetailPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/account"
+                      element={
+                        <ProtectedRoute>
+                          <AccountPage />
                         </ProtectedRoute>
                       }
                     />

@@ -128,6 +128,7 @@ describe('TripDetailPage - Helper Functions', () => {
     display_name: 'Test User',
     avatar_url: '',
     created_at: '2024-01-01T10:00:00Z',
+    ai_tier: 'free' as const,
   };
 
   const mockActivities: Activity[] = [
